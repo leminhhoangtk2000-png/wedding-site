@@ -1,31 +1,32 @@
 'use client';
 
 const cards = [
-  { image: '/images/000062.jpg', text: '6 năm\nbạn học', targetId: 'section-6' },
-  { image: '/images/000042-4.jpg', text: '9 năm\nbạn gái', targetId: 'section-9' },
-  { image: '/images/000046-4.jpg', text: '69 năm\nbạn đời', targetId: 'section-13' },
+  { image: '/images/000062.jpg', text: '6 năm\nbạn học', phaseKey: '6' },
+  { image: '/images/000042-4.jpg', text: '9 năm\nbạn gái', phaseKey: '9' },
+  { image: '/images/000046-4.jpg', text: '69 năm\nbạn đời', phaseKey: '69' },
 ];
 
-export default function SectionChon() {
-  const handleClick = (targetId) => {
-    const el = document.getElementById(targetId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+export default function SectionChon({ onPhaseChange, activePhase }) {
+  const handleClick = (phaseKey) => {
+    if (onPhaseChange) {
+      onPhaseChange(phaseKey);
+    }
   };
 
   return (
     <section className="section-chon" id="section-chon">
       <div className="section-chon__grid">
-        {cards.map((card, index) => (
+        {cards.map((card) => (
           <div
-            key={card.targetId}
-            className="section-chon__card"
-            onClick={() => handleClick(card.targetId)}
+            key={card.phaseKey}
+            className={`section-chon__card ${activePhase === card.phaseKey ? 'section-chon__card--active' : ''}`}
+            onClick={() => handleClick(card.phaseKey)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                handleClick(card.targetId);
+                handleClick(card.phaseKey);
               }
             }}
           >

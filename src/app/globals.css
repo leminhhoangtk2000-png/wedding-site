@@ -504,6 +504,20 @@ ul, ol {
   white-space: pre-line;
 }
 
+.section-chon__card--active {
+  ring: 3px solid var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent), 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.section-chon__card--active .section-chon__card-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(201, 169, 110, 0.7) 0%,
+    rgba(0, 0, 0, 0.15) 50%,
+    transparent 100%
+  );
+}
+
 @media (max-width: 768px) {
   .section-chon__grid {
     flex-direction: column;

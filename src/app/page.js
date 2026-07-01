@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import HeroSection from '@/components/HeroSection';
 import QuoteSection from '@/components/QuoteSection';
+import SectionChon from '@/components/SectionChon';
 import GallerySection from '@/components/GallerySection';
 import ImageLightbox from '@/components/ImageLightbox';
 import { gallerySections } from '@/lib/storyData';
@@ -92,19 +93,8 @@ export default function HomePage() {
 
       <QuoteSection />
 
-      {/* Phase Tab Bar */}
-      <div className="phase-tab-bar" id="story-gallery">
-        {phases.map(phase => (
-          <button
-            key={phase.key}
-            className={`phase-tab ${activePhase === phase.key ? 'phase-tab--active' : ''}`}
-            onClick={() => handlePhaseChange(phase.key)}
-          >
-            <span className="phase-tab__number">{phase.label}</span>
-            <span className="phase-tab__label">năm {phase.subtitle}</span>
-          </button>
-        ))}
-      </div>
+      {/* Section Chon (original image cards) */}
+      <SectionChon onPhaseChange={handlePhaseChange} activePhase={activePhase} />
 
       {/* Sidebar Navigation */}
       <div className="phase-sidebar">
@@ -121,7 +111,7 @@ export default function HomePage() {
       </div>
 
       {/* Gallery Content for Active Phase */}
-      <div className="phase-content" key={activePhase}>
+      <div className="phase-content" id="story-gallery" key={activePhase}>
         {activeSections.map((section) => (
           <GallerySection
             key={section.id}
