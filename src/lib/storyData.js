@@ -199,23 +199,7 @@ export const gallerySections = [
           }
         ]
       },
-      {
-        "type": "text",
-        "x": 1.56,
-        "y": 1.1552,
-        "w": 26.17,
-        "h": 0.4398,
-        "textData": [
-          {
-            "text": "Hành trình của tụi mình không bắt đầu bằng một tiếng sét ái tình, mà bắt đầu bằng một tình bạn 6 năm.",
-            "fontSize": 14.0,
-            "fontFamily": "Fraunces",
-            "fontWeight": 400,
-            "textAlign": "CENTER",
-            "lineHeight": 17.098011016845703
-          }
-        ]
-      },
+
       {
         "type": "text",
         "x": 1.56,
