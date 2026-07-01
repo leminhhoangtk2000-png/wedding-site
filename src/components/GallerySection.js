@@ -44,14 +44,17 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                 }}
                 onClick={() => onImageClick && onImageClick(item.src)}
               >
-                <Image 
+                <img 
                   src={item.src} 
                   alt="" 
-                  fill={true}
+                  loading="lazy"
+                  decoding="async"
                   className="gallery__item-image"
-                  sizes={`${Math.max(10, Math.ceil(item.w))}vw`}
                   style={{
-                    objectFit: 'cover'
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
                   }} 
                 />
               </div>
