@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 export default function GallerySection({ section, allImages = [], onImageClick }) {
   // Use padding-top hack to maintain the container's exact aspect ratio
   // section.height and section.width are the raw Figma dimensions
@@ -22,7 +24,8 @@ export default function GallerySection({ section, allImages = [], onImageClick }
           position: 'relative',
           width: '100%',
           paddingTop: paddingTop,
-          overflow: 'hidden' // prevents any weird bleeding
+          overflow: 'hidden',
+          containerType: 'inline-size' // Enable container queries for exact scaling
         }}
       >
         {section.items.map((item, index) => {
@@ -41,16 +44,14 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                 }}
                 onClick={() => onImageClick && onImageClick(item.src)}
               >
-                <img 
+                <Image 
                   src={item.src} 
                   alt="" 
-                  loading="lazy" 
+                  fill={true}
                   className="gallery__item-image"
+                  sizes={`${Math.max(10, Math.ceil(item.w))}vw`}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block'
+                    objectFit: 'cover'
                   }} 
                 />
               </div>
@@ -68,7 +69,7 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                   left: `${item.x}%`,
                   width: `${item.w}%`,
                   height: `${item.h}%`,
-                  padding: item.w >= 95 ? '24px 20px' : '20px',
+                  padding: item.w >= 95 ? '2% 2%' : '2%', // Use percentage padding
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
@@ -85,13 +86,14 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                     
                     return (
                       <p key={ti} style={{
-                        marginBottom: ti < item.textData.length - 1 ? '16px' : 0,
+                        marginBottom: ti < item.textData.length - 1 ? '2cqw' : 0,
                         whiteSpace: 'pre-line',
-                        fontSize: `calc(${t.fontSize}px * var(--zoom, 1))`,
+                        // Scale font size exactly to the container's width using cqw
+                        fontSize: `calc(${t.fontSize} / ${section.width} * 100cqw)`,
                         fontFamily: `${fontVar}, "${t.fontFamily}", sans-serif`,
                         fontWeight: t.fontWeight,
                         textAlign: t.textAlign === 'CENTER' ? 'center' : (t.textAlign === 'RIGHT' ? 'right' : 'left'),
-                        lineHeight: `calc(${t.lineHeight}px * var(--zoom, 1))`,
+                        lineHeight: `calc(${t.lineHeight} / ${section.width} * 100cqw)`,
                         color: 'inherit'
                       }}>
                         {t.text}
