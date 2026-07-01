@@ -1,66 +1,84 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import HeroSection from '@/components/HeroSection';
+import QuoteSection from '@/components/QuoteSection';
+import SectionChon from '@/components/SectionChon';
+import GallerySection from '@/components/GallerySection';
+import ImageLightbox from '@/components/ImageLightbox';
+import { gallerySections } from '@/lib/storyData';
 
-export default function Home() {
+export default function HomePage() {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Collect ALL images from all sections for global lightbox navigation
+  const allImages = useMemo(() => {
+    const images = [];
+    gallerySections.forEach(section => {
+      section.items.forEach(item => {
+        if (item.type === 'image' && item.src) {
+          images.push(item.src);
+        }
+      });
+    });
+    return images;
+  }, []);
+
+  const handleImageClick = useCallback((src) => {
+    const idx = allImages.indexOf(src);
+    if (idx >= 0) {
+      setLightboxIndex(idx);
+      setLightboxOpen(true);
+    }
+  }, [allImages]);
+
+  // Scroll reveal animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <>
+      <HeroSection />
+      <QuoteSection />
+      <SectionChon />
+      
+
+
+      <div style={{ overflowX: 'auto', width: '100vw', display: 'flex', justifyContent: 'center', background: 'var(--color-bg)' }}>
+        <div style={{ '--zoom': zoomLevel, width: `calc(100% * var(--zoom, 1))`, minWidth: '100%', transition: 'width 0.3s ease' }}>
+          {gallerySections.map((section) => (
+            <GallerySection
+              key={section.id}
+              section={section}
+              allImages={allImages}
+              onImageClick={handleImageClick}
             />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
-    </div>
+      </div>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={allImages}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNavigate={setLightboxIndex}
+        />
+      )}
+    </>
   );
 }
