@@ -38,6 +38,7 @@ export const gallerySections = [
         "y": 4.597,
         "w": 100.0,
         "h": 11.7906,
+        "rotation": 0,
         "src": "/images/000067.jpg"
       },
       {
@@ -46,6 +47,7 @@ export const gallerySections = [
         "y": 87.8547,
         "w": 100.0,
         "h": 12.1453,
+        "rotation": 0,
         "src": "/images/000058.jpg"
       },
       {
@@ -71,6 +73,7 @@ export const gallerySections = [
         "y": 36.4501,
         "w": 100.0,
         "h": 12.1453,
+        "rotation": 0,
         "src": "/images/000056.jpg"
       },
       {
@@ -79,6 +82,7 @@ export const gallerySections = [
         "y": 65.9478,
         "w": 79.69,
         "h": 21.6232,
+        "rotation": 0,
         "src": "/images/000057.jpg"
       },
       {
@@ -87,6 +91,7 @@ export const gallerySections = [
         "y": 27.5539,
         "w": 31.64,
         "h": 8.584,
+        "rotation": 0,
         "src": "/images/000054.jpg"
       },
       {
@@ -95,6 +100,7 @@ export const gallerySections = [
         "y": 27.5539,
         "w": 66.95,
         "h": 8.6124,
+        "rotation": 0,
         "src": "/images/000053.jpg"
       },
       {
@@ -103,6 +109,7 @@ export const gallerySections = [
         "y": 55.0591,
         "w": 39.06,
         "h": 10.6049,
+        "rotation": 0,
         "src": "/images/000062.jpg"
       },
       {
@@ -111,6 +118,7 @@ export const gallerySections = [
         "y": 48.8791,
         "w": 61.88,
         "h": 16.7849,
+        "rotation": 0,
         "src": "/images/000061.jpg"
       },
       {
@@ -136,6 +144,7 @@ export const gallerySections = [
         "y": 19.7448,
         "w": 18.75,
         "h": 5.0904,
+        "rotation": 0,
         "src": "/images/000060.jpg"
       },
       {
@@ -144,6 +153,7 @@ export const gallerySections = [
         "y": 16.6714,
         "w": 39.06,
         "h": 10.5988,
+        "rotation": 0,
         "src": "/images/000063.jpg"
       },
       {
@@ -152,6 +162,7 @@ export const gallerySections = [
         "y": 16.6714,
         "w": 39.06,
         "h": 10.5988,
+        "rotation": 0,
         "src": "/images/000065.jpg"
       },
       {
@@ -174,6 +185,36 @@ export const gallerySections = [
       {
         "type": "text",
         "x": 1.56,
+        "y": 0.4316,
+        "w": 26.17,
+        "h": 0.4398,
+        "textData": [
+          {
+            "text": "6 năm bạn học...",
+            "fontSize": 19.0,
+            "fontFamily": "Be Vietnam Pro",
+            "fontWeight": 400,
+            "textAlign": "CENTER",
+            "lineHeight": 23.204444885253906
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "x": 1.56,
+        "y": 1.1552,
+        "w": 26.17,
+        "h": 0.4398,
+        "textData": [
+          {
+            "text": "Hành trình của tụi mình không bắt đầu bằng một tiếng sét ái tình, mà bắt đầu bằng một tình bạn 6 năm.",
+            "fontSize": 14.0,
+            "fontFamily": "Fraunces",
+            "fontWeight": 400,
+            "textAlign": "CENTER",
+            "lineHeight": 17.098011016845703
+          }
+        ]
       },
       {
         "type": "text",
@@ -240,6 +281,7 @@ export const gallerySections = [
         "y": 45.4726,
         "w": 47.5,
         "h": 23.7121,
+        "rotation": 0,
         "src": "/images/000063-3.jpg"
       },
       {
@@ -248,6 +290,7 @@ export const gallerySections = [
         "y": 20.8917,
         "w": 100.0,
         "h": 22.3611,
+        "rotation": 0,
         "src": "/images/000005.jpg"
       },
       {
@@ -256,6 +299,7 @@ export const gallerySections = [
         "y": 8.4612,
         "w": 49.22,
         "h": 11.0059,
+        "rotation": 0,
         "src": "/images/000043.jpg"
       },
       {
@@ -264,6 +308,7 @@ export const gallerySections = [
         "y": 8.4612,
         "w": 22.27,
         "h": 11.1274,
+        "rotation": 0,
         "src": "/images/000045.jpg"
       },
       {
@@ -272,6 +317,7 @@ export const gallerySections = [
         "y": 43.7751,
         "w": 50.86,
         "h": 25.4096,
+        "rotation": 0,
         "src": "/images/000006.jpg"
       },
       {
@@ -280,6 +326,7 @@ export const gallerySections = [
         "y": 69.707,
         "w": 60.62,
         "h": 30.293,
+        "rotation": 0,
         "src": "/images/000040.jpg"
       },
       {
@@ -288,6 +335,7 @@ export const gallerySections = [
         "y": 8.4612,
         "w": 23.83,
         "h": 11.9083,
+        "rotation": 0,
         "src": "/images/000042.jpg"
       },
       {
@@ -296,6 +344,7 @@ export const gallerySections = [
         "y": 80.9624,
         "w": 38.12,
         "h": 19.0376,
+        "rotation": 0,
         "src": "/images/000041.jpg"
       },
       {
@@ -363,6 +412,7 @@ export const gallerySections = [
         "y": 2.8366,
         "w": 100.0,
         "h": 37.3033,
+        "rotation": 0,
         "src": "/images/000044.jpg"
       },
       {
@@ -371,6 +421,7 @@ export const gallerySections = [
         "y": 77.9483,
         "w": 59.38,
         "h": 22.0517,
+        "rotation": 0,
         "src": "/images/000050.jpg"
       },
       {
@@ -396,6 +447,7 @@ export const gallerySections = [
         "y": 60.9287,
         "w": 100.0,
         "h": 16.631,
+        "rotation": 0,
         "src": "/images/000048.jpg"
       },
       {
@@ -404,6 +456,7 @@ export const gallerySections = [
         "y": 40.5285,
         "w": 49.22,
         "h": 18.3214,
+        "rotation": 0,
         "src": "/images/000047.jpg"
       },
       {
@@ -412,6 +465,7 @@ export const gallerySections = [
         "y": 40.5285,
         "w": 49.3,
         "h": 18.3408,
+        "rotation": 0,
         "src": "/images/000046.jpg"
       },
       {
@@ -462,6 +516,7 @@ export const gallerySections = [
         "y": 0.1401,
         "w": 53.83,
         "h": 7.2059,
+        "rotation": -180,
         "src": "/images/000072.jpg"
       },
       {
@@ -487,6 +542,7 @@ export const gallerySections = [
         "y": 4.895,
         "w": 46.17,
         "h": 6.1835,
+        "rotation": 90,
         "src": "/images/000042-3.jpg"
       },
       {
@@ -512,6 +568,7 @@ export const gallerySections = [
         "y": 60.3079,
         "w": 100.0,
         "h": 6.0505,
+        "rotation": 0,
         "src": "/images/000067-3.jpg"
       },
       {
@@ -520,6 +577,7 @@ export const gallerySections = [
         "y": 66.4984,
         "w": 39.06,
         "h": 5.2311,
+        "rotation": 0,
         "src": "/images/000005-3.jpg"
       },
       {
@@ -545,6 +603,7 @@ export const gallerySections = [
         "y": 66.4984,
         "w": 39.06,
         "h": 5.2311,
+        "rotation": 0,
         "src": "/images/000004-2.jpg"
       },
       {
@@ -553,6 +612,7 @@ export const gallerySections = [
         "y": 11.2185,
         "w": 100.0,
         "h": 6.0014,
+        "rotation": 0,
         "src": "/images/000050-3.jpg"
       },
       {
@@ -561,6 +621,7 @@ export const gallerySections = [
         "y": 36.2146,
         "w": 100.0,
         "h": 6.0575,
+        "rotation": 0,
         "src": "/images/000058-5.jpg"
       },
       {
@@ -569,6 +630,7 @@ export const gallerySections = [
         "y": 42.4121,
         "w": 32.73,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000059-5.jpg"
       },
       {
@@ -577,6 +639,7 @@ export const gallerySections = [
         "y": 31.6908,
         "w": 39.06,
         "h": 3.5925,
+        "rotation": 0,
         "src": "/images/000052-2.jpg"
       },
       {
@@ -585,6 +648,7 @@ export const gallerySections = [
         "y": 42.4121,
         "w": 32.73,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000060-5.jpg"
       },
       {
@@ -593,6 +657,7 @@ export const gallerySections = [
         "y": 42.4121,
         "w": 32.42,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000047-3.jpg"
       },
       {
@@ -618,6 +683,7 @@ export const gallerySections = [
         "y": 71.8696,
         "w": 100.0,
         "h": 6.0505,
+        "rotation": 0,
         "src": "/images/000070-2.jpg"
       },
       {
@@ -626,6 +692,7 @@ export const gallerySections = [
         "y": 31.6978,
         "w": 59.38,
         "h": 3.5855,
+        "rotation": 0,
         "src": "/images/000051-2.jpg"
       },
       {
@@ -634,6 +701,7 @@ export const gallerySections = [
         "y": 78.8514,
         "w": 100.0,
         "h": 6.0014,
+        "rotation": 0,
         "src": "/images/000040-3.jpg"
       },
       {
@@ -642,6 +710,7 @@ export const gallerySections = [
         "y": 95.5182,
         "w": 32.73,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000047-6.jpg"
       },
       {
@@ -650,6 +719,7 @@ export const gallerySections = [
         "y": 95.5182,
         "w": 32.73,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000046-5.jpg"
       },
       {
@@ -658,6 +728,7 @@ export const gallerySections = [
         "y": 95.5182,
         "w": 32.66,
         "h": 4.3418,
+        "rotation": 0,
         "src": "/images/000044-6.jpg"
       },
       {
@@ -683,6 +754,7 @@ export const gallerySections = [
         "y": 84.9929,
         "w": 69.22,
         "h": 4.1947,
+        "rotation": 0,
         "src": "/images/000048-5.jpg"
       },
       {
@@ -691,6 +763,7 @@ export const gallerySections = [
         "y": 84.9999,
         "w": 28.98,
         "h": 4.1807,
+        "rotation": 0,
         "src": "/images/000049-5.jpg"
       },
       {
@@ -699,6 +772,7 @@ export const gallerySections = [
         "y": 89.3277,
         "w": 100.0,
         "h": 6.0505,
+        "rotation": 0,
         "src": "/images/000045-5.jpg"
       },
       {
@@ -707,6 +781,7 @@ export const gallerySections = [
         "y": 46.894,
         "w": 100.0,
         "h": 13.2739,
+        "rotation": 0,
         "src": "/images/000068-2.jpg"
       },
       {
@@ -715,6 +790,7 @@ export const gallerySections = [
         "y": 18.1514,
         "w": 100.0,
         "h": 13.3994,
+        "rotation": 0,
         "src": "/images/000045-3.jpg"
       },
       {
@@ -748,6 +824,7 @@ export const gallerySections = [
         "y": 0.2097,
         "w": 59.38,
         "h": 11.7936,
+        "rotation": 0,
         "src": "/images/000050-6.jpg"
       },
       {
@@ -773,6 +850,7 @@ export const gallerySections = [
         "y": 81.4657,
         "w": 100.0,
         "h": 9.0575,
+        "rotation": 0,
         "src": "/images/000056-6.jpg"
       },
       {
@@ -781,6 +859,7 @@ export const gallerySections = [
         "y": 21.5963,
         "w": 100.0,
         "h": 9.0575,
+        "rotation": 0,
         "src": "/images/000053-6.jpg"
       },
       {
@@ -789,6 +868,7 @@ export const gallerySections = [
         "y": 12.3292,
         "w": 100.0,
         "h": 9.0575,
+        "rotation": 0,
         "src": "/images/000058-6.jpg"
       },
       {
@@ -797,6 +877,7 @@ export const gallerySections = [
         "y": 30.8634,
         "w": 100.0,
         "h": 19.8656,
+        "rotation": 0,
         "src": "/images/000054-4.jpg"
       },
       {
@@ -805,6 +886,7 @@ export const gallerySections = [
         "y": 90.7329,
         "w": 100.0,
         "h": 9.0575,
+        "rotation": 0,
         "src": "/images/000057-5.jpg"
       },
       {
@@ -813,6 +895,7 @@ export const gallerySections = [
         "y": 50.9387,
         "w": 100.0,
         "h": 9.0575,
+        "rotation": 0,
         "src": "/images/000051-5.jpg"
       },
       {
@@ -821,6 +904,7 @@ export const gallerySections = [
         "y": 61.3904,
         "w": 100.0,
         "h": 19.8656,
+        "rotation": 0,
         "src": "/images/000052-4.jpg"
       },
       {
@@ -854,6 +938,7 @@ export const gallerySections = [
         "y": 34.4582,
         "w": 100.0,
         "h": 17.7715,
+        "rotation": 0,
         "src": "/images/000057-2.jpg"
       },
       {
@@ -862,6 +947,7 @@ export const gallerySections = [
         "y": 18.6016,
         "w": 38.91,
         "h": 15.4414,
+        "rotation": 0,
         "src": "/images/000059-3.jpg"
       },
       {
@@ -887,6 +973,7 @@ export const gallerySections = [
         "y": 18.6016,
         "w": 59.38,
         "h": 10.5641,
+        "rotation": 0,
         "src": "/images/000060-3.jpg"
       },
       {
@@ -895,6 +982,7 @@ export const gallerySections = [
         "y": 52.6447,
         "w": 100.0,
         "h": 17.7715,
+        "rotation": 0,
         "src": "/images/000050-4.jpg"
       },
       {
@@ -920,6 +1008,7 @@ export const gallerySections = [
         "y": 70.8313,
         "w": 59.38,
         "h": 10.5518,
+        "rotation": 0,
         "src": "/images/000056-3.jpg"
       },
       {
@@ -928,6 +1017,7 @@ export const gallerySections = [
         "y": 81.7982,
         "w": 100.0,
         "h": 17.7867,
+        "rotation": 0,
         "src": "/images/000048-3.jpg"
       },
       {
@@ -936,6 +1026,7 @@ export const gallerySections = [
         "y": 0.4151,
         "w": 100.0,
         "h": 17.7715,
+        "rotation": 0,
         "src": "/images/000058-3.jpg"
       }
     ]
@@ -952,6 +1043,7 @@ export const gallerySections = [
         "y": 9.8549,
         "w": 49.22,
         "h": 4.6415,
+        "rotation": 0,
         "src": "/images/000004-3.jpg"
       },
       {
@@ -960,6 +1052,7 @@ export const gallerySections = [
         "y": 9.8549,
         "w": 49.22,
         "h": 4.6415,
+        "rotation": 0,
         "src": "/images/000005-4.jpg"
       },
       {
@@ -968,6 +1061,7 @@ export const gallerySections = [
         "y": 15.9592,
         "w": 49.22,
         "h": 4.6415,
+        "rotation": 0,
         "src": "/images/000007.jpg"
       },
       {
@@ -976,6 +1070,7 @@ export const gallerySections = [
         "y": 20.8206,
         "w": 59.06,
         "h": 5.5654,
+        "rotation": 0,
         "src": "/images/000009.jpg"
       },
       {
@@ -984,6 +1079,7 @@ export const gallerySections = [
         "y": 20.8206,
         "w": 39.06,
         "h": 8.2208,
+        "rotation": 0,
         "src": "/images/000042-4.jpg"
       },
       {
@@ -992,6 +1088,7 @@ export const gallerySections = [
         "y": 15.9592,
         "w": 49.22,
         "h": 4.6305,
+        "rotation": 0,
         "src": "/images/000008.jpg"
       },
       {
@@ -1000,6 +1097,7 @@ export const gallerySections = [
         "y": 90.3622,
         "w": 100.0,
         "h": 9.4178,
+        "rotation": 0,
         "src": "/images/000026.jpg"
       },
       {
@@ -1008,6 +1106,7 @@ export const gallerySections = [
         "y": 0.22,
         "w": 100.0,
         "h": 9.4149,
+        "rotation": 0,
         "src": "/images/000003-2.jpg"
       },
       {
@@ -1016,6 +1115,7 @@ export const gallerySections = [
         "y": 50.5329,
         "w": 59.38,
         "h": 6.4013,
+        "rotation": 0,
         "src": "/images/000044-4.jpg"
       },
       {
@@ -1024,6 +1124,7 @@ export const gallerySections = [
         "y": 50.5329,
         "w": 39.06,
         "h": 6.4013,
+        "rotation": 0,
         "src": "/images/000001-2.jpg"
       },
       {
@@ -1032,6 +1133,7 @@ export const gallerySections = [
         "y": 29.2613,
         "w": 100.0,
         "h": 21.0516,
+        "rotation": 0,
         "src": "/images/000002-2.jpg"
       },
       {
@@ -1057,6 +1159,7 @@ export const gallerySections = [
         "y": 57.1541,
         "w": 100.0,
         "h": 9.4178,
+        "rotation": 0,
         "src": "/images/000006-4.jpg"
       },
       {
@@ -1065,6 +1168,7 @@ export const gallerySections = [
         "y": 66.7919,
         "w": 39.06,
         "h": 9.1619,
+        "rotation": 0,
         "src": "/images/000041-4.jpg"
       },
       {
@@ -1073,6 +1177,7 @@ export const gallerySections = [
         "y": 70.362,
         "w": 59.38,
         "h": 5.5918,
+        "rotation": 0,
         "src": "/images/000010.jpg"
       },
       {
@@ -1115,6 +1220,7 @@ export const gallerySections = [
         "y": 76.1739,
         "w": 100.0,
         "h": 9.4259,
+        "rotation": 0,
         "src": "/images/000043-4.jpg"
       },
       {
@@ -1233,6 +1339,7 @@ export const gallerySections = [
         "y": 10.341,
         "w": 32.42,
         "h": 5.7278,
+        "rotation": 0,
         "src": "/images/000034.jpg"
       },
       {
@@ -1241,6 +1348,7 @@ export const gallerySections = [
         "y": 10.341,
         "w": 32.42,
         "h": 5.7278,
+        "rotation": 0,
         "src": "/images/000035.jpg"
       },
       {
@@ -1249,6 +1357,7 @@ export const gallerySections = [
         "y": 10.341,
         "w": 32.42,
         "h": 5.7278,
+        "rotation": 0,
         "src": "/images/000004-4.jpg"
       },
       {
@@ -1257,6 +1366,7 @@ export const gallerySections = [
         "y": 83.8028,
         "w": 100.0,
         "h": 7.9173,
+        "rotation": 0,
         "src": "/images/000003-3.jpg"
       },
       {
@@ -1265,6 +1375,7 @@ export const gallerySections = [
         "y": 19.2468,
         "w": 100.0,
         "h": 17.6729,
+        "rotation": 0,
         "src": "/images/000006-5.jpg"
       },
       {
@@ -1273,6 +1384,7 @@ export const gallerySections = [
         "y": 66.1067,
         "w": 100.0,
         "h": 17.5113,
+        "rotation": 0,
         "src": "/images/000063-5.jpg"
       },
       {
@@ -1281,6 +1393,7 @@ export const gallerySections = [
         "y": 47.784,
         "w": 49.3,
         "h": 8.7117,
+        "rotation": 0,
         "src": "/images/000046-4.jpg"
       },
       {
@@ -1289,6 +1402,7 @@ export const gallerySections = [
         "y": 47.784,
         "w": 49.3,
         "h": 8.721,
+        "rotation": 0,
         "src": "/images/000043-5.jpg"
       },
       {
@@ -1297,6 +1411,7 @@ export const gallerySections = [
         "y": 37.1045,
         "w": 59.38,
         "h": 10.4947,
+        "rotation": 0,
         "src": "/images/000055-4.jpg"
       },
       {
@@ -1305,6 +1420,7 @@ export const gallerySections = [
         "y": 91.9047,
         "w": 100.0,
         "h": 7.9105,
+        "rotation": 0,
         "src": "/images/000005-5.jpg"
       },
       {
@@ -1313,6 +1429,7 @@ export const gallerySections = [
         "y": 2.171,
         "w": 100.0,
         "h": 7.9853,
+        "rotation": 0,
         "src": "/images/000068-3.jpg"
       },
       {
@@ -1321,6 +1438,7 @@ export const gallerySections = [
         "y": 56.6897,
         "w": 100.0,
         "h": 7.8834,
+        "rotation": 0,
         "src": "/images/000064-3.jpg"
       },
       {
@@ -1405,6 +1523,7 @@ export const gallerySections = [
         "y": 0.1044,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000069-2.jpg"
       },
       {
@@ -1413,6 +1532,7 @@ export const gallerySections = [
         "y": 26.658,
         "w": 59.38,
         "h": 5.9292,
+        "rotation": 0,
         "src": "/images/000058-2.jpg"
       },
       {
@@ -1421,6 +1541,7 @@ export const gallerySections = [
         "y": 4.6779,
         "w": 39.06,
         "h": 3.9011,
+        "rotation": 0,
         "src": "/images/000060-2.jpg"
       },
       {
@@ -1446,6 +1567,7 @@ export const gallerySections = [
         "y": 18.5993,
         "w": 100.0,
         "h": 7.9543,
+        "rotation": 0,
         "src": "/images/000039.jpg"
       },
       {
@@ -1454,6 +1576,7 @@ export const gallerySections = [
         "y": 14.022,
         "w": 100.0,
         "h": 4.473,
+        "rotation": 0,
         "src": "/images/000043-2.jpg"
       },
       {
@@ -1462,6 +1585,7 @@ export const gallerySections = [
         "y": 41.8387,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000045-2.jpg"
       },
       {
@@ -1470,6 +1594,7 @@ export const gallerySections = [
         "y": 8.6864,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000044-2.jpg"
       },
       {
@@ -1478,6 +1603,7 @@ export const gallerySections = [
         "y": 4.6779,
         "w": 39.06,
         "h": 3.9011,
+        "rotation": 0,
         "src": "/images/000059-2.jpg"
       },
       {
@@ -1486,6 +1612,7 @@ export const gallerySections = [
         "y": 32.6916,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000046-2.jpg"
       },
       {
@@ -1494,6 +1621,7 @@ export const gallerySections = [
         "y": 47.8319,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000041-2.jpg"
       },
       {
@@ -1502,6 +1630,7 @@ export const gallerySections = [
         "y": 62.4983,
         "w": 59.38,
         "h": 2.6514,
+        "rotation": 0,
         "src": "/images/000005-2.jpg"
       },
       {
@@ -1510,6 +1639,7 @@ export const gallerySections = [
         "y": 76.595,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000059-4.jpg"
       },
       {
@@ -1518,6 +1648,7 @@ export const gallerySections = [
         "y": 52.4093,
         "w": 100.0,
         "h": 9.9846,
+        "rotation": 0,
         "src": "/images/000040-2.jpg"
       },
       {
@@ -1543,6 +1674,7 @@ export const gallerySections = [
         "y": 62.4983,
         "w": 39.06,
         "h": 3.9011,
+        "rotation": 0,
         "src": "/images/000004.jpg"
       },
       {
@@ -1551,6 +1683,7 @@ export const gallerySections = [
         "y": 81.1686,
         "w": 100.0,
         "h": 4.4678,
+        "rotation": 0,
         "src": "/images/000066-2.jpg"
       },
       {
@@ -1559,6 +1692,7 @@ export const gallerySections = [
         "y": 37.2651,
         "w": 100.0,
         "h": 4.4692,
+        "rotation": 0,
         "src": "/images/000047-2.jpg"
       },
       {
@@ -1567,6 +1701,7 @@ export const gallerySections = [
         "y": 95.4279,
         "w": 100.0,
         "h": 4.4678,
+        "rotation": 0,
         "src": "/images/000002.jpg"
       },
       {
@@ -1592,6 +1727,7 @@ export const gallerySections = [
         "y": 91.4194,
         "w": 39.06,
         "h": 3.9041,
+        "rotation": 0,
         "src": "/images/000001.jpg"
       },
       {
@@ -1600,6 +1736,7 @@ export const gallerySections = [
         "y": 91.4194,
         "w": 59.38,
         "h": 2.6514,
+        "rotation": 0,
         "src": "/images/000003.jpg"
       },
       {
@@ -1625,6 +1762,7 @@ export const gallerySections = [
         "y": 66.5038,
         "w": 100.0,
         "h": 9.9868,
+        "rotation": 0,
         "src": "/images/000006-2.jpg"
       },
       {
@@ -1633,6 +1771,7 @@ export const gallerySections = [
         "y": 85.7407,
         "w": 100.0,
         "h": 4.4678,
+        "rotation": 0,
         "src": "/images/000062-2.jpg"
       }
     ]

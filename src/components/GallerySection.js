@@ -26,6 +26,8 @@ export default function GallerySection({ section, allImages = [], onImageClick }
       >
         {section.items.map((item, index) => {
           if (item.type === 'image') {
+            const isRotated90 = Math.abs(item.rotation || 0) === 90;
+            
             return (
               <div
                 key={index}
@@ -36,7 +38,8 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                   left: `${item.x}%`,
                   width: `${item.w}%`,
                   height: `${item.h}%`,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  containerType: isRotated90 ? 'size' : 'normal'
                 }}
                 onClick={() => onImageClick && onImageClick(item.src)}
               >
@@ -47,10 +50,20 @@ export default function GallerySection({ section, allImages = [], onImageClick }
                   decoding="async"
                   className="gallery__item-image"
                   style={{
-                    width: '100%',
-                    height: '100%',
                     objectFit: 'cover',
-                    display: 'block'
+                    display: 'block',
+                    ...(isRotated90 ? {
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      width: '100cqh',
+                      height: '100cqw',
+                      transform: `translate(-50%, -50%) rotate(${item.rotation}deg)`
+                    } : {
+                      width: '100%',
+                      height: '100%',
+                      transform: item.rotation ? `rotate(${item.rotation}deg)` : 'none'
+                    })
                   }} 
                 />
               </div>

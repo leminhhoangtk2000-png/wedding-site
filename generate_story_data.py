@@ -85,9 +85,20 @@ try:
                             w_pct = round((bbox_n.get('width', 0) / sec_w) * 100, 2)
                             h_pct = round((bbox_n.get('height', 0) / sec_h) * 100, 4)
                             
+                            # Extract rotation
+                            import math
+                            transform = n.get('relativeTransform', None)
+                            if transform:
+                                cos_val = transform[0][0]
+                                sin_val = transform[1][0]
+                                angle = round(math.degrees(math.atan2(sin_val, cos_val)))
+                            else:
+                                angle = round(math.degrees(n.get('rotation', 0)))
+
                             items.append({
                                 'type': 'image',
                                 'x': x_pct, 'y': y_pct, 'w': w_pct, 'h': h_pct,
+                                'rotation': angle,
                                 'src': f'/images/{name}.jpg'
                             })
                     else:
