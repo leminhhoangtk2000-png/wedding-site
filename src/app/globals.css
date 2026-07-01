@@ -1951,3 +1951,213 @@ body::after {
     max-width: 450px;
   }
 }
+
+/* ============================================
+   STORY WISH CTA BUTTON
+   ============================================ */
+.story-wish-cta {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px 20px;
+  background: var(--color-bg);
+}
+
+.wish-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 16px 32px;
+  border-radius: 100px;
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.wish-cta-button:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
+}
+
+/* ============================================
+   PHASE TAB BAR
+   ============================================ */
+.phase-tab-bar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px 32px;
+  background: var(--color-bg);
+  position: sticky;
+  top: 60px;
+  z-index: 90;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.phase-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 28px;
+  border: 2px solid var(--color-border);
+  border-radius: 100px;
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+}
+
+.phase-tab__number {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.phase-tab__label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.phase-tab:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.phase-tab--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.phase-tab--active .phase-tab__number {
+  color: #fff;
+}
+
+.phase-tab--active .phase-tab__label {
+  color: rgba(255,255,255,0.85);
+}
+
+/* ============================================
+   PHASE SIDEBAR (floating on right)
+   ============================================ */
+.phase-sidebar {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.phase-sidebar__btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--color-glass-border);
+  background: var(--color-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phase-sidebar__btn:hover {
+  transform: scale(1.15);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.phase-sidebar__btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(201, 169, 110, 0.4);
+}
+
+/* ============================================
+   PHASE CONTENT (animated transitions)
+   ============================================ */
+.phase-content {
+  background: var(--color-bg);
+  animation: phaseSlideIn 0.5s ease-out;
+}
+
+@keyframes phaseSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .phase-tab-bar {
+    gap: 6px;
+    padding: 24px 12px 20px;
+    top: 50px;
+  }
+
+  .phase-tab {
+    padding: 10px 20px;
+  }
+
+  .phase-tab__number {
+    font-size: 18px;
+  }
+
+  .phase-tab__label {
+    font-size: 10px;
+  }
+
+  .phase-sidebar {
+    right: 8px;
+    gap: 8px;
+  }
+
+  .phase-sidebar__btn {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .story-wish-cta {
+    padding: 40px 16px 16px;
+  }
+
+  .wish-cta-button {
+    font-size: 15px;
+    padding: 14px 24px;
+    gap: 8px;
+  }
+
+  .wish-cta-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
