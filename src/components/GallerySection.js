@@ -3,10 +3,6 @@
 import Image from 'next/image';
 
 export default function GallerySection({ section, allImages = [], onImageClick }) {
-  // Use padding-top hack to maintain the container's exact aspect ratio
-  // section.height and section.width are the raw Figma dimensions
-  const paddingTop = `${(section.height / section.width) * 100}%`;
-
   return (
     <section className="gallery" id={section.id}>
       {section.chapterTitle && (
@@ -23,9 +19,9 @@ export default function GallerySection({ section, allImages = [], onImageClick }
         style={{
           position: 'relative',
           width: '100%',
-          paddingTop: paddingTop,
+          aspectRatio: `${section.width} / ${section.height}`,
           overflow: 'hidden',
-          containerType: 'inline-size' // Enable container queries for exact scaling
+          containerType: 'inline-size'
         }}
       >
         {section.items.map((item, index) => {
