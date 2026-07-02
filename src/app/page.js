@@ -78,6 +78,40 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, [activePhase]);
 
+  // Auto-next tab when scrolling to bottom
+  useEffect(() => {
+    const marker = document.getElementById('gallery-end-marker');
+    if (!marker) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          const currentIndex = phases.findIndex(p => p.key === activePhase);
+          if (currentIndex >= 0 && currentIndex < phases.length - 1) {
+            const nextPhaseKey = phases[currentIndex + 1].key;
+            
+            // Switch phase
+            setActivePhase(nextPhaseKey);
+            
+            // Jump to the top of the gallery so they can start reading the new tab
+            setTimeout(() => {
+              const el = document.getElementById('story-gallery');
+              if (el) {
+                // Determine offset of header/tabs so we scroll to the exact beginning of gallery
+                const y = el.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top: y, behavior: 'instant' });
+              }
+            }, 0);
+          }
+        }
+      },
+      { threshold: 0, rootMargin: '100px 0px 0px 0px' }
+    );
+
+    observer.observe(marker);
+    return () => observer.disconnect();
+  }, [activePhase]);
+
   return (
     <>
       <HeroSection />
@@ -120,6 +154,10 @@ export default function HomePage() {
             onImageClick={handleImageClick}
           />
         ))}
+        {/* End marker for auto-next tab */}
+        {activePhase !== '69' && (
+          <div id="gallery-end-marker" style={{ height: '2px', width: '100%' }} />
+        )}
       </div>
 
       {lightboxOpen && (
