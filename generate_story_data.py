@@ -99,7 +99,7 @@ try:
                                 'type': 'image',
                                 'x': x_pct, 'y': y_pct, 'w': w_pct, 'h': h_pct,
                                 'rotation': angle,
-                                'src': f'/images/{name}.jpg'
+                                'src': f'/images/{name}.webp'
                             })
                     else:
                         if n.get('type') == 'TEXT':

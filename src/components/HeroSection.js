@@ -5,7 +5,7 @@ export default function HeroSection() {
     <section className="hero" id="hero">
       <div className="hero__image-wrapper">
         <img
-          src="/images/000064-3.jpg"
+          src="/images/000064-3.webp"
           alt="Hoàng & Duyên"
           className="hero__image"
         />
