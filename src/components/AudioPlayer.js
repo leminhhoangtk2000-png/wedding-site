@@ -4,29 +4,48 @@ import { useState, useEffect, useRef } from 'react';
 export default function AudioPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+  const playPromiseRef = useRef(null);
 
-  useEffect(() => {
-    // Try to autoplay, though browsers often block this without interaction
+  const safePlay = () => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.5; // Set volume to 50%
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch((error) => {
-            console.log("Autoplay prevented by browser, waiting for user interaction.", error);
-          });
+      const promise = audioRef.current.play();
+      playPromiseRef.current = promise;
+      if (promise !== undefined) {
+        promise.then(() => setIsPlaying(true)).catch(e => console.log("Autoplay prevented:", e));
       }
     }
+  };
 
-    // Play on first user interaction if it didn't autoplay
-    const handleInteraction = () => {
+  const safePause = () => {
+    if (audioRef.current) {
+      if (playPromiseRef.current !== undefined && playPromiseRef.current !== null) {
+        playPromiseRef.current.then(() => {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        }).catch(() => {});
+      } else {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5; // Set volume to 50%
+      safePlay();
+    }
+
+    const handleInteraction = (e) => {
+      // If clicking the video facade, do not autoplay background music
+      if (e.target.closest && e.target.closest('.video-facade')) {
+        document.removeEventListener('click', handleInteraction);
+        document.removeEventListener('touchstart', handleInteraction);
+        return;
+      }
+      
       if (audioRef.current && audioRef.current.paused) {
-        audioRef.current.play()
-          .then(() => setIsPlaying(true))
-          .catch(e => console.log(e));
+        safePlay();
       }
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('touchstart', handleInteraction);
@@ -37,20 +56,13 @@ export default function AudioPlayer() {
 
     // Custom events to pause/play music when video plays
     const handlePauseMusic = () => {
-      if (audioRef.current && !audioRef.current.paused) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-        window.sessionStorage.setItem('music-paused-by-video', 'true');
-      }
+      safePause();
+      window.sessionStorage.setItem('music-paused-by-video', 'true');
     };
     
     const handlePlayMusic = () => {
       if (window.sessionStorage.getItem('music-paused-by-video') === 'true') {
-        if (audioRef.current && audioRef.current.paused) {
-          audioRef.current.play()
-            .then(() => setIsPlaying(true))
-            .catch(e => console.log(e));
-        }
+        safePlay();
         window.sessionStorage.removeItem('music-paused-by-video');
       }
     };
@@ -69,12 +81,10 @@ export default function AudioPlayer() {
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
+        safePause();
+        window.sessionStorage.removeItem('music-paused-by-video'); // User manually paused
       } else {
-        audioRef.current.play()
-          .then(() => setIsPlaying(true))
-          .catch(e => console.log(e));
+        safePlay();
       }
     }
   };
