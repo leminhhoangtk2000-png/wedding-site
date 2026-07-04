@@ -7,6 +7,7 @@ import GallerySection from '@/components/GallerySection';
 import ImageLightbox from '@/components/ImageLightbox';
 import { gallerySections } from '@/lib/storyData';
 import Link from 'next/link';
+import Script from 'next/script';
 
 const phases = [
   { key: '6', label: '6', subtitle: 'bạn học', prefix: 'HS' },
@@ -116,6 +117,18 @@ export default function HomePage() {
     <>
       <HeroSection />
       
+      <div style={{ padding: '75% 0 0 0', position: 'relative', width: '100%', maxWidth: '100vw', overflow: 'hidden' }}>
+        <iframe 
+          src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1" 
+          frameBorder="0" 
+          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+          referrerPolicy="strict-origin-when-cross-origin" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
+          title="PreWedding HOANG&DUYEN: Project 69"
+        ></iframe>
+      </div>
+      <Script src="https://player.vimeo.com/api/player.js" strategy="lazyOnload" />
+
       <div className="story-wish-cta reveal">
         <Link href="/wishes" className="wish-cta-button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

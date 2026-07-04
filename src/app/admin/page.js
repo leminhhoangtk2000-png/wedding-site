@@ -297,8 +297,8 @@ export default function AdminPage() {
                           const isCurrentlyHighlighted = wish.is_highlighted;
                           if (!isCurrentlyHighlighted) {
                             const highlightedCount = wishes.filter(w => w.is_highlighted).length;
-                            if (highlightedCount >= 5) {
-                              alert("Chỉ được ghim tối đa 5 lời chúc! Vui lòng bỏ ghim lời chúc khác trước.");
+                            if (highlightedCount >= 20) {
+                              alert("Chỉ được ghim tối đa 20 lời chúc! Vui lòng bỏ ghim lời chúc khác trước.");
                               return;
                             }
                           }

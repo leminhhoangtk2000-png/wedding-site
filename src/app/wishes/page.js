@@ -502,7 +502,7 @@ export default function WishesPage() {
       {/* Highlighted Wishes */}
       {wishes.filter(w => w.is_highlighted).length > 0 && (
         <div className="highlight-section">
-          <h2 className="highlight-title">Những Lời Chúc Đặc Biệt</h2>
+
           <div className="highlight-grid">
             {wishes.filter(w => w.is_highlighted).map((wish, idx) => (
               <div className="highlight-card" key={wish.id || idx}>
