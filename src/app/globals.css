@@ -1867,7 +1867,7 @@ body::after {
 
 .polaroid-message {
   font-family: 'Caveat', var(--font-heading);
-  font-size: 24px;
+  font-size: 17px;
   line-height: 1.4;
   color: #333;
   margin-bottom: 12px;
@@ -1877,7 +1877,7 @@ body::after {
 
 .polaroid-author {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 10px;
   color: #777;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -1972,7 +1972,7 @@ body::after {
 
 .highlight-message {
   font-family: 'Caveat', var(--font-heading);
-  font-size: 24px;
+  font-size: 17px;
   line-height: 1.5;
   color: #333;
   margin-bottom: 24px;
@@ -1982,7 +1982,7 @@ body::after {
 .highlight-author {
   font-weight: bold;
   color: var(--color-accent-dark);
-  font-size: 16px;
+  font-size: 11px;
   text-align: right;
   border-top: 1px dashed #ddd;
   padding-top: 16px;
