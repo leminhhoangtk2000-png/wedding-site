@@ -122,7 +122,7 @@ export default function HomePage() {
         {!isVideoPlaying ? (
           <div 
             onClick={() => setIsVideoPlaying(true)}
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/images/000064-3.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/images/000069-2.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
             className="video-facade"
           >
             {/* Dark overlay */}
