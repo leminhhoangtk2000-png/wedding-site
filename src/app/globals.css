@@ -1947,6 +1947,7 @@ body::after {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   border: 1px solid rgba(201, 169, 110, 0.3);
+  cursor: pointer;
 }
 
 .highlight-card:hover {
@@ -1977,6 +1978,11 @@ body::after {
   color: #333;
   margin-bottom: 24px;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .highlight-author {

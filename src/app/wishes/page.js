@@ -615,7 +615,7 @@ export default function WishesPage() {
 
           <div className="highlight-grid">
             {wishes.filter(w => w.is_highlighted).map((wish, idx) => (
-              <div className="highlight-card" key={wish.id || idx}>
+              <div className="highlight-card" key={wish.id || idx} onClick={() => setSelectedWish(wish)}>
                 {wish.media && wish.media.length > 0 ? (
                   wish.media[0].type === 'image' ? (
                     <img src={wish.media[0].dataUrl || wish.media[0]} className="highlight-media" alt="" />
