@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 
 import { supabase } from '@/lib/supabase';
 
@@ -338,9 +338,104 @@ export default function WishesPage() {
 
   // Tracks which wish to map to which cell globally across matrices
   let cellCounter = 0; 
-  
+
+  // IntersectionObserver for shape reveal
+  const shapeBoardRef = useRef(null);
+  const [isShapeVisible, setIsShapeVisible] = useState(false);
+  const particlesCanvasRef = useRef(null);
+
+  useEffect(() => {
+    const el = shapeBoardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsShapeVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Particles (floating hearts) effect
+  useEffect(() => {
+    if (!isShapeVisible) return;
+    const canvas = particlesCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let animId;
+    const dpr = window.devicePixelRatio || 1;
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.offsetWidth * dpr;
+      canvas.height = parent.offsetHeight * dpr;
+      canvas.style.width = parent.offsetWidth + 'px';
+      canvas.style.height = parent.offsetHeight + 'px';
+      ctx.scale(dpr, dpr);
+    };
+    resize();
+
+    const hearts = [];
+    const HEART_COUNT = 18;
+    const W = () => canvas.width / dpr;
+    const H = () => canvas.height / dpr;
+    for (let i = 0; i < HEART_COUNT; i++) {
+      hearts.push({
+        x: Math.random() * W(),
+        y: Math.random() * H(),
+        size: 6 + Math.random() * 10,
+        speedY: -(0.15 + Math.random() * 0.3),
+        speedX: (Math.random() - 0.5) * 0.3,
+        opacity: 0.15 + Math.random() * 0.25,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    const drawHeart = (x, y, size, opacity) => {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = '#d4a574';
+      ctx.beginPath();
+      const s = size / 2;
+      ctx.moveTo(x, y + s * 0.3);
+      ctx.bezierCurveTo(x, y - s * 0.5, x - s, y - s * 0.5, x - s, y + s * 0.1);
+      ctx.bezierCurveTo(x - s, y + s * 0.6, x, y + s, x, y + s * 1.2);
+      ctx.bezierCurveTo(x, y + s, x + s, y + s * 0.6, x + s, y + s * 0.1);
+      ctx.bezierCurveTo(x + s, y - s * 0.5, x, y - s * 0.5, x, y + s * 0.3);
+      ctx.fill();
+      ctx.restore();
+    };
+
+    let t = 0;
+    const animate = () => {
+      ctx.clearRect(0, 0, W(), H());
+      t += 0.02;
+      hearts.forEach(h => {
+        h.x += h.speedX + Math.sin(t + h.phase) * 0.2;
+        h.y += h.speedY;
+        if (h.y < -20) { h.y = H() + 10; h.x = Math.random() * W(); }
+        if (h.x < -20) h.x = W() + 10;
+        if (h.x > W() + 20) h.x = -10;
+        drawHeart(h.x, h.y, h.size, h.opacity);
+      });
+      animId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    window.addEventListener('resize', resize);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
+    };
+  }, [isShapeVisible]);
+
   // Helper to render a shape matrix
-  const renderMatrix = (matrix) => {
+  const renderMatrix = (matrix, matrixOffset = 0) => {
     const rows = matrix.length;
     const cols = matrix[0].length;
     return (
@@ -363,7 +458,16 @@ export default function WishesPage() {
             
             if (!wish) {
               // Empty placeholder for cell
-              return <div key={`${r}-${c}`} className="grid-cell" style={{ background: 'var(--color-border)' }} />;
+              return (
+                <div 
+                  key={`${r}-${c}`} 
+                  className={`grid-cell ${isShapeVisible ? 'shape-revealed' : ''}`}
+                  style={{ 
+                    background: 'var(--color-border)',
+                    animationDelay: `${(matrixOffset + r) * 0.08 + c * 0.04}s`
+                  }} 
+                />
+              );
             }
             
             const hasMedia = wish.media && wish.media.length > 0;
@@ -373,8 +477,11 @@ export default function WishesPage() {
             return (
               <div 
                 key={`${r}-${c}`} 
-                className="grid-cell"
-                style={{ background: hasMedia ? '#000' : gradient, animationDelay: `${(wishIndex % 20) * 0.05}s` }}
+                className={`grid-cell ${isShapeVisible ? 'shape-revealed' : ''}`}
+                style={{ 
+                  background: hasMedia ? '#000' : gradient, 
+                  animationDelay: `${(matrixOffset + r) * 0.08 + c * 0.04}s`
+                }}
                 onClick={() => setSelectedWish(wish)}
               >
                 <div className="grid-cell-content">
@@ -494,9 +601,12 @@ export default function WishesPage() {
       </div>
 
       {/* 69 Shape Board */}
-      <div className="shape-board-container">
-        {MATRICES[gridSize] && renderMatrix(MATRICES[gridSize].matrix6)}
-        {MATRICES[gridSize] && renderMatrix(MATRICES[gridSize].matrix9)}
+      <div className="shape-board-wrapper" ref={shapeBoardRef}>
+        <canvas ref={particlesCanvasRef} className="particles-canvas" />
+        <div className="shape-board-container">
+          {MATRICES[gridSize] && renderMatrix(MATRICES[gridSize].matrix6, 0)}
+          {MATRICES[gridSize] && renderMatrix(MATRICES[gridSize].matrix9, MATRICES[gridSize].matrix6.length)}
+        </div>
       </div>
 
       {/* Highlighted Wishes */}
