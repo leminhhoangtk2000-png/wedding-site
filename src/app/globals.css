@@ -1383,7 +1383,7 @@ body::after {
   padding-top: var(--header-height);
   min-height: 100vh;
   background-color: var(--color-bg);
-  background-image: url('/bg-wishboard.jpg');
+  background-image: url('/bg-wishboard.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -1801,6 +1801,11 @@ body::after {
   box-shadow: 0 10px 40px rgba(0,0,0,0.3);
   max-width: 400px;
   width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
   transform: rotate(-2deg);
   animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   position: relative;
