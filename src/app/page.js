@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import HeroSection from '@/components/HeroSection';
 import QuoteSection from '@/components/QuoteSection';
 import SectionChon from '@/components/SectionChon';
@@ -20,6 +20,23 @@ export default function HomePage() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [activePhase, setActivePhase] = useState('6');
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const iframeRef = useRef(null);
+
+  // Initialize Vimeo player when iframe is loaded
+  useEffect(() => {
+    if (isVideoPlaying && iframeRef.current && window.Vimeo) {
+      const player = new window.Vimeo.Player(iframeRef.current);
+      player.on('play', () => {
+        window.dispatchEvent(new Event('pause-bg-music'));
+      });
+      player.on('pause', () => {
+        window.dispatchEvent(new Event('play-bg-music'));
+      });
+      player.on('ended', () => {
+        window.dispatchEvent(new Event('play-bg-music'));
+      });
+    }
+  }, [isVideoPlaying]);
 
   // Group sections by phase prefix
   const sectionsByPhase = useMemo(() => {
@@ -121,7 +138,10 @@ export default function HomePage() {
       <div style={{ position: 'relative', width: '100%', maxWidth: 'calc(90vh * (4/3))', aspectRatio: '4/3', margin: '0 auto', overflow: 'hidden', backgroundColor: '#000' }}>
         {!isVideoPlaying ? (
           <div 
-            onClick={() => setIsVideoPlaying(true)}
+            onClick={() => {
+              setIsVideoPlaying(true);
+              window.dispatchEvent(new Event('pause-bg-music'));
+            }}
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/images/000069-2.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
             className="video-facade"
           >
@@ -136,6 +156,7 @@ export default function HomePage() {
           </div>
         ) : (
           <iframe 
+            ref={iframeRef}
             src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1&muted=0" 
             frameBorder="0" 
             allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 

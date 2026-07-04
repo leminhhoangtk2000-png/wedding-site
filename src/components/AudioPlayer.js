@@ -35,9 +35,34 @@ export default function AudioPlayer() {
     document.addEventListener('click', handleInteraction);
     document.addEventListener('touchstart', handleInteraction);
 
+    // Custom events to pause/play music when video plays
+    const handlePauseMusic = () => {
+      if (audioRef.current && !audioRef.current.paused) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+        window.sessionStorage.setItem('music-paused-by-video', 'true');
+      }
+    };
+    
+    const handlePlayMusic = () => {
+      if (window.sessionStorage.getItem('music-paused-by-video') === 'true') {
+        if (audioRef.current && audioRef.current.paused) {
+          audioRef.current.play()
+            .then(() => setIsPlaying(true))
+            .catch(e => console.log(e));
+        }
+        window.sessionStorage.removeItem('music-paused-by-video');
+      }
+    };
+
+    window.addEventListener('pause-bg-music', handlePauseMusic);
+    window.addEventListener('play-bg-music', handlePlayMusic);
+
     return () => {
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('pause-bg-music', handlePauseMusic);
+      window.removeEventListener('play-bg-music', handlePlayMusic);
     };
   }, []);
 
