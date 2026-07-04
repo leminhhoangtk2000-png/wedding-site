@@ -119,12 +119,13 @@ export default function HomePage() {
       
       <div style={{ padding: '75% 0 0 0', position: 'relative', width: '100%', maxWidth: '100vw', overflow: 'hidden' }}>
         <iframe 
-          src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1" 
+          src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1&muted=1" 
           frameBorder="0" 
           allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
           referrerPolicy="strict-origin-when-cross-origin" 
           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
           title="PreWedding HOANG&DUYEN: Project 69"
+          loading="lazy"
         ></iframe>
       </div>
       <Script src="https://player.vimeo.com/api/player.js" strategy="lazyOnload" />
