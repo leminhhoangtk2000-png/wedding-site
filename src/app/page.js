@@ -19,6 +19,7 @@ export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [activePhase, setActivePhase] = useState('6');
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   // Group sections by phase prefix
   const sectionsByPhase = useMemo(() => {
@@ -117,18 +118,35 @@ export default function HomePage() {
     <>
       <HeroSection />
       
-      <div style={{ padding: '75% 0 0 0', position: 'relative', width: '100%', maxWidth: '100vw', overflow: 'hidden' }}>
-        <iframe 
-          src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1&muted=1" 
-          frameBorder="0" 
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-          referrerPolicy="strict-origin-when-cross-origin" 
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
-          title="PreWedding HOANG&DUYEN: Project 69"
-          loading="lazy"
-        ></iframe>
+      <div style={{ padding: '75% 0 0 0', position: 'relative', width: '100%', maxWidth: '100vw', overflow: 'hidden', backgroundColor: '#000' }}>
+        {!isVideoPlaying ? (
+          <div 
+            onClick={() => setIsVideoPlaying(true)}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/images/000064-3.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+            className="video-facade"
+          >
+            {/* Dark overlay */}
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.3)' }}></div>
+            {/* Play Button */}
+            <div className="play-button" style={{ position: 'relative', zIndex: 1, width: 70, height: 70, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'transform 0.2s' }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--color-accent-dark)" stroke="var(--color-accent-dark)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 6 }}>
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </div>
+          </div>
+        ) : (
+          <iframe 
+            src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1&muted=0" 
+            frameBorder="0" 
+            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
+            referrerPolicy="strict-origin-when-cross-origin" 
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
+            title="PreWedding HOANG&DUYEN: Project 69"
+            loading="lazy"
+          ></iframe>
+        )}
       </div>
-      <Script src="https://player.vimeo.com/api/player.js" strategy="lazyOnload" />
+      {isVideoPlaying && <Script src="https://player.vimeo.com/api/player.js" strategy="lazyOnload" />}
 
       <div className="story-wish-cta reveal">
         <Link href="/wishes" className="wish-cta-button">
