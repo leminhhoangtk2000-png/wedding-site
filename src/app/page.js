@@ -118,7 +118,7 @@ export default function HomePage() {
     <>
       <HeroSection />
       
-      <div style={{ padding: '75% 0 0 0', position: 'relative', width: '100%', maxWidth: '100vw', overflow: 'hidden', backgroundColor: '#000' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 'calc(90vh * (4/3))', aspectRatio: '4/3', margin: '0 auto', overflow: 'hidden', backgroundColor: '#000' }}>
         {!isVideoPlaying ? (
           <div 
             onClick={() => setIsVideoPlaying(true)}
