@@ -1,0 +1,1083 @@
+/* =========================================================
+   RSVP PAGE CSS MODULE — TRIFOLD & CINEMATIC HERO
+   Theme: Warm cream paper, green vine frame, watercolor celebration
+   ========================================================= */
+
+.rsvpContainer {
+  min-height: 100vh;
+  min-height: 100svh;
+  background-color: #FDFAF5;
+  color: #1A1A1A;
+  font-family: var(--font-body), sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  background-image: radial-gradient(circle at 50% 0%, rgba(232, 223, 200, 0.35) 0%, rgba(253, 250, 245, 0) 70%);
+}
+
+/* =========================================================
+   PANEL 1: CINEMATIC HERO
+   ========================================================= */
+.rsvpHero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #FDFAF5;
+}
+
+.heroStage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Parallax Layers */
+.heroLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroWashBg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #F7F1E5 0%, #FDFAF5 80%);
+  opacity: 1;
+}
+
+.heroVenueMidground {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center bottom;
+  opacity: 0.85;
+  filter: brightness(1.02) contrast(0.95);
+  transform-origin: center center;
+}
+
+/* Foliage Gates (Parting left and right) */
+.gateLeft,
+.gateRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  z-index: 4;
+  pointer-events: none;
+  background-repeat: no-repeat;
+}
+
+.gateLeft {
+  left: 0;
+  background-position: left center;
+  background-size: contain;
+}
+
+.gateRight {
+  right: 0;
+  background-position: right center;
+  background-size: contain;
+}
+
+/* Hero Center Card (The emerging invitation) */
+.heroInvitationCard {
+  position: relative;
+  z-index: 5;
+  width: min(90vw, 460px);
+  aspect-ratio: 588 / 833;
+  max-height: 86vh;
+  background: #FDFAF5;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(43, 76, 63, 0.12), 0 6px 18px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 36px 24px 28px;
+  border: 1px solid rgba(232, 223, 200, 0.8);
+  pointer-events: auto;
+}
+
+.cardVineOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  object-fit: fill;
+  z-index: 2;
+}
+
+.ribbonLeftCorner,
+.ribbonRightCorner {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.ribbonLeftCorner {
+  left: 0;
+  width: 28%;
+  height: auto;
+}
+
+.ribbonRightCorner {
+  right: 0;
+  width: 24%;
+  height: auto;
+}
+
+.heroCardContent {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.heroSaveTheDate {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(48px, 9vw, 76px);
+  line-height: 1.1;
+  color: #000000;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.heroDate {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(20px, 3.8vw, 28px);
+  color: #0D0D0B;
+  letter-spacing: 0.05em;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+.heroCouple {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(42px, 8vw, 70px);
+  line-height: 1.1;
+  color: #000000;
+  margin-top: 14px;
+  font-weight: 400;
+}
+
+.heroVenue {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 600;
+  color: #0D0D0B;
+  margin-top: 12px;
+}
+
+.heroAddress {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(14px, 2.5vw, 19px);
+  color: #4A4A45;
+  margin-top: 2px;
+}
+
+.heroCtaWrapper {
+  position: relative;
+  z-index: 4;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.heroCtaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: #2B4C3F;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid #1F382E;
+  box-shadow: 0 4px 16px rgba(43, 76, 63, 0.25);
+  transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.heroCtaButton:hover {
+  background: #213B31;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(43, 76, 63, 0.35);
+}
+
+.heroCtaButton:focus-visible {
+  outline: 3px solid #C9A96E;
+  outline-offset: 3px;
+}
+
+/* Motion Controls (Skip / Replay) */
+.motionControls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.motionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: rgba(253, 250, 245, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(232, 223, 200, 0.9);
+  color: #2B4C3F;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.motionButton:hover {
+  background: #FFFFFF;
+  border-color: #2B4C3F;
+}
+
+.motionButton:focus-visible {
+  outline: 2px solid #2B4C3F;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   TRIFOLD SEQUENCE CONTAINER
+   ========================================================= */
+.trifoldSequence {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+/* Panel Card Base */
+.trifoldCard {
+  position: relative;
+  background: #FDFAF5;
+  border-radius: 24px;
+  box-shadow: 0 16px 45px rgba(43, 76, 63, 0.07), 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(232, 223, 200, 0.85);
+  overflow: hidden;
+  padding: 48px 32px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* =========================================================
+   PANEL 2: SAVE THE DATE CARD (FIGMA NODE 131:50)
+   ========================================================= */
+.saveTheDateCard {
+  width: 100%;
+  max-width: 588px;
+  aspect-ratio: 588 / 833;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 50px 28px 20px;
+}
+
+.cardVineBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.saveDateContent {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.saveDateTitle {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(54px, 11vw, 92px);
+  line-height: 1.1;
+  color: #000000;
+  margin: 0;
+  font-weight: 400;
+}
+
+.saveDateTag {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(22px, 4.5vw, 34px);
+  color: #0D0D0B;
+  margin-top: 8px;
+  letter-spacing: -0.01em;
+}
+
+.saveDateNames {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(48px, 10vw, 84px);
+  line-height: 1.1;
+  color: #000000;
+  margin-top: 18px;
+  font-weight: 400;
+}
+
+.saveDateVenue {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(20px, 3.8vw, 30px);
+  color: #0D0D0B;
+  margin-top: 14px;
+}
+
+.saveDateAddress {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(16px, 3.2vw, 24px);
+  color: #3A3A36;
+  margin-top: 2px;
+}
+
+/* Node 131:50 Bottom Watercolor Illustrations */
+.saveDateIllustrations {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 240px;
+  margin-top: auto;
+  pointer-events: none;
+}
+
+.artCouple {
+  position: absolute;
+  left: 2%;
+  bottom: 0;
+  width: 44%;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
+  object-position: bottom left;
+}
+
+.artChampagne {
+  position: absolute;
+  left: 33%;
+  bottom: 0;
+  width: 25%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+.artFlower {
+  position: absolute;
+  left: 54%;
+  bottom: 5px;
+  width: 18%;
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+}
+
+.artTable {
+  position: absolute;
+  right: 1%;
+  bottom: 0;
+  width: 40%;
+  height: auto;
+  max-height: 210px;
+  object-fit: contain;
+  object-position: bottom right;
+}
+
+/* =========================================================
+   PANEL 3: TIMELINE CARD (FIGMA NODE 131:96)
+   ========================================================= */
+.timelineCard {
+  width: 100%;
+  max-width: 588px;
+  aspect-ratio: 588 / 833;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 50px 32px 20px;
+}
+
+.timelineTitle {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(54px, 11vw, 92px);
+  line-height: 1.1;
+  color: #000000;
+  margin: 0 0 20px;
+  font-weight: 400;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+
+.timelineGrid {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+}
+
+.timelineItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.timelineItemCenter {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+
+.timelineTime {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(22px, 4vw, 27px);
+  font-weight: 700;
+  color: #0D0D0B;
+  line-height: 1.2;
+}
+
+.timelineLabel {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: clamp(20px, 3.8vw, 25px);
+  font-weight: 400;
+  color: #0D0D0B;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* Node 131:96 Bottom Decor */
+.timelineBottomDecor {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 150px;
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.timelineDecorLeft {
+  width: 48%;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+  object-position: bottom left;
+}
+
+.timelineDecorRight {
+  width: 50%;
+  height: auto;
+  max-height: 140px;
+  object-fit: contain;
+  object-position: bottom right;
+}
+
+/* =========================================================
+   PANEL 4: RSVP FORM CARD
+   ========================================================= */
+.rsvpFormCard {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+  padding: 44px 32px;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 3;
+}
+
+.formEyebrow {
+  display: inline-block;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: #2B4C3F;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.formTitle {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(42px, 8vw, 68px);
+  color: #000000;
+  line-height: 1.1;
+  font-weight: 400;
+  margin: 0;
+}
+
+.formSubtitle {
+  font-size: 15px;
+  color: #555550;
+  margin-top: 8px;
+  max-width: 480px;
+  margin-inline: auto;
+  line-height: 1.5;
+}
+
+.rsvpForm {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.label {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #1A1A1A;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.requiredStar {
+  color: #C0392B;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1.5px solid #DCD4C0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  color: #1A1A1A;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #2B4C3F;
+  box-shadow: 0 0 0 3px rgba(43, 76, 63, 0.15);
+}
+
+.inputError {
+  border-color: #C0392B;
+}
+
+.fieldError {
+  font-size: 13px;
+  color: #C0392B;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Segmented Attendance Radio Cards */
+.attendanceFieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.attendanceLegend {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 10px;
+}
+
+.attendanceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.attendanceCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  background: #FFFFFF;
+  border: 2px solid #E0D7C5;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 80px;
+}
+
+.attendanceCard:hover {
+  border-color: #2B4C3F;
+  background: #FAF8F2;
+}
+
+.attendanceCardActive {
+  border-color: #2B4C3F;
+  background: #F2F7F4;
+  box-shadow: 0 4px 12px rgba(43, 76, 63, 0.1);
+}
+
+.attendanceRadioInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.attendanceIcon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.attendanceLabelText {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A1A;
+  line-height: 1.2;
+}
+
+/* Stepper Control for Guest Count */
+.stepperWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 220px;
+}
+
+.stepperBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid #DCD4C0;
+  background: #FFFFFF;
+  color: #2B4C3F;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stepperBtn:hover:not(:disabled) {
+  background: #2B4C3F;
+  color: #FFFFFF;
+  border-color: #2B4C3F;
+}
+
+.stepperBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepperInput {
+  width: 70px;
+  text-align: center;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 1.5px solid #DCD4C0;
+}
+
+.fieldHint {
+  font-size: 13px;
+  color: #666660;
+  line-height: 1.4;
+}
+
+/* Dietary Preset Chips */
+.chipsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+.chipButton {
+  background: #FFFFFF;
+  border: 1px solid #D8CFBA;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 15px;
+  color: #3A3A36;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chipButton:hover {
+  background: #F5EFE0;
+  border-color: #2B4C3F;
+}
+
+.chipButtonActive {
+  background: #2B4C3F;
+  color: #FFFFFF;
+  border-color: #2B4C3F;
+}
+
+/* Privacy Text */
+.privacyNotice {
+  font-size: 12.5px;
+  color: #7A7A72;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Submit Button */
+.submitBtn {
+  width: 100%;
+  padding: 16px 24px;
+  background: #2B4C3F;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(43, 76, 63, 0.2);
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #1F382E;
+  box-shadow: 0 6px 22px rgba(43, 76, 63, 0.3);
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitBtnDecline {
+  background: #695E54;
+}
+
+.submitBtnDecline:hover:not(:disabled) {
+  background: #544A41;
+}
+
+/* =========================================================
+   PANEL 5: CONFIRMATION & EDIT CARD
+   ========================================================= */
+.confirmationCard {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.confirmationBadge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #E8F4EC;
+  color: #2B4C3F;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 18px;
+  border: 1px solid #C2E2CC;
+}
+
+.confirmationTitle {
+  font-family: var(--font-display), 'Ingrid Darling', cursive;
+  font-size: clamp(44px, 8.5vw, 70px);
+  color: #000000;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.confirmationParty {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #2B4C3F;
+  margin-top: 10px;
+}
+
+.confirmationText {
+  font-size: 15.5px;
+  color: #555550;
+  margin-top: 10px;
+  line-height: 1.6;
+  max-width: 480px;
+  margin-inline: auto;
+}
+
+.confirmationDetailsBox {
+  margin-top: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E4DCCB;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmDetailItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #333330;
+}
+
+.confirmDetailIcon {
+  color: #2B4C3F;
+  flex-shrink: 0;
+}
+
+.confirmationActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.confirmActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmActionPrimary {
+  background: #2B4C3F;
+  color: #FFFFFF;
+  border: 1px solid #2B4C3F;
+}
+
+.confirmActionPrimary:hover {
+  background: #1F382E;
+}
+
+.confirmActionSecondary {
+  background: #FFFFFF;
+  color: #2B4C3F;
+  border: 1.5px solid #2B4C3F;
+}
+
+.confirmActionSecondary:hover {
+  background: #F4F8F5;
+}
+
+.editNoticeBox {
+  margin-top: 24px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #FAF7EE;
+  border: 1px solid #E5DEC9;
+  font-size: 13.5px;
+  color: #6B6252;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* =========================================================
+   STATUS / ERROR NOTICES
+   ========================================================= */
+.statusNotice {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto 20px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.statusNoticeWarn {
+  background: #FFF8E6;
+  border: 1px solid #F0D597;
+  color: #7A5B0B;
+}
+
+.statusNoticeError {
+  background: #FDF2F2;
+  border: 1px solid #F5C6CB;
+  color: #9C1C26;
+}
+
+.statusNoticeIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+@media (max-width: 600px) {
+  .trifoldSequence {
+    padding: 24px 12px 60px;
+    gap: 40px;
+  }
+
+  .trifoldCard {
+    padding: 36px 16px 24px;
+    border-radius: 18px;
+  }
+
+  .saveTheDateCard,
+  .timelineCard {
+    aspect-ratio: auto;
+    min-height: 640px;
+    padding: 36px 16px 16px;
+  }
+
+  .timelineGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .attendanceGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .confirmationActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .confirmActionBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .saveDateTitle,
+  .timelineTitle {
+    font-size: 46px;
+  }
+
+  .saveDateNames {
+    font-size: 42px;
+  }
+
+  .saveDateIllustrations {
+    height: 180px;
+  }
+
+  .timelineBottomDecor {
+    height: 110px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .heroInvitationCard {
+    transition: none !important;
+  }
+
+  .heroCtaButton,
+  .submitBtn,
+  .motionButton {
+    transition: none !important;
+  }
+}

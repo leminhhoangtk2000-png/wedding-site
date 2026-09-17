@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { animate } from 'animejs';
 
 export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -49,9 +50,19 @@ export default function MusicPlayer() {
     };
   }, []);
 
+  const btnRef = useRef(null);
+
   const togglePlay = () => {
     if (!hasInteracted) {
       setHasInteracted(true);
+    }
+
+    if (btnRef.current) {
+      animate(btnRef.current, {
+        scale: [1, 0.82, 1.12, 1],
+        duration: 450,
+        ease: 'spring(1, 80, 10, 0)',
+      });
     }
 
     if (audioRef.current) {
@@ -77,6 +88,7 @@ export default function MusicPlayer() {
       id="music-player"
     >
       <button
+        ref={btnRef}
         className="music-player__btn"
         onClick={togglePlay}
         aria-label={isPlaying ? 'Pause music' : 'Play music'}

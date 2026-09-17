@@ -1,5 +1,7 @@
 'use client';
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import gsap from 'gsap';
+import { animate } from 'animejs';
 
 import { supabase } from '@/lib/supabase';
 
@@ -231,6 +233,29 @@ export default function WishesPage() {
     }
     fetchData();
   }, []);
+
+  // GSAP hero entrance
+  useEffect(() => {
+    gsap.from('.wishes-hero > *', {
+      y: 28,
+      opacity: 0,
+      stagger: 0.12,
+      duration: 0.8,
+      ease: 'power3.out',
+    });
+  }, []);
+
+  // Anime.js modal popup animation
+  useEffect(() => {
+    if (isModalOpen) {
+      animate('.wishes-modal', {
+        scale: [0.88, 1],
+        opacity: [0, 1],
+        duration: 450,
+        ease: 'spring(1, 80, 10, 0)',
+      });
+    }
+  }, [isModalOpen]);
 
   const handleFileSelect = useCallback((e) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -628,7 +653,7 @@ export default function WishesPage() {
                   </div>
                 )}
                 <div className="highlight-content">
-                  <div className="highlight-message">"{wish.message}"</div>
+                  <div className="highlight-message">&ldquo;{wish.message}&rdquo;</div>
                   <div className="highlight-author">- {wish.guest_name}</div>
                 </div>
               </div>

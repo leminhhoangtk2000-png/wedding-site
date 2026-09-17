@@ -1,12 +1,15 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export default function ImageLightbox({ images = [], currentIndex = 0, onClose, onNavigate }) {
   const [zoom, setZoom] = useState(1);
-
-  useEffect(() => {
-    setZoom(1);
-  }, [currentIndex]);
+  const [prevIndex, setPrevIndex] = useState(currentIndex);
+  if (currentIndex !== prevIndex) {
+    setPrevIndex(currentIndex);
+    if (zoom !== 1) {
+      setZoom(1);
+    }
+  }
 
   const goNext = useCallback(() => {
     onNavigate((currentIndex + 1) % images.length);

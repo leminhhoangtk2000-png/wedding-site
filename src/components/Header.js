@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -22,10 +22,13 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile nav on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    if (mobileOpen) {
+      setMobileOpen(false);
+    }
+  }
 
   // Prevent body scroll when mobile nav is open
   useEffect(() => {
@@ -41,6 +44,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'Our Story' },
+    { href: '/rsvp', label: 'RSVP' },
     { href: '/wishes', label: 'Wishes Board' },
   ];
 

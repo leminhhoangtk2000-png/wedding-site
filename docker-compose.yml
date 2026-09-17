@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-https://uloouvqxfjaonldsjfir.supabase.co}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsb291dnF4Zmphb25sZHNqZmlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4OTc3MDMsImV4cCI6MjA5ODQ3MzcwM30.hitRwnsELl3NTIaVydp36gwY1ws9HDegskMJNlL2eVQ}
+    image: wedding-site:latest
+    container_name: wedding-site
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - path: .env.local
+        required: false
+      - path: .env
+        required: false
+    environment:
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-696969}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-https://uloouvqxfjaonldsjfir.supabase.co}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsb291dnF4Zmphb25sZHNqZmlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4OTc3MDMsImV4cCI6MjA5ODQ3MzcwM30.hitRwnsELl3NTIaVydp36gwY1ws9HDegskMJNlL2eVQ}
+

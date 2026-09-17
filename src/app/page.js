@@ -1,13 +1,15 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import HeroSection from '@/components/HeroSection';
+import VideoSection from '@/components/VideoSection';
+import WishSection from '@/components/WishSection';
 import QuoteSection from '@/components/QuoteSection';
+import HomeRsvpCard from '@/components/HomeRsvpCard';
 import SectionChon from '@/components/SectionChon';
 import GallerySection from '@/components/GallerySection';
 import ImageLightbox from '@/components/ImageLightbox';
 import { gallerySections } from '@/lib/storyData';
-import Link from 'next/link';
-import Script from 'next/script';
+import gsap from 'gsap';
 
 const phases = [
   { key: '6', label: '6', subtitle: 'bạn học', prefix: 'HS' },
@@ -19,24 +21,6 @@ export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [activePhase, setActivePhase] = useState('6');
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const iframeRef = useRef(null);
-
-  // Initialize Vimeo player when iframe is loaded
-  useEffect(() => {
-    if (isVideoPlaying && iframeRef.current && window.Vimeo) {
-      const player = new window.Vimeo.Player(iframeRef.current);
-      player.on('play', () => {
-        window.dispatchEvent(new Event('pause-bg-music'));
-      });
-      player.on('pause', () => {
-        window.dispatchEvent(new Event('play-bg-music'));
-      });
-      player.on('ended', () => {
-        window.dispatchEvent(new Event('play-bg-music'));
-      });
-    }
-  }, [isVideoPlaying]);
 
   // Group sections by phase prefix
   const sectionsByPhase = useMemo(() => {
@@ -97,6 +81,19 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, [activePhase]);
 
+
+  // GSAP smooth fade & slide when switching gallery phase
+  useEffect(() => {
+    const el = document.getElementById('story-gallery');
+    if (el) {
+      gsap.fromTo(
+        el,
+        { opacity: 0.2, y: 25 },
+        { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }
+      );
+    }
+  }, [activePhase]);
+
   // Auto-next tab when scrolling to bottom
   useEffect(() => {
     const marker = document.getElementById('gallery-end-marker');
@@ -135,50 +132,13 @@ export default function HomePage() {
     <>
       <HeroSection />
       
-      <div style={{ position: 'relative', width: '100%', maxWidth: 'calc(90vh * (4/3))', aspectRatio: '4/3', margin: '0 auto', overflow: 'hidden', backgroundColor: '#000' }}>
-        {!isVideoPlaying ? (
-          <div 
-            onClick={() => {
-              setIsVideoPlaying(true);
-              window.dispatchEvent(new Event('pause-bg-music'));
-            }}
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundImage: 'url(/images/000069-2.webp)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-            className="video-facade"
-          >
-            {/* Dark overlay */}
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.3)' }}></div>
-            {/* Play Button */}
-            <div className="play-button" style={{ position: 'relative', zIndex: 1, width: 70, height: 70, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.3)', transition: 'transform 0.2s' }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="var(--color-accent-dark)" stroke="var(--color-accent-dark)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 6 }}>
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-            </div>
-          </div>
-        ) : (
-          <iframe 
-            ref={iframeRef}
-            src="https://player.vimeo.com/video/1206395637?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&loop=1&muted=0" 
-            frameBorder="0" 
-            allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share" 
-            referrerPolicy="strict-origin-when-cross-origin" 
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} 
-            title="PreWedding HOANG&DUYEN: Project 69"
-            loading="lazy"
-          ></iframe>
-        )}
-      </div>
-      {isVideoPlaying && <Script src="https://player.vimeo.com/api/player.js" strategy="lazyOnload" />}
-
-      <div className="story-wish-cta reveal">
-        <Link href="/wishes" className="wish-cta-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-          </svg>
-          <span>Gửi lời chúc cho tụi mình nhé!</span>
-        </Link>
-      </div>
+      <VideoSection />
+      <WishSection />
 
       <QuoteSection />
+
+      {/* RSVP Invitation Card */}
+      <HomeRsvpCard />
 
       {/* Section Chon (original image cards) */}
       <SectionChon onPhaseChange={handlePhaseChange} activePhase={activePhase} />
