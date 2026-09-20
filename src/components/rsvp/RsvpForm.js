@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ATTENDANCE_VALUES, DIETARY_PRESETS } from '@/lib/rsvpConstants';
 import AttendanceChoice from './AttendanceChoice';
 import GuestCountField from './GuestCountField';
@@ -100,17 +100,28 @@ export default function RsvpForm({
   const isAttending = attendance === ATTENDANCE_VALUES.ATTENDING;
 
   return (
-    <div className={styles.rsvpFormCard} id="rsvp-form-section">
+    <div className={styles.banquetCard} id="rsvp-form-section">
+      {/* Gilded Corner Filigree Accents */}
+      <div className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} aria-hidden="true" />
+      <div className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} aria-hidden="true" />
+      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomLeft}`} aria-hidden="true" />
+      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomRight}`} aria-hidden="true" />
+
       <div className={styles.formHeader}>
-        <span className={styles.formEyebrow}>
-          {isEditing ? 'Update Details' : 'Wedding Invitation'}
+        <span className={styles.cardEyebrow}>
+          {isEditing ? 'Update Details' : 'Kindly Reply by September 30, 2026'}
         </span>
-        <h2 className={styles.formTitle}>
-          {isEditing ? 'Edit Your Response' : 'RSVP'}
+        <h2 className={styles.cardTitleScript}>
+          {isEditing ? 'Edit Response' : 'RSVP'}
         </h2>
-        <p className={styles.formSubtitle}>
-          Please let Hoàng &amp; Duyên know your plans so we can make the most thoughtful arrangements for you!
+        <p className={styles.cardSubtitle}>
+          Please let Hoàng &amp; Duyên know your plans so we can prepare the best experience for you!
         </p>
+        <div className={styles.goldFiligreeDivider} aria-hidden="true">
+          <div className={styles.goldFiligreeLine} />
+          <span className={styles.goldFiligreeKnot}>❧</span>
+          <div className={styles.goldFiligreeLine} />
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.rsvpForm} noValidate>
@@ -123,7 +134,7 @@ export default function RsvpForm({
             ref={nameInputRef}
             id="rsvp-fullname"
             type="text"
-            placeholder="e.g. John Doe"
+            placeholder="e.g. Eleanor Vance"
             maxLength={100}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -163,7 +174,7 @@ export default function RsvpForm({
                 Dietary restrictions &amp; special requests (optional)
               </label>
               <div className={styles.fieldHint}>
-                e.g. Vegetarian, food allergies, or any special accommodations.
+                e.g. Vegetarian, seafood allergy, or any special accommodations.
               </div>
 
               {/* Quick Preset Chips */}
@@ -208,7 +219,7 @@ export default function RsvpForm({
             id="rsvp-message"
             rows={3}
             maxLength={1000}
-            placeholder="Send something warm and lovely..."
+            placeholder="Send something warm and lovely to Hoàng & Duyên..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={submitting}
@@ -225,7 +236,7 @@ export default function RsvpForm({
 
         {/* Privacy reassurance */}
         <p className={styles.privacyNotice}>
-          🔒 Your information will only be used to prepare for this wedding celebration.
+          🔒 Your response is confidential and will only be used to prepare for our wedding celebration.
         </p>
 
         {/* Submit CTA */}
@@ -235,7 +246,7 @@ export default function RsvpForm({
           className={`${styles.submitBtn} ${!isAttending ? styles.submitBtnDecline : ''}`}
         >
           {submitting ? (
-            <span>Submitting response…</span>
+            <span>Saving your response…</span>
           ) : isAttending ? (
             <span>{isEditing ? 'Save Changes' : 'Confirm Attendance'}</span>
           ) : (

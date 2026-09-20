@@ -176,7 +176,7 @@ export default function RsvpPage() {
         <EventTimeline />
 
         {/* PANEL 4 & 5: FORM CARD OR PERSISTED CONFIRMATION */}
-        <section className={styles.trifoldCard} id="rsvp-form-section" aria-label="RSVP Response Section">
+        <div id="rsvp-form-section" aria-label="RSVP Response Section" style={{ width: '100%' }}>
           {persistedRsvp && !isEditingMode ? (
             <RsvpConfirmation
               rsvpData={persistedRsvp}
@@ -194,7 +194,7 @@ export default function RsvpPage() {
               onSubmit={handleSubmitForm}
             />
           )}
-        </section>
+        </div>
       </main>
     </div>
   );

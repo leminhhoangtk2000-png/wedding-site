@@ -30,9 +30,9 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
             className={styles.attendanceRadioInput}
           />
           <div className={styles.attendanceIcon} aria-hidden="true">
-            {isAttending ? '✨' : '🌿'}
+            {isAttending ? '🕊️' : '✨'}
           </div>
-          <span className={styles.attendanceLabelText}>Yes, I will attend</span>
+          <span className={styles.attendanceLabelText}>Joyfully Accept</span>
         </label>
 
         {/* Option: Declined */}
@@ -53,7 +53,7 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
           <div className={styles.attendanceIcon} aria-hidden="true">
             {isDeclined ? '💌' : '🍃'}
           </div>
-          <span className={styles.attendanceLabelText}>Regretfully decline</span>
+          <span className={styles.attendanceLabelText}>Regretfully Decline</span>
         </label>
       </div>
     </fieldset>
