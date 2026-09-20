@@ -26,18 +26,18 @@ function validatePayload(body) {
   const message = (body.message || body.wishes || '').trim().slice(0, 1000);
 
   if (!guestName || guestName.length < 2) {
-    errors.push('Vui lòng nhập họ và tên (ít nhất 2 ký tự).');
+    errors.push('Please enter your full name (at least 2 characters).');
   }
 
   if (attendance !== ATTENDANCE_VALUES.ATTENDING && attendance !== ATTENDANCE_VALUES.DECLINED) {
-    errors.push('Vui lòng chọn xác nhận tham dự hoặc gửi lời chúc mừng.');
+    errors.push('Please select whether you will attend or send regrets.');
   }
 
   if (attendance === ATTENDANCE_VALUES.ATTENDING) {
     if (isNaN(attendeeCount) || attendeeCount < 1) {
-      errors.push('Số lượng khách tham dự phải từ 1 người trở lên.');
+      errors.push('Guest count must be at least 1.');
     } else if (attendeeCount > 10) {
-      errors.push('Số lượng khách tối đa là 10 người mỗi nhóm.');
+      errors.push('Maximum 10 guests allowed per party.');
     }
   } else {
     attendeeCount = 0;
@@ -62,7 +62,7 @@ export async function POST(request) {
       return NextResponse.json(
         {
           success: false,
-          error: `Hạn chót xác nhận tham dự (${WEDDING_EVENT.cutoffDisplay}) đã qua. Xin vui lòng liên hệ trực tiếp cô dâu & chú rể nếu có thay đổi.`,
+          error: `The RSVP deadline (${WEDDING_EVENT.cutoffDisplay}) has passed. Please contact the bride & groom directly for any adjustments.`,
         },
         { status: 403 }
       );
@@ -114,13 +114,13 @@ export async function POST(request) {
           {
             success: false,
             code: 'TABLE_NOT_FOUND',
-            error: 'Bảng dữ liệu RSVP chưa được tạo trong cơ sở dữ liệu Supabase. Vui lòng mở Supabase SQL Editor và chạy file migration trong thư mục supabase/migrations/20260916_create_rsvps_table.sql.',
+            error: 'The RSVP database table has not been initialized yet in Supabase.',
           },
           { status: 503 }
         );
       }
       return NextResponse.json(
-        { success: false, error: error.message || 'Lỗi khi ghi nhận thông tin RSVP.' },
+        { success: false, error: error.message || 'An error occurred while recording your RSVP.' },
         { status: 500 }
       );
     }
@@ -142,7 +142,7 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'Gửi phản hồi RSVP thành công!',
+        message: 'RSVP submitted successfully!',
         data: normalizedData,
         rsvp: normalizedData,
         edit_token: editToken,
@@ -154,7 +154,7 @@ export async function POST(request) {
   } catch (err) {
     console.error('RSVP POST handler error:', err);
     return NextResponse.json(
-      { success: false, error: 'Đã xảy ra lỗi máy chủ. Vui lòng thử lại sau.' },
+      { success: false, error: 'A server error occurred. Please try again later.' },
       { status: 500 }
     );
   }
@@ -167,7 +167,7 @@ export async function GET(request) {
 
     if (!token) {
       return NextResponse.json(
-        { success: false, error: 'Thiếu mã xác thực chỉnh sửa (token).' },
+        { success: false, error: 'Missing edit verification token.' },
         { status: 400 }
       );
     }
@@ -205,7 +205,7 @@ export async function GET(request) {
           {
             success: false,
             code: 'TABLE_NOT_FOUND',
-            error: 'Bảng dữ liệu RSVP chưa được tạo trong cơ sở dữ liệu Supabase.',
+            error: 'The RSVP database table has not been initialized yet in Supabase.',
           },
           { status: 503 }
         );
@@ -215,7 +215,7 @@ export async function GET(request) {
 
     if (!data) {
       return NextResponse.json(
-        { success: false, error: 'Không tìm thấy phản hồi RSVP tương ứng với mã chỉnh sửa này.' },
+        { success: false, error: 'No RSVP response found matching this edit token.' },
         { status: 404 }
       );
     }
@@ -244,7 +244,7 @@ export async function GET(request) {
   } catch (err) {
     console.error('RSVP GET handler error:', err);
     return NextResponse.json(
-      { success: false, error: 'Lỗi khi truy xuất dữ liệu phản hồi.' },
+      { success: false, error: 'An error occurred while retrieving your RSVP response.' },
       { status: 500 }
     );
   }
@@ -257,7 +257,7 @@ export async function PUT(request) {
 
     if (!token) {
       return NextResponse.json(
-        { success: false, error: 'Thiếu mã xác thực chỉnh sửa (token).' },
+        { success: false, error: 'Missing edit verification token.' },
         { status: 400 }
       );
     }
@@ -266,7 +266,7 @@ export async function PUT(request) {
       return NextResponse.json(
         {
           success: false,
-          error: `Hạn chót thay đổi thông tin (${WEDDING_EVENT.cutoffDisplay}) đã qua. Vui lòng liên hệ trực tiếp cô dâu & chú rể nếu có thay đổi khẩn cấp.`,
+          error: `The deadline to modify your RSVP (${WEDDING_EVENT.cutoffDisplay}) has passed. Please contact the bride & groom directly for any adjustments.`,
         },
         { status: 403 }
       );
@@ -301,14 +301,14 @@ export async function PUT(request) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: error.message || 'Không thể cập nhật thông tin RSVP.' },
+        { success: false, error: error.message || 'Unable to update RSVP details.' },
         { status: 500 }
       );
     }
 
     if (!data) {
       return NextResponse.json(
-        { success: false, error: 'Không tìm thấy phản hồi phù hợp với mã xác thực này.' },
+        { success: false, error: 'No RSVP response found matching this verification token.' },
         { status: 404 }
       );
     }
@@ -329,7 +329,7 @@ export async function PUT(request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Cập nhật phản hồi thành công!',
+      message: 'RSVP updated successfully!',
       data: normalizedData,
       rsvp: normalizedData,
       can_edit: canEdit,
@@ -338,7 +338,7 @@ export async function PUT(request) {
   } catch (err) {
     console.error('RSVP PUT handler error:', err);
     return NextResponse.json(
-      { success: false, error: 'Lỗi khi cập nhật dữ liệu phản hồi.' },
+      { success: false, error: 'An error occurred while updating your RSVP response.' },
       { status: 500 }
     );
   }

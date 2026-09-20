@@ -38,7 +38,7 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
   return (
     <div className={styles.formGroup}>
       <label htmlFor="rsvp-guest-count" className={styles.label}>
-        Tụi mình nên chuẩn bị chỗ cho bao nhiêu người, tính cả bạn? <span className={styles.requiredStar}>*</span>
+        How many guests should we prepare seats for, including yourself? <span className={styles.requiredStar}>*</span>
       </label>
 
       <div className={styles.stepperWrapper}>
@@ -47,7 +47,7 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
           onClick={handleDecrement}
           disabled={disabled || count <= 1}
           className={styles.stepperBtn}
-          aria-label="Giảm 1 người"
+          aria-label="Decrease guest count by 1"
         >
           –
         </button>
@@ -70,14 +70,14 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
           onClick={handleIncrement}
           disabled={disabled}
           className={styles.stepperBtn}
-          aria-label="Tăng 1 người"
+          aria-label="Increase guest count by 1"
         >
           +
         </button>
       </div>
 
       <div id="guest-count-hint" className={styles.fieldHint}>
-        Bao gồm bạn và người thân / bạn đồng hành cùng tham dự.
+        Including yourself and any plus-ones or companions attending.
       </div>
 
       {error && (

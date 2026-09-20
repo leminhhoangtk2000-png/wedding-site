@@ -56,7 +56,7 @@ export function isOffline() {
 
 export async function submitRsvp(payload) {
   if (isOffline()) {
-    const err = new Error('Thiết bị đang ngoại tuyến (offline). Vui lòng kiểm tra kết nối mạng và thử lại.');
+    const err = new Error('Your device is currently offline. Please check your network connection and try again.');
     err.code = 'OFFLINE';
     throw err;
   }
@@ -72,7 +72,7 @@ export async function submitRsvp(payload) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    const error = new Error(data.error || 'Có lỗi xảy ra khi gửi xác nhận. Vui lòng thử lại.');
+    const error = new Error(data.error || 'Something went wrong while submitting your RSVP. Please try again.');
     error.status = res.status;
     error.code = data.code;
     throw error;
@@ -87,7 +87,7 @@ export async function submitRsvp(payload) {
 export async function getRsvpByToken(token) {
   if (!token) return null;
   if (isOffline()) {
-    const err = new Error('Thiết bị đang ngoại tuyến (offline). Vui lòng kết nối mạng để tải lại thông tin.');
+    const err = new Error('Your device is currently offline. Please reconnect to view your RSVP details.');
     err.code = 'OFFLINE';
     throw err;
   }
@@ -103,7 +103,7 @@ export async function getRsvpByToken(token) {
       clearStoredEditToken();
       return null;
     }
-    const error = new Error(data.error || 'Không thể tải thông tin phản hồi.');
+    const error = new Error(data.error || 'Could not load your RSVP response.');
     error.status = res.status;
     error.code = data.code;
     throw error;
@@ -114,10 +114,10 @@ export async function getRsvpByToken(token) {
 
 export async function updateRsvp(token, payload) {
   if (!token) {
-    throw new Error('Mã chỉnh sửa không hợp lệ hoặc đã hết hạn.');
+    throw new Error('Invalid or expired edit token.');
   }
   if (isOffline()) {
-    const err = new Error('Thiết bị đang ngoại tuyến (offline). Vui lòng kiểm tra kết nối mạng.');
+    const err = new Error('Your device is currently offline. Please check your internet connection.');
     err.code = 'OFFLINE';
     throw err;
   }
@@ -132,7 +132,7 @@ export async function updateRsvp(token, payload) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    const error = new Error(data.error || 'Không thể cập nhật thông tin. Vui lòng thử lại.');
+    const error = new Error(data.error || 'Could not update RSVP response. Please try again.');
     error.status = res.status;
     error.code = data.code;
     throw error;

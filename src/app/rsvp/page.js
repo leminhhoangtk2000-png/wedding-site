@@ -44,8 +44,8 @@ export default function RsvpPage() {
       setOffline(true);
       setNoticeState({
         type: 'warn',
-        title: 'Thiết bị ngoại tuyến',
-        message: 'Bạn đang ngoại tuyến. Hãy kết nối lại mạng để gửi hoặc cập nhật phản hồi RSVP.',
+        title: 'Device Offline',
+        message: 'You are currently offline. Please reconnect to the internet to submit or update your RSVP.',
       });
     };
 
@@ -82,8 +82,8 @@ export default function RsvpPage() {
         if (err.code === 'TABLE_NOT_FOUND') {
           setNoticeState({
             type: 'error',
-            title: 'Cơ sở dữ liệu đang chờ khởi tạo',
-            message: 'Bảng dữ liệu RSVP chưa được tạo trong Supabase. Quản trị viên vui lòng chạy migration trong supabase/migrations/20260916_create_rsvps_table.sql.',
+            title: 'Database Setup Pending',
+            message: 'The RSVP database table has not been initialized yet in Supabase.',
           });
         }
       });
@@ -126,20 +126,20 @@ export default function RsvpPage() {
       }
     } catch (err) {
       console.error('RSVP submit error:', err);
-      const errMsg = err.message || 'Chưa thể lưu phản hồi. Thông tin bạn nhập vẫn còn ở đây — vui lòng thử lại.';
+      const errMsg = err.message || 'Unable to save your response. Your input is safely preserved here — please try again.';
       setSubmitError(errMsg);
 
       if (err.code === 'TABLE_NOT_FOUND' || err.status === 503) {
         setNoticeState({
           type: 'error',
-          title: 'Hệ thống lưu trữ đang bảo trì',
-          message: 'Bảng dữ liệu RSVP chưa được tạo trong cơ sở dữ liệu Supabase. Thông tin bạn nhập đã được giữ an toàn trên máy.',
+          title: 'System Maintenance',
+          message: 'The RSVP database table is pending setup. Your information is safely preserved on your device.',
         });
       } else if (err.code === 'OFFLINE') {
         setNoticeState({
           type: 'warn',
-          title: 'Không có kết nối mạng',
-          message: 'Bạn đang ngoại tuyến. Vui lòng kết nối mạng và bấm gửi lại.',
+          title: 'No Internet Connection',
+          message: 'You are currently offline. Please reconnect and submit again.',
         });
       }
     } finally {
@@ -176,7 +176,7 @@ export default function RsvpPage() {
         <EventTimeline />
 
         {/* PANEL 4 & 5: FORM CARD OR PERSISTED CONFIRMATION */}
-        <section className={styles.trifoldCard} id="rsvp-form-section" aria-label="Xác nhận tham dự">
+        <section className={styles.trifoldCard} id="rsvp-form-section" aria-label="RSVP Response Section">
           {persistedRsvp && !isEditingMode ? (
             <RsvpConfirmation
               rsvpData={persistedRsvp}

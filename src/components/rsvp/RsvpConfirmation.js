@@ -10,7 +10,7 @@ export default function RsvpConfirmation({
 }) {
   const isAttending = rsvpData?.attendance === ATTENDANCE_VALUES.ATTENDING;
   const guestCount = rsvpData?.attendee_count || 1;
-  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Bạn';
+  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Guest';
 
   return (
     <div className={styles.confirmationCard} aria-live="polite">
@@ -19,31 +19,31 @@ export default function RsvpConfirmation({
       </div>
 
       <h2 className={styles.confirmationTitle}>
-        {isAttending ? 'Hẹn Gặp Bạn Nhé!' : 'Cảm Ơn Bạn!'}
+        {isAttending ? 'See You There!' : 'Thank You!'}
       </h2>
 
       {isAttending ? (
         <>
           <div className={styles.confirmationParty}>
-            {guestName} · {guestCount} người tham dự
+            {guestName} · {guestCount} {guestCount === 1 ? 'guest attending' : 'guests attending'}
           </div>
           <p className={styles.confirmationText}>
-            Tụi mình đã ghi nhận thông tin và rất háo hức được đón tiếp bạn trong ngày vui của tụi mình!
+            Your RSVP has been confirmed. We can&apos;t wait to celebrate our special day with you!
           </p>
 
           <div className={styles.confirmationDetailsBox}>
             <div className={styles.confirmDetailItem}>
               <span className={styles.confirmDetailIcon} aria-hidden="true">📅</span>
-              <span><strong>Thời gian:</strong> {WEDDING_EVENT.timeDisplay}</span>
+              <span><strong>Date &amp; Time:</strong> {WEDDING_EVENT.dateDisplay} ({WEDDING_EVENT.timeDisplay})</span>
             </div>
             <div className={styles.confirmDetailItem}>
               <span className={styles.confirmDetailIcon} aria-hidden="true">📍</span>
-              <span><strong>Địa điểm:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}</span>
+              <span><strong>Venue:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}</span>
             </div>
             {rsvpData?.dietary_notes && (
               <div className={styles.confirmDetailItem}>
                 <span className={styles.confirmDetailIcon} aria-hidden="true">🥗</span>
-                <span><strong>Ghi chú:</strong> {rsvpData.dietary_notes}</span>
+                <span><strong>Special Requests:</strong> {rsvpData.dietary_notes}</span>
               </div>
             )}
           </div>
@@ -64,7 +64,7 @@ export default function RsvpConfirmation({
               onClick={downloadIcsFile}
               className={`${styles.confirmActionBtn} ${styles.confirmActionSecondary}`}
             >
-              <span>Tải file lịch (.ics)</span>
+              <span>Download (.ics)</span>
             </button>
 
             <a
@@ -73,7 +73,7 @@ export default function RsvpConfirmation({
               rel="noopener noreferrer"
               className={`${styles.confirmActionBtn} ${styles.confirmActionSecondary}`}
             >
-              <span>Bản đồ đường đi</span>
+              <span>Directions &amp; Map</span>
             </a>
           </div>
         </>
@@ -83,7 +83,7 @@ export default function RsvpConfirmation({
             {guestName}
           </div>
           <p className={styles.confirmationText}>
-            Tụi mình đã nhận được phản hồi. Cảm ơn bạn đã dành thời gian báo cho tụi mình biết nhé. Dù không thể chung vui trực tiếp, những lời chúc tốt đẹp của bạn vẫn luôn là món quà quý giá đối với tụi mình!
+            We have received your response. Thank you so much for letting us know! Although you won&apos;t be able to join us in person, your warm wishes and thoughtful love mean the world to us.
           </p>
         </>
       )}
@@ -97,15 +97,15 @@ export default function RsvpConfirmation({
             className={`${styles.confirmActionBtn} ${styles.confirmActionSecondary}`}
             style={{ fontSize: 15 }}
           >
-            ✏️ Chỉnh sửa phản hồi
+            ✏️ Edit Response
           </button>
           <p style={{ fontSize: 12, color: '#888', marginTop: 6 }}>
-            Bạn có thể chỉnh sửa phản hồi trước {WEDDING_EVENT.cutoffDisplay}.
+            You can update your response until {WEDDING_EVENT.cutoffDisplay}.
           </p>
         </div>
       ) : (
         <div className={styles.editNoticeBox}>
-          Phản hồi đã được chốt để tụi mình chuẩn bị chu đáo. Nếu cần thay đổi gấp, vui lòng liên hệ trực tiếp với tụi mình qua điện thoại hoặc tin nhắn.
+          RSVP responses are now finalized for event preparation. If you need any urgent changes, please contact the couple directly.
         </div>
       )}
     </div>

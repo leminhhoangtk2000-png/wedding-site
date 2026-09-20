@@ -193,7 +193,7 @@ export default function RsvpHero({ onScrollToForm }) {
   };
 
   return (
-    <section className={styles.rsvpHero} ref={heroRef} aria-label="Thiệp cưới hoạt cảnh">
+    <section className={styles.rsvpHero} ref={heroRef} aria-label="Cinematic wedding invitation">
       {/* Motion Controls: Skip & Replay */}
       <div className={styles.motionControls}>
         {isPlaying && (
@@ -201,9 +201,9 @@ export default function RsvpHero({ onScrollToForm }) {
             type="button"
             className={styles.motionButton}
             onClick={handleSkip}
-            aria-label="Bỏ qua hiệu ứng chuyển động"
+            aria-label="Skip animation"
           >
-            <span>Bỏ qua</span>
+            <span>Skip</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="5 4 15 12 5 20 5 4" />
               <line x1="19" y1="5" x2="19" y2="19" />
@@ -215,13 +215,13 @@ export default function RsvpHero({ onScrollToForm }) {
             type="button"
             className={styles.motionButton}
             onClick={handleReplay}
-            aria-label="Xem lại hiệu ứng mở thiệp"
+            aria-label="Replay invitation animation"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="1 4 1 10 7 10" />
               <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
             </svg>
-            <span>Xem lại</span>
+            <span>Replay</span>
           </button>
         )}
       </div>
@@ -303,9 +303,9 @@ export default function RsvpHero({ onScrollToForm }) {
               href="#rsvp-form-section"
               onClick={handleScrollToRsvp}
               className={styles.heroCtaButton}
-              aria-label="Cuộn xuống form xác nhận tham dự tiệc cưới"
+              aria-label="Scroll down to RSVP form"
             >
-              <span>Xác nhận tham dự</span>
+              <span>RSVP Now</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <polyline points="19 12 12 19 5 12" />

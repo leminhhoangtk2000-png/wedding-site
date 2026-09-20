@@ -10,7 +10,7 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
   return (
     <fieldset className={styles.attendanceFieldset}>
       <legend className={styles.attendanceLegend}>
-        Bạn có thể đến chung vui cùng tụi mình không? <span className={styles.requiredStar}>*</span>
+        Will you be able to celebrate with us? <span className={styles.requiredStar}>*</span>
       </legend>
 
       <div className={styles.attendanceGrid}>
@@ -32,7 +32,7 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
           <div className={styles.attendanceIcon} aria-hidden="true">
             {isAttending ? '✨' : '🌿'}
           </div>
-          <span className={styles.attendanceLabelText}>Có, mình sẽ tham dự</span>
+          <span className={styles.attendanceLabelText}>Yes, I will attend</span>
         </label>
 
         {/* Option: Declined */}
@@ -53,7 +53,7 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
           <div className={styles.attendanceIcon} aria-hidden="true">
             {isDeclined ? '💌' : '🍃'}
           </div>
-          <span className={styles.attendanceLabelText}>Rất tiếc, mình không thể tham dự</span>
+          <span className={styles.attendanceLabelText}>Regretfully decline</span>
         </label>
       </div>
     </fieldset>

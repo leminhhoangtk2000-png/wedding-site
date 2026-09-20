@@ -29,26 +29,26 @@ export default function RsvpForm({
     const errs = {};
     const trimmedName = fullName.trim();
     if (!trimmedName) {
-      errs.fullName = 'Vui lòng nhập họ và tên của bạn.';
+      errs.fullName = 'Please enter your full name.';
     } else if (trimmedName.length < 2) {
-      errs.fullName = 'Họ và tên quá ngắn (tối thiểu 2 ký tự).';
+      errs.fullName = 'Full name is too short (minimum 2 characters).';
     } else if (trimmedName.length > 100) {
-      errs.fullName = 'Họ và tên tối đa 100 ký tự.';
+      errs.fullName = 'Full name must not exceed 100 characters.';
     }
 
     if (attendance === ATTENDANCE_VALUES.ATTENDING) {
       const count = parseInt(attendeeCount, 10);
       if (isNaN(count) || count < 1) {
-        errs.attendeeCount = 'Số lượng khách phải từ 1 người trở lên.';
+        errs.attendeeCount = 'Guest count must be at least 1.';
       }
     }
 
     if (dietaryNotes && dietaryNotes.length > 500) {
-      errs.dietaryNotes = 'Yêu cầu đặc biệt tối đa 500 ký tự.';
+      errs.dietaryNotes = 'Special requests must not exceed 500 characters.';
     }
 
     if (message && message.length > 1000) {
-      errs.message = 'Lời nhắn tối đa 1000 ký tự.';
+      errs.message = 'Message must not exceed 1,000 characters.';
     }
 
     setErrors(errs);
@@ -103,13 +103,13 @@ export default function RsvpForm({
     <div className={styles.rsvpFormCard} id="rsvp-form-section">
       <div className={styles.formHeader}>
         <span className={styles.formEyebrow}>
-          {isEditing ? 'Cập nhật thông tin' : 'Lời mời chung vui'}
+          {isEditing ? 'Update Details' : 'Wedding Invitation'}
         </span>
         <h2 className={styles.formTitle}>
-          {isEditing ? 'Chỉnh Sửa Phản Hồi' : 'Xác Nhận Tham Dự'}
+          {isEditing ? 'Edit Your Response' : 'RSVP'}
         </h2>
         <p className={styles.formSubtitle}>
-          Hãy cho Hoàng &amp; Duyên biết kế hoạch của bạn để chúng mình chuẩn bị đón tiếp thật chu đáo nhé!
+          Please let Hoàng &amp; Duyên know your plans so we can make the most thoughtful arrangements for you!
         </p>
       </div>
 
@@ -117,13 +117,13 @@ export default function RsvpForm({
         {/* Full Name */}
         <div className={styles.formGroup}>
           <label htmlFor="rsvp-fullname" className={styles.label}>
-            Họ và tên của bạn <span className={styles.requiredStar}>*</span>
+            Your Full Name <span className={styles.requiredStar}>*</span>
           </label>
           <input
             ref={nameInputRef}
             id="rsvp-fullname"
             type="text"
-            placeholder="Ví dụ: Nguyễn Văn A"
+            placeholder="e.g. John Doe"
             maxLength={100}
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -160,14 +160,14 @@ export default function RsvpForm({
             {/* Special Requests (Dietary, Allergies) */}
             <div className={styles.formGroup}>
               <label htmlFor="rsvp-dietary" className={styles.label}>
-                Yêu cầu đặc biệt về ẩm thực (nếu có)
+                Dietary restrictions &amp; special requests (optional)
               </label>
               <div className={styles.fieldHint}>
-                Ví dụ: món chay, dị ứng thực phẩm hoặc hỗ trợ đặc biệt.
+                e.g. Vegetarian, food allergies, or any special accommodations.
               </div>
 
               {/* Quick Preset Chips */}
-              <div className={styles.chipsContainer} role="group" aria-label="Gợi ý yêu cầu món ăn">
+              <div className={styles.chipsContainer} role="group" aria-label="Suggested dietary preferences">
                 {DIETARY_PRESETS.map((preset) => {
                   const isActive = dietaryNotes.includes(preset);
                   return (
@@ -189,7 +189,7 @@ export default function RsvpForm({
                 id="rsvp-dietary"
                 rows={2}
                 maxLength={500}
-                placeholder="Ghi chú thêm về món ăn hoặc lưu ý khác..."
+                placeholder="Additional notes regarding dietary needs or accommodations..."
                 value={dietaryNotes}
                 onChange={(e) => setDietaryNotes(e.target.value)}
                 disabled={submitting}
@@ -202,13 +202,13 @@ export default function RsvpForm({
         {/* Optional Message */}
         <div className={styles.formGroup}>
           <label htmlFor="rsvp-message" className={styles.label}>
-            Lời nhắn gửi đến cô dâu &amp; chú rể (tùy chọn)
+            Message for the Bride &amp; Groom (optional)
           </label>
           <textarea
             id="rsvp-message"
             rows={3}
             maxLength={1000}
-            placeholder="Gửi gắm điều gì đó thật ấm áp nhé..."
+            placeholder="Send something warm and lovely..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={submitting}
@@ -225,7 +225,7 @@ export default function RsvpForm({
 
         {/* Privacy reassurance */}
         <p className={styles.privacyNotice}>
-          🔒 Thông tin của bạn chỉ được dùng để chuẩn bị cho tiệc cưới này.
+          🔒 Your information will only be used to prepare for this wedding celebration.
         </p>
 
         {/* Submit CTA */}
@@ -235,11 +235,11 @@ export default function RsvpForm({
           className={`${styles.submitBtn} ${!isAttending ? styles.submitBtnDecline : ''}`}
         >
           {submitting ? (
-            <span>Đang gửi phản hồi…</span>
+            <span>Submitting response…</span>
           ) : isAttending ? (
-            <span>{isEditing ? 'Lưu thay đổi' : 'Gửi xác nhận'}</span>
+            <span>{isEditing ? 'Save Changes' : 'Confirm Attendance'}</span>
           ) : (
-            <span>{isEditing ? 'Lưu thay đổi' : 'Xác nhận không tham dự'}</span>
+            <span>{isEditing ? 'Save Changes' : 'Decline Invitation'}</span>
           )}
         </button>
       </form>

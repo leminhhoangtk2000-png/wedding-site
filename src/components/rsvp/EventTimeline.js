@@ -13,7 +13,7 @@ const TIMELINE_EVENTS = [
 
 export default function EventTimeline() {
   return (
-    <section className={styles.trifoldCard} aria-label="Lịch trình tiệc cưới Timeline">
+    <section className={styles.trifoldCard} aria-label="Wedding Event Timeline">
       <div className={styles.timelineCard}>
         {/* Vine Border Background Frame */}
         <Image

@@ -5,7 +5,7 @@ import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function InvitationPanel() {
   return (
-    <section className={styles.trifoldCard} aria-label="Thiệp mời Save The Date">
+    <section className={styles.trifoldCard} aria-label="Save The Date Invitation">
       <div className={styles.saveTheDateCard}>
         {/* Vine Border Background Frame */}
         <Image
