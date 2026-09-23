@@ -1,20 +1,14 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { isDeadlinePassed, ATTENDANCE_VALUES, WEDDING_EVENT } from '@/lib/rsvpConstants';
+import { ATTENDANCE_VALUES, WEDDING_EVENT } from '@/lib/rsvpConstants';
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
 function checkServerCanEdit() {
-  try {
-    const now = new Date().getTime();
-    const cutoff = new Date(WEDDING_EVENT.cutoffIso).getTime();
-    return now < cutoff;
-  } catch {
-    return false;
-  }
+  return true;
 }
 
 function validatePayload(body) {
@@ -63,15 +57,6 @@ function validatePayload(body) {
 
 export async function POST(request) {
   try {
-    if (isDeadlinePassed()) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `The RSVP deadline (${WEDDING_EVENT.cutoffDisplay}) has passed. Please contact the bride & groom directly for any adjustments.`,
-        },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const validation = validatePayload(body);
@@ -299,15 +284,6 @@ export async function PUT(request) {
       );
     }
 
-    if (isDeadlinePassed()) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `The deadline to modify your RSVP (${WEDDING_EVENT.cutoffDisplay}) has passed. Please contact the bride & groom directly for any adjustments.`,
-        },
-        { status: 403 }
-      );
-    }
 
     const body = await request.json();
     const validation = validatePayload(body);

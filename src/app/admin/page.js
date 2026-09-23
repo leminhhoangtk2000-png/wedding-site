@@ -67,7 +67,6 @@ export default function AdminPage() {
   const [modalSaving, setModalSaving] = useState(false);
   const [modalForm, setModalForm] = useState({
     full_name: '',
-    phone: '',
     attendance: ATTENDANCE_VALUES.ATTENDING,
     attendee_count: 1,
     arrival_time: '',
@@ -224,7 +223,6 @@ export default function AdminPage() {
     setSelectedRsvp(rsvp);
     setModalForm({
       full_name: rsvp.full_name || '',
-      phone: rsvp.phone || '',
       attendance: rsvp.attendance || ATTENDANCE_VALUES.ATTENDING,
       attendee_count: rsvp.attendee_count || 1,
       arrival_time: rsvp.arrival_time || '',
@@ -246,7 +244,6 @@ export default function AdminPage() {
     try {
       await updateAdminRsvp(adminToken, selectedRsvp.id, {
         full_name: modalForm.full_name,
-        phone: modalForm.phone,
         attendance: modalForm.attendance,
         attendee_count: modalForm.attendance === ATTENDANCE_VALUES.ATTENDING ? modalForm.attendee_count : 0,
         arrival_time: modalForm.attendance === ATTENDANCE_VALUES.ATTENDING ? modalForm.arrival_time : null,
@@ -283,7 +280,6 @@ export default function AdminPage() {
     const headers = [
       'STT',
       'Họ và tên',
-      'Số điện thoại',
       'Trạng thái',
       'Số lượng khách',
       'Thời gian có mặt',
@@ -303,7 +299,6 @@ export default function AdminPage() {
       return [
         index + 1,
         sanitize(item.full_name),
-        sanitize(item.phone),
         sanitize(attendanceStr),
         attendeeCountStr,
         sanitize(arrivalTimeStr),
@@ -559,7 +554,7 @@ export default function AdminPage() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm tên, số điện thoại..."
+                  placeholder="Tìm kiếm tên khách mời..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="admin-search-input"
@@ -652,7 +647,6 @@ export default function AdminPage() {
                   <thead>
                     <tr>
                       <th>Khách mời</th>
-                      <th>Số điện thoại</th>
                       <th>Trạng thái</th>
                       <th>Số khách</th>
                       <th>Giờ có mặt</th>
@@ -668,7 +662,6 @@ export default function AdminPage() {
                         <td>
                           <strong>{rsvp.full_name}</strong>
                         </td>
-                        <td>{rsvp.phone ? <code>{rsvp.phone}</code> : <span className="admin-text-muted">—</span>}</td>
                         <td>
                           {rsvp.attendance === ATTENDANCE_VALUES.ATTENDING ? (
                             <span className="admin-badge admin-badge--attending">Tham dự</span>
@@ -751,7 +744,6 @@ export default function AdminPage() {
                       <div className="admin-guest-card__top">
                         <div>
                           <h3 className="admin-guest-card__name">{rsvp.full_name}</h3>
-                          {rsvp.phone && <div className="admin-guest-card__phone">{rsvp.phone}</div>}
                         </div>
                         {rsvp.attendance === ATTENDANCE_VALUES.ATTENDING ? (
                           <span className="admin-badge admin-badge--attending">Tham dự ({rsvp.attendee_count})</span>
@@ -1015,16 +1007,6 @@ export default function AdminPage() {
                   required
                   value={modalForm.full_name}
                   onChange={(e) => setModalForm({ ...modalForm, full_name: e.target.value })}
-                  className="rsvp-input"
-                />
-              </div>
-
-              <div className="rsvp-field">
-                <label className="rsvp-label">Số điện thoại</label>
-                <input
-                  type="tel"
-                  value={modalForm.phone}
-                  onChange={(e) => setModalForm({ ...modalForm, phone: e.target.value })}
                   className="rsvp-input"
                 />
               </div>

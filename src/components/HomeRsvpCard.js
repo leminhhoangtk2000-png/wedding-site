@@ -52,15 +52,6 @@ export default function HomeRsvpCard() {
           </div>
         </div>
 
-        {/* Deadline notice */}
-        <div className="home-rsvp-card__deadline">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-          <span>Hạn gửi xác nhận: <strong>{WEDDING_EVENT.cutoffDisplay}</strong></span>
-        </div>
-
         {/* Action Buttons */}
         <div className="home-rsvp-card__actions">
           <Link href="/rsvp" className="home-rsvp-btn home-rsvp-btn--primary">

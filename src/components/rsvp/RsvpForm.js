@@ -258,7 +258,7 @@ export default function RsvpForm({
       <div className={styles.formHeader}>
         <div className={styles.badgePill}>
           <span className={styles.badgeSparkle}>✦</span>
-          <span>{isEditing ? 'UPDATE RSVP' : 'KINDLY REPLY BY SEPTEMBER 30, 2026'}</span>
+          <span>{isEditing ? 'UPDATE RSVP' : 'KINDLY RSVP'}</span>
           <span className={styles.badgeSparkle}>✦</span>
         </div>
 

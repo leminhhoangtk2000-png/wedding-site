@@ -66,11 +66,7 @@ export const ARRIVAL_TIME_OPTIONS = [
 ];
 
 export function isDeadlinePassed() {
-  try {
-    return new Date().getTime() > new Date(WEDDING_EVENT.cutoffIso).getTime();
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 export function generateGoogleCalendarUrl() {
