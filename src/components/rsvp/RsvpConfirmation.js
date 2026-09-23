@@ -19,19 +19,19 @@ export default function RsvpConfirmation({
 }) {
   const isAttending = rsvpData?.attendance === ATTENDANCE_VALUES.ATTENDING;
   const guestCount = rsvpData?.attendee_count || 1;
-  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Quý khách';
+  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Valued Guest';
 
   return (
     <div className={styles.banquetCard} aria-live="polite">
       <div className={styles.formHeader}>
         <div className={styles.badgePill}>
           <span className={styles.badgeSparkle}>✦</span>
-          <span>{isAttending ? 'ĐÃ GHI NHẬN PHẢN HỒI' : 'CẢM ƠN LỜI HỒI ĐÁP'}</span>
+          <span>{isAttending ? 'RESPONSE CONFIRMED' : 'THANK YOU FOR REPLYING'}</span>
           <span className={styles.badgeSparkle}>✦</span>
         </div>
 
         <h2 className={styles.cardTitleScript}>
-          {isAttending ? 'Hẹn Gặp Bạn Tại Buổi Tiệc!' : 'Cảm Ơn Tình Cảm Của Bạn'}
+          {isAttending ? 'We Look Forward to Seeing You!' : 'Thank You for Your Warm Wishes'}
         </h2>
 
         <div className={styles.goldFiligreeDivider} aria-hidden="true">
@@ -50,13 +50,13 @@ export default function RsvpConfirmation({
             <div>
               <strong className={styles.guestHighlightName}>{guestName}</strong>
               <div className={styles.guestHighlightCount}>
-                Xác nhận tham dự: <strong>{guestCount}</strong> {guestCount === 1 ? 'người' : 'khách'}
+                Attendance confirmed: <strong>{guestCount}</strong> {guestCount === 1 ? 'guest' : 'guests'}
               </div>
             </div>
           </div>
 
           <p className={styles.cardSubtitle} style={{ marginTop: 14 }}>
-            Hoàng &amp; Duyên rất hạnh phúc và mong chờ được đón tiếp bạn trong ngày vui trọng đại của tụi mình!
+            Hoàng &amp; Duyên are thrilled and cannot wait to celebrate our special day with you!
           </p>
 
           <div className={styles.invitationVenueCard}>
@@ -66,7 +66,7 @@ export default function RsvpConfirmation({
                   <HanddrawnCalendar size={18} />
                 </span>
                 <div>
-                  <strong>Thời gian:</strong> {WEDDING_EVENT.dateDisplay} ({WEDDING_EVENT.timeDisplay})
+                  <strong>Time:</strong> {WEDDING_EVENT.dateDisplay} ({WEDDING_EVENT.timeDisplay})
                 </div>
               </div>
               <div className={styles.eventInfoItem}>
@@ -74,7 +74,7 @@ export default function RsvpConfirmation({
                   <HanddrawnMapPin size={18} />
                 </span>
                 <div>
-                  <strong>Địa điểm:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}
+                  <strong>Venue:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}
                 </div>
               </div>
               {rsvpData?.arrival_time && (
@@ -83,7 +83,7 @@ export default function RsvpConfirmation({
                     <HanddrawnClock size={18} />
                   </span>
                   <div>
-                    <strong>Thời gian có mặt dự kiến:</strong> {rsvpData.arrival_time}
+                    <strong>Expected arrival:</strong> {rsvpData.arrival_time}
                   </div>
                 </div>
               )}
@@ -93,7 +93,7 @@ export default function RsvpConfirmation({
                     <HanddrawnLeaf size={18} />
                   </span>
                   <div>
-                    <strong>Khẩu phần ăn riêng:</strong> {rsvpData.dietary_notes}
+                    <strong>Dietary requests:</strong> {rsvpData.dietary_notes}
                   </div>
                 </div>
               )}
@@ -109,7 +109,7 @@ export default function RsvpConfirmation({
               className={styles.invitationButtonOutline}
             >
               <HanddrawnCalendar size={18} />
-              <span>Thêm vào Google Calendar</span>
+              <span>Add to Google Calendar</span>
             </a>
 
             <a
@@ -119,7 +119,7 @@ export default function RsvpConfirmation({
               className={styles.invitationButtonOutline}
             >
               <HanddrawnMapPin size={18} />
-              <span>Xem chỉ đường Google Maps</span>
+              <span>Get Directions</span>
             </a>
           </div>
 
@@ -131,7 +131,7 @@ export default function RsvpConfirmation({
                 onClick={onEdit}
                 className={styles.textLinkBtn}
               >
-                Cần thay đổi thông tin hoặc số lượng người? Bấm vào đây để chỉnh sửa
+                Need to update your plans or guest count? Click here to edit
               </button>
             </div>
           )}
@@ -144,17 +144,17 @@ export default function RsvpConfirmation({
             </span>
             <div>
               <strong className={styles.guestHighlightName}>{guestName}</strong>
-              <div className={styles.guestHighlightCount}>Đã gửi lời chúc phúc từ xa</div>
+              <div className={styles.guestHighlightCount}>Sending warmest blessings from afar</div>
             </div>
           </div>
 
           <p className={styles.cardSubtitle} style={{ maxWidth: 520, margin: '16px auto 24px' }}>
-            Dù rất tiếc vì không thể gặp bạn trong ngày vui, Hoàng &amp; Duyên vô cùng trân trọng tình cảm và lời chúc phúc của bạn trên chặng đường mới này.
+            Though we will miss having you with us, Hoàng &amp; Duyên truly cherish your love, support, and warm blessings on this new journey.
           </p>
 
           <div className={styles.invitationActions}>
             <Link href="/wishes" className={styles.submitBtn} style={{ textDecoration: 'none', display: 'inline-flex' }}>
-              <span>Gửi lời chúc vào Sổ Lưu Bút →</span>
+              <span>Leave a Message in Our Guestbook →</span>
             </Link>
 
             {canEdit && (
@@ -163,7 +163,7 @@ export default function RsvpConfirmation({
                 onClick={onEdit}
                 className={styles.invitationButtonOutline}
               >
-                <span>Thay đổi ý định? Cập nhật lại phản hồi</span>
+                <span>Changed your mind? Update your RSVP</span>
               </button>
             )}
           </div>

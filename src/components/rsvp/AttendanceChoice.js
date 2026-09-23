@@ -15,7 +15,7 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
   return (
     <fieldset className={styles.attendanceFieldset}>
       <legend className={styles.attendanceLegend}>
-        Bạn sẽ đến chung vui cùng tụi mình chứ? <span className={styles.requiredStar}>*</span>
+        Will you be able to celebrate with us? <span className={styles.requiredStar}>*</span>
       </legend>
 
       <div className={styles.attendanceGrid}>
@@ -45,8 +45,8 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
             )}
           </div>
           <div className={styles.attendanceMeta}>
-            <span className={styles.attendanceLabelText}>Chắc chắn tham dự</span>
-            <span className={styles.attendanceSubText}>Sẽ có mặt cùng chúc mừng!</span>
+            <span className={styles.attendanceLabelText}>Joyfully Accept</span>
+            <span className={styles.attendanceSubText}>Delighted to attend and celebrate!</span>
           </div>
         </label>
 
@@ -76,8 +76,8 @@ export default function AttendanceChoice({ value, onChange, disabled }) {
             )}
           </div>
           <div className={styles.attendanceMeta}>
-            <span className={styles.attendanceLabelText}>Rất tiếc không thể đến</span>
-            <span className={styles.attendanceSubText}>Gửi lời chúc phúc từ xa</span>
+            <span className={styles.attendanceLabelText}>Regretfully Decline</span>
+            <span className={styles.attendanceSubText}>Sending warm blessings from afar</span>
           </div>
         </label>
       </div>

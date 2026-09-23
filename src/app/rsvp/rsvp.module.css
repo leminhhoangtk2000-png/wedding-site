@@ -1654,5 +1654,526 @@
   line-height: 1.35;
 }
 
+/* ========================================================
+   DRESS CODE SECTION
+   ======================================================== */
+.cleanPaletteRibbon {
+  display: flex;
+  height: 38px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 0 22px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
 
+.cleanPaletteSegment {
+  flex: 1;
+  height: 100%;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+}
 
+.cleanPaletteSegment:hover {
+  transform: scaleY(1.15);
+  z-index: 2;
+  filter: brightness(1.05);
+}
+
+.cleanSwatchesGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.cleanSwatchCard {
+  background: #ffffff;
+  border: 1.5px solid #ece4d8;
+  border-radius: 14px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  outline: none;
+  font-family: inherit;
+}
+
+.cleanSwatchCard:hover {
+  transform: translateY(-3px);
+  border-color: #c9a96e;
+  box-shadow: 0 6px 18px rgba(176, 141, 79, 0.16);
+}
+
+.cleanSwatchCardCopied {
+  border-color: #3b703e !important;
+  background: #f7fcf7 !important;
+  box-shadow: 0 4px 14px rgba(59, 112, 62, 0.16) !important;
+}
+
+.cleanSwatchCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 9px;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.cleanSwatchCard:hover .cleanSwatchCircle {
+  transform: scale(1.08);
+}
+
+.cleanSwatchCheck {
+  color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cleanSwatchName {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2b221a;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.cleanSwatchHex {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #736454;
+  background: #f7f3ec;
+  border: 1px solid #ebd9c8;
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.cleanSwatchCardCopied .cleanSwatchHex {
+  background: #2e6930;
+  color: #ffffff;
+  border-color: #2e6930;
+}
+
+@media (max-width: 768px) {
+  .cleanSwatchesGrid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  .cleanSwatchCircle {
+    width: 38px;
+    height: 38px;
+  }
+  .cleanSwatchName {
+    font-size: 12px;
+  }
+  .cleanSwatchHex {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+}
+
+@media (max-width: 540px) {
+  .cleanSwatchesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .cleanSwatchCard {
+    padding: 12px 6px;
+  }
+  .cleanSwatchCircle {
+    width: 40px;
+    height: 40px;
+  }
+  .cleanSwatchName {
+    font-size: 13px;
+  }
+}
+
+/* =========================================================
+   STEP-BY-STEP RSVP CARD CAROUSEL (HORIZONTAL TRANSITION)
+   ========================================================= */
+
+.stepProgressContainer {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.stepProgressInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.stepProgressBadge {
+  font-family: var(--font-condensed), 'Truculenta', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #8c6721;
+  background: #fdf8ee;
+  border: 1px solid rgba(201, 169, 110, 0.45);
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.stepProgressCurrentTitle {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 14.5px;
+  color: #383027;
+  font-weight: 600;
+  text-align: right;
+}
+
+.stepDotsBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  padding: 4px 0;
+}
+
+.stepDotsBar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: #ede6da;
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.stepDotBtn {
+  position: relative;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #dcd4c6;
+  color: #8a7c6c;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+}
+
+.stepDotBtn:hover:not(:disabled) {
+  border-color: #c9a96e;
+  color: #8c6721;
+  transform: scale(1.08);
+}
+
+.stepDotBtnActive {
+  background: linear-gradient(135deg, #c9a96e 0%, #b08d4f 100%);
+  border-color: #9f7d3e;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(176, 141, 79, 0.4);
+  transform: scale(1.15);
+}
+
+.stepDotBtnCompleted {
+  background: #fbf7ee;
+  border-color: #c9a96e;
+  color: #8c6721;
+}
+
+/* Slider Viewport & Track */
+.stepSliderViewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  min-height: 280px;
+}
+
+.stepSliderTrack {
+  display: flex;
+  width: 100%;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  align-items: flex-start;
+}
+
+.stepSlide {
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 4px 12px;
+  transition: opacity 0.35s ease;
+}
+
+.stepCardHeader {
+  text-align: center;
+  margin-bottom: 22px;
+  max-width: 520px;
+}
+
+.stepCardQuestion {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: clamp(20px, 4.2vw, 25px);
+  color: #1e1913;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+.stepCardHint {
+  font-family: var(--font-body), 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  color: #6a5e50;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.stepCardBody {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Big Name Input on Step 1 */
+.stepBigInputWrap {
+  position: relative;
+  width: 100%;
+}
+
+.stepBigInput {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(201, 169, 110, 0.5);
+  background: #fdfcfa;
+  font-family: var(--font-body), 'Be Vietnam Pro', sans-serif;
+  font-size: 17px;
+  color: #231c15;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.stepBigInput:focus {
+  border-color: #b08d4f;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.18), 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.stepInputHint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: #7d7060;
+  padding: 0 4px;
+}
+
+/* Summary Review Card on Final Step */
+.stepReviewSummary {
+  background: #faf7f2;
+  border: 1px solid #ebdcc5;
+  border-radius: 16px;
+  padding: 16px 18px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.stepReviewTitle {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 14.5px;
+  color: #8c6721;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px dashed rgba(201, 169, 110, 0.35);
+  padding-bottom: 8px;
+  margin: 0;
+}
+
+.stepReviewRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  font-size: 13.5px;
+  line-height: 1.45;
+  gap: 10px;
+}
+
+.stepReviewLabel {
+  color: #6e6457;
+  flex-shrink: 0;
+}
+
+.stepReviewValue {
+  color: #231c15;
+  font-weight: 600;
+  text-align: right;
+}
+
+.stepReviewEditLink {
+  background: none;
+  border: none;
+  color: #b08d4f;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+/* Navigation Row */
+.stepNavigationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(201, 169, 110, 0.25);
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.stepBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 100px;
+  background: #ffffff;
+  border: 1.5px solid #dcd4c6;
+  color: #594f42;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.stepBackBtn:hover:not(:disabled) {
+  border-color: #b08d4f;
+  color: #2b251e;
+  background: #faf7f2;
+  transform: translateX(-2px);
+}
+
+.stepBackBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepNextBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 32px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, #c9a96e 0%, #b08d4f 100%);
+  color: #ffffff;
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 15.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.28s ease;
+  box-shadow: 0 6px 20px -3px rgba(176, 141, 79, 0.45);
+}
+
+.stepNextBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -2px rgba(176, 141, 79, 0.55);
+}
+
+.stepNextBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.stepSubmitBtn {
+  padding: 15px 36px;
+  font-size: 16px;
+}
+
+@media (max-width: 520px) {
+  .stepProgressInfo {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .stepProgressCurrentTitle {
+    text-align: center;
+    font-size: 13.5px;
+  }
+  .stepDotBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  .stepNavigationRow {
+    gap: 10px;
+  }
+  .stepBackBtn {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+  .stepNextBtn {
+    padding: 12px 22px;
+    font-size: 14.5px;
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

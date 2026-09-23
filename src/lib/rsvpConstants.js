@@ -4,14 +4,14 @@ export const WEDDING_EVENT = {
   bride: 'Duyên',
   couple: 'Hoàng & Duyên',
   dateFormatted: '03 · 10 · 2026',
-  dateDisplay: 'Thứ Bảy, ngày 03 tháng 10 năm 2026',
-  timeDisplay: '16:00 đón khách · 17:30 bắt đầu lễ cưới',
+  dateDisplay: 'Saturday, October 3rd, 2026',
+  timeDisplay: '4:00 PM Welcome · 5:30 PM Ceremony',
   venueName: 'Hidden Haven',
-  venueAddress: '393/21 đường Bình Quới, Phường 28, Quận Bình Thạnh, TP. Hồ Chí Minh',
+  venueAddress: '393/21 Binh Quoi Street, Ward 28, Binh Thanh District, Ho Chi Minh City',
   googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hidden+Haven+393%2F21+B%C3%ACnh+Qu%E1%BB%9Bi+Ph%C6%B0%E1%BB%9Dng+28+B%C3%ACnh+Th%E1%BA%A1nh+TP+HCM',
   // Cutoff deadline: 16:00 30/09/2026 GMT+7
   cutoffIso: '2026-09-30T16:00:00+07:00',
-  cutoffDisplay: '16:00 ngày 30/09/2026',
+  cutoffDisplay: '4:00 PM, September 30, 2026',
 };
 
 export const ATTENDANCE_VALUES = {
@@ -20,34 +20,50 @@ export const ATTENDANCE_VALUES = {
 };
 
 export const DIETARY_PRESETS = [
-  'Ăn chay',
-  'Dị ứng hải sản',
+  'Vegetarian',
+  'Seafood Allergy',
+  'Peanut Allergy',
+  'Not Spicy',
+  'No Alcohol',
 ];
+
+export const DRESSCODE_PALETTE = [
+  { id: 'olive', name: 'Olive', hex: '#4B5136', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'sage', name: 'Sage', hex: '#8A8F73', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'walnut', name: 'Walnut', hex: '#6B4426', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'warm-taupe', name: 'Warm Taupe', hex: '#CBB9A3', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'cream', name: 'Cream', hex: '#E8DCC5', border: 'rgba(0, 0, 0, 0.15)' },
+  { id: 'golden-ochre', name: 'Golden Ochre', hex: '#C19A68', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'burnt-sienna', name: 'Burnt Sienna', hex: '#B44E26', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'olive-green', name: 'Olive Green', hex: '#3E5352', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'blue-grey', name: 'Blue-Grey', hex: '#6C7A89', border: 'rgba(0, 0, 0, 0.12)' },
+  { id: 'cream-white', name: 'Cream White', hex: '#F5F5DC', border: 'rgba(0, 0, 0, 0.18)' },
+];
+
 
 export const ARRIVAL_TIME_OPTIONS = [
   {
     id: 'welcome',
-    value: '16:00 (Đón khách & Tiệc trà)',
+    value: '16:00 (Welcome & Afternoon Tea)',
     time: '16:00',
-    title: 'Đón khách & Tiệc trà',
-    desc: 'Đến sớm cùng chụp ảnh & thưởng trà với dâu rể',
+    title: 'Welcome & Afternoon Tea',
+    desc: 'Arrive early to take photos & enjoy tea with the couple',
   },
   {
     id: 'ceremony',
-    value: '17:00 - 17:30 (Nghi lễ thành hôn)',
+    value: '17:00 - 17:30 (Wedding Ceremony)',
     time: '17:00 - 17:30',
-    title: 'Nghi lễ thành hôn',
-    desc: 'Có mặt trước giờ cử hành hôn lễ thiêng liêng',
+    title: 'Wedding Ceremony',
+    desc: 'Arrive before the sacred exchange of vows',
   },
   {
     id: 'banquet',
-    value: '18:00 - 18:30 (Khai tiệc thân mật)',
+    value: '18:00 - 18:30 (Dinner Banquet)',
     time: '18:00 - 18:30',
-    title: 'Khai tiệc thân mật',
-    desc: 'Có mặt dùng tiệc tối ấm cúng & nâng ly chúc phúc',
+    title: 'Dinner Banquet',
+    desc: 'Join our intimate dinner & raise a toast',
   },
 ];
-
 
 export function isDeadlinePassed() {
   try {
@@ -58,9 +74,9 @@ export function isDeadlinePassed() {
 }
 
 export function generateGoogleCalendarUrl() {
-  const title = encodeURIComponent(`Lễ Thành Hôn - ${WEDDING_EVENT.couple}`);
+  const title = encodeURIComponent(`Wedding Celebration - ${WEDDING_EVENT.couple}`);
   const details = encodeURIComponent(
-    `Hôn lễ ấm cúng của ${WEDDING_EVENT.couple}.\nĐịa điểm: ${WEDDING_EVENT.venueName} - ${WEDDING_EVENT.venueAddress}.\nThời gian: ${WEDDING_EVENT.timeDisplay}.\nRất hân hạnh được đón tiếp bạn!`
+    `Join the intimate wedding celebration of ${WEDDING_EVENT.couple}.\nVenue: ${WEDDING_EVENT.venueName} - ${WEDDING_EVENT.venueAddress}.\nTime: ${WEDDING_EVENT.timeDisplay}.\nWe look forward to celebrating with you!`
   );
   const location = encodeURIComponent(`${WEDDING_EVENT.venueName}, ${WEDDING_EVENT.venueAddress}`);
   // 16:00 GMT+7 is 09:00 UTC. 21:30 GMT+7 is 14:30 UTC
@@ -72,15 +88,15 @@ export function generateIcsContent() {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Hoang & Duyen Wedding//RSVP Calendar//VI',
+    'PRODID:-//Hoang & Duyen Wedding//RSVP Calendar//EN',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     'UID:hoang-duyen-wedding-20261003@hiddenhaven',
     'DTSTAMP:20260916T000000Z',
     'DTSTART:20261003T090000Z',
     'DTEND:20261003T143000Z',
-    `SUMMARY:Lễ Thành Hôn - ${WEDDING_EVENT.couple}`,
-    `DESCRIPTION:Hôn lễ ấm cúng của ${WEDDING_EVENT.couple} tại ${WEDDING_EVENT.venueName}.`,
+    `SUMMARY:Wedding Celebration - ${WEDDING_EVENT.couple}`,
+    `DESCRIPTION:Intimate wedding celebration of ${WEDDING_EVENT.couple} at ${WEDDING_EVENT.venueName}.`,
     `LOCATION:${WEDDING_EVENT.venueName}, ${WEDDING_EVENT.venueAddress}`,
     'STATUS:CONFIRMED',
     'END:VEVENT',
@@ -95,7 +111,7 @@ export function downloadIcsFile() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', 'le-thanh-hon-hoang-duyen.ics');
+  link.setAttribute('download', 'wedding-invitation-hoang-duyen.ics');
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

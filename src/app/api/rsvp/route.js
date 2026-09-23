@@ -41,7 +41,7 @@ function validatePayload(body) {
       errors.push('Maximum 10 guests allowed per party.');
     }
     if (!arrivalTime) {
-      errors.push('Vui lòng chọn thời gian bạn sẽ có mặt.');
+      errors.push('Please select your expected arrival time.');
     }
   } else {
     attendeeCount = 0;

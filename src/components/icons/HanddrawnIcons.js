@@ -461,3 +461,39 @@ export function HanddrawnClock({ size = 20, className = '', ...props }) {
   );
 }
 
+// 23. Handdrawn Palette / Colors (replaces 🎨)
+export function HanddrawnPalette({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      <path d="M12 3C7 3 3 7 3 12c0 2.5 1 4 2.8 4 1 0 1.5-.6 2-1.2.4-.5.8-1 1.8-1h1.5c4 0 7.4-3.4 7.4-7.4C18.5 4.5 15.5 3 12 3z" />
+      <circle cx="7.5" cy="8.5" r="1.1" fill="currentColor" />
+      <circle cx="11.5" cy="6.8" r="1.1" fill="currentColor" />
+      <circle cx="14.8" cy="9.2" r="1.1" fill="currentColor" />
+      <circle cx="14.8" cy="13" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+// 24. Handdrawn Hanger / Wardrobe (replaces 👗, 👔)
+export function HanddrawnHanger({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      <path d="M12 5.5a2 2 0 1 1 2-2c0 .9-.6 1.6-1.4 1.9L3.5 13.8a1.5 1.5 0 0 0 .9 2.7h15.2a1.5 1.5 0 0 0 .9-2.7L12 5.5z" />
+      <path d="M4 16.5v1.2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.2" />
+    </svg>
+  );
+}
+
+

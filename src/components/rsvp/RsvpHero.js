@@ -292,9 +292,9 @@ export default function RsvpHero({ onScrollToForm }) {
   }, []);
 
   const chapters = [
-    { label: 'Gặp Gỡ & Kết Duyên', ratio: 0.18 },
-    { label: 'Tiệc Cưới Sân Vườn', ratio: 0.58 },
-    { label: 'Xác Nhận Tham Dự', ratio: 0.92 },
+    { label: 'The Encounter & Vows', ratio: 0.18 },
+    { label: 'Garden Banquet', ratio: 0.58 },
+    { label: 'RSVP Confirmation', ratio: 0.92 },
   ];
 
   return (
@@ -309,7 +309,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s1-bg-wrap">
             <Image
               src="/images/hero-animated/scene1-bg.webp"
-              alt="Hoàng hôn thơ mộng sân vườn tiệc cưới"
+              alt="Romantic sunset garden wedding"
               fill
               priority
               className="hero-s1-bg"
@@ -322,10 +322,10 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s1-intro-cue">
             <div className="hero-s1-intro-badge">
               <span>✦</span>
-              <span>Thiệp Cưới Hoàng &amp; Duyên</span>
+              <span>Hoàng &amp; Duyên Wedding Invitation</span>
               <span>✦</span>
             </div>
-            <p className="hero-s1-intro-hint">Cuộn chuột để mở thiệp cưới</p>
+            <p className="hero-s1-intro-hint">Scroll down to open invitation</p>
             <div className="hero-s1-scroll-arrow" aria-hidden="true">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -339,13 +339,13 @@ export default function RsvpHero({ onScrollToForm }) {
             {/* Groom from left */}
             <img
               src="/images/hero-animated/groom.webp"
-              alt="Chú rể Hoàng"
+              alt="Groom Hoàng"
               className="hero-char hero-char-groom"
             />
             {/* Bride from right */}
             <img
               src="/images/hero-animated/bride.webp"
-              alt="Cô dâu Duyên"
+              alt="Bride Duyên"
               className="hero-char hero-char-bride"
             />
           </div>
@@ -355,7 +355,7 @@ export default function RsvpHero({ onScrollToForm }) {
             <div className="hero-s1-hands-card">
               <img
                 src="/images/hero-animated/ring-hands.webp"
-                alt="Đôi bàn tay đan chặt mang nhẫn cưới hạnh phúc"
+                alt="Clasped hands with wedding rings"
                 className="hero-s1-hands-img"
               />
 
@@ -386,7 +386,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s2-bg-wrap">
             <Image
               src="/images/hero-animated/scene2-bg.webp"
-              alt="Bầu trời đêm tiệc cưới sân vườn lung linh"
+              alt="Starry twilight garden banquet"
               fill
               className="hero-s2-bg"
               sizes="100vw"
@@ -398,7 +398,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s2-tree-wrap">
             <img
               src="/images/hero-animated/grand-tree.webp"
-              alt="Cây đại thụ giăng đèn lãng mạn"
+              alt="Grand ancient tree with fairy lights"
               className="hero-s2-tree"
             />
           </div>
@@ -407,7 +407,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s2-guests-wrap">
             <img
               src="/images/hero-animated/guests.webp"
-              alt="Khách mời vui vẻ nâng ly chúc phúc"
+              alt="Cheering wedding guests"
               className="hero-s2-guests"
             />
           </div>
@@ -416,7 +416,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s2-table-wrap">
             <img
               src="/images/hero-animated/banquet-table.webp"
-              alt="Bàn tiệc cưới gỗ mộc ngoài trời đầy hoa và nến"
+              alt="Rustic candlelit wedding banquet table"
               className="hero-s2-table"
             />
           </div>
@@ -425,7 +425,7 @@ export default function RsvpHero({ onScrollToForm }) {
           <div className="hero-s2-arch-wrap">
             <img
               src="/images/hero-animated/foreground-arch.webp"
-              alt="Vòm hoa lá rủ tiền cảnh"
+              alt="Hanging floral archway"
               className="hero-s2-arch"
             />
           </div>
@@ -440,14 +440,14 @@ export default function RsvpHero({ onScrollToForm }) {
             <div className="hero-rsvp-card">
               <div className="hero-rsvp-badge">
                 <span>✦</span>
-                <span>Lời Ngỏ Từ Hoàng &amp; Duyên</span>
+                <span>A Warm Welcome From Hoàng &amp; Duyên</span>
                 <span>✦</span>
               </div>
               <h2 className="hero-rsvp-title">
-                Bạn Sẽ Đến Chung Vui Cùng Tụi Mình Chứ?
+                Will You Celebrate With Us?
               </h2>
               <p className="hero-rsvp-subtitle">
-                {WEDDING_EVENT.dateDisplay} · {WEDDING_EVENT.venueName}, TP. Hồ Chí Minh
+                {WEDDING_EVENT.dateDisplay} · {WEDDING_EVENT.venueName}, Ho Chi Minh City
               </p>
               <div className="hero-rsvp-btn-row">
                 <button
@@ -459,7 +459,7 @@ export default function RsvpHero({ onScrollToForm }) {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
-                  <span>Xác Nhận Tham Dự Ngay</span>
+                  <span>RSVP Now</span>
                 </button>
 
                 <button
@@ -467,7 +467,7 @@ export default function RsvpHero({ onScrollToForm }) {
                   onClick={handleScrollToNext}
                   className="hero-rsvp-btn-sec"
                 >
-                  <span>Xem thiệp mời chi tiết</span>
+                  <span>View Invitation Details</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <polyline points="19 12 12 19 5 12" />
@@ -481,7 +481,7 @@ export default function RsvpHero({ onScrollToForm }) {
         {/* ---------------------------------------------------------------- */}
         {/* STORY CHAPTER PROGRESS DOTS */}
         {/* ---------------------------------------------------------------- */}
-        <nav className="hero-progress-nav" aria-label="Tiến trình câu chuyện">
+        <nav className="hero-progress-nav" aria-label="Story chapter progress">
           {chapters.map((ch, idx) => (
             <button
               key={idx}

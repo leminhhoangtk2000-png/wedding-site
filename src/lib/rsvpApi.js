@@ -156,7 +156,7 @@ export async function getAdminRsvps(adminPassword, params = {}) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    const error = new Error(data.error || 'Không thể tải danh sách RSVP.');
+    const error = new Error(data.error || 'Could not load RSVP list.');
     error.status = res.status;
     error.code = data.code;
     throw error;
@@ -177,7 +177,7 @@ export async function updateAdminRsvp(adminPassword, id, updates) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    throw new Error(data.error || 'Không thể cập nhật RSVP.');
+    throw new Error(data.error || 'Could not update RSVP.');
   }
   return data;
 }
@@ -192,7 +192,7 @@ export async function deleteAdminRsvp(adminPassword, id) {
 
   const data = await res.json();
   if (!res.ok || !data.success) {
-    throw new Error(data.error || 'Không thể xoá phản hồi RSVP.');
+    throw new Error(data.error || 'Could not delete RSVP response.');
   }
   return data;
 }

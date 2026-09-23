@@ -15,10 +15,10 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
   return (
     <div className={styles.formGroup}>
       <label className={styles.label}>
-        Số lượng người tham dự (bao gồm bạn) <span className={styles.requiredStar}>*</span>
+        How many guests should we prepare seats for, including yourself? <span className={styles.requiredStar}>*</span>
       </label>
 
-      <div className={styles.guestCountGrid} role="radiogroup" aria-label="Số lượng khách tham dự">
+      <div className={styles.guestCountGrid} role="radiogroup" aria-label="Number of guests attending">
         {/* Option 1: 1 Guest */}
         <button
           type="button"
@@ -39,8 +39,8 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
             )}
           </div>
           <div className={styles.guestCountCardBody}>
-            <span className={styles.guestCountTitle}>1 người</span>
-            <span className={styles.guestCountDesc}>Tham dự một mình</span>
+            <span className={styles.guestCountTitle}>1 Guest</span>
+            <span className={styles.guestCountDesc}>Attending solo</span>
           </div>
         </button>
 
@@ -64,14 +64,14 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
             )}
           </div>
           <div className={styles.guestCountCardBody}>
-            <span className={styles.guestCountTitle}>2 người</span>
-            <span className={styles.guestCountDesc}>Đi cùng người thương</span>
+            <span className={styles.guestCountTitle}>2 Guests</span>
+            <span className={styles.guestCountDesc}>Attending with a plus-one</span>
           </div>
         </button>
       </div>
 
       <div id="guest-count-hint" className={styles.fieldHint}>
-        Bao gồm bạn và người thương hoặc bạn bè đi cùng nhé.
+        Including yourself and any plus-ones or companions attending.
       </div>
 
       {error && (

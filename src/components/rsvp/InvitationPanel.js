@@ -6,18 +6,18 @@ import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function InvitationPanel() {
   return (
-    <section className={styles.banquetCard} aria-label="Thông tin thiệp mời hôn lễ">
+    <section className={styles.banquetCard} aria-label="Wedding Invitation Details">
       {/* Header */}
       <div className={styles.badgePill}>
         <span className={styles.badgeSparkle}>✦</span>
-        <span>THIỆP MỜI LỄ THÀNH HÔN</span>
+        <span>WEDDING INVITATION</span>
         <span className={styles.badgeSparkle}>✦</span>
       </div>
 
       <h2 className={styles.cardTitleScript}>{WEDDING_EVENT.couple}</h2>
 
       <p className={styles.cardSubtitle}>
-        Trân trọng kính mời quý người thân, bạn bè đến chung vui trong ngày hạnh phúc của tụi mình
+        Cordially invite you to celebrate with us on our special day
       </p>
 
       {/* Gold Filigree Divider */}
@@ -45,7 +45,7 @@ export default function InvitationPanel() {
             target="_blank"
             rel="noopener noreferrer"
             className={styles.invitationButtonOutline}
-            aria-label="Thêm đám cưới vào Google Calendar"
+            aria-label="Add wedding to Google Calendar"
           >
             <HanddrawnCalendar size={18} />
             <span>Google Calendar</span>
@@ -56,10 +56,10 @@ export default function InvitationPanel() {
             target="_blank"
             rel="noopener noreferrer"
             className={styles.invitationButtonOutline}
-            aria-label="Mở địa chỉ tiệc cưới trên Google Maps"
+            aria-label="Open venue location on Google Maps"
           >
             <HanddrawnMapPin size={18} />
-            <span>Chỉ đường Google Maps</span>
+            <span>Get Directions</span>
           </a>
         </div>
       </div>

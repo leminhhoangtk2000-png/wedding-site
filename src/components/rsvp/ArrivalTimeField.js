@@ -20,7 +20,7 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
   const handleSelectCustom = () => {
     if (disabled) return;
     setIsCustomManual(true);
-    onChange(customText || 'Khung giờ khác');
+    onChange(customText || 'Other time');
   };
 
   const handleCustomTextChange = (e) => {
@@ -33,15 +33,15 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
     <fieldset className={styles.formGroup} style={{ border: 'none', padding: 0, margin: 0 }}>
       <legend className={styles.label} style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
         <HanddrawnClock size={16} style={{ color: '#b08d4f' }} />
-        <span>Thời gian bạn sẽ có mặt</span>
+        <span>Expected Arrival Time</span>
         <span className={styles.requiredStar}>*</span>
       </legend>
 
       <div className={styles.fieldHint} style={{ marginBottom: 10 }}>
-        Bạn dự kiến sẽ đến chung vui cùng Hoàng &amp; Duyên vào khung giờ nào nhé?
+        When do you plan to join Hoàng &amp; Duyên?
       </div>
 
-      <div className={styles.arrivalTimeList} role="radiogroup" aria-label="Chọn thời gian bạn sẽ có mặt">
+      <div className={styles.arrivalTimeList} role="radiogroup" aria-label="Select expected arrival time">
         {ARRIVAL_TIME_OPTIONS.map((opt) => {
           const isSelected = !isCustom && value === opt.value;
           return (
@@ -88,11 +88,11 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
             className={styles.attendanceRadioInput}
           />
           <div className={styles.arrivalTimeBadge} style={{ fontSize: 12 }}>
-            Khác...
+            Other...
           </div>
           <div className={styles.arrivalTimeInfo}>
-            <div className={styles.arrivalTimeTitle}>Khung giờ khác</div>
-            <div className={styles.arrivalTimeDesc}>Bạn sẽ đến vào một thời gian đặc biệt khác</div>
+            <div className={styles.arrivalTimeTitle}>Other Arrival Time</div>
+            <div className={styles.arrivalTimeDesc}>Arriving at a different time</div>
           </div>
           <div className={styles.arrivalTimeCheckWrapper}>
             <span className={`${styles.arrivalTimeRadioDot} ${isCustom ? styles.arrivalTimeRadioDotActive : ''}`}>
@@ -107,7 +107,7 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
         <div className={styles.customTimeWrapper}>
           <input
             type="text"
-            placeholder="Ghi rõ thời gian bạn dự kiến có mặt (ví dụ: 16:30, sau 19:00...)"
+            placeholder="Please specify your arrival time (e.g., 4:30 PM, after 7:00 PM...)"
             maxLength={50}
             value={customText}
             onChange={handleCustomTextChange}

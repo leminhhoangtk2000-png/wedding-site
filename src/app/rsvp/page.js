@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import RsvpHero from '@/components/rsvp/RsvpHero';
 import InvitationPanel from '@/components/rsvp/InvitationPanel';
 import EventTimeline from '@/components/rsvp/EventTimeline';
+import DressCodeSection from '@/components/rsvp/DressCodeSection';
 import RsvpForm from '@/components/rsvp/RsvpForm';
 import RsvpConfirmation from '@/components/rsvp/RsvpConfirmation';
 import RsvpStatusNotice from '@/components/rsvp/RsvpStatusNotice';
@@ -175,6 +176,9 @@ export default function RsvpPage() {
 
         {/* PANEL 3: EVENT TIMELINE CARD (FIGMA NODE 131:96) */}
         <EventTimeline />
+
+        {/* DRESS CODE SECTION */}
+        <DressCodeSection />
 
         {/* PANEL 4 & 5: FORM CARD OR PERSISTED CONFIRMATION */}
         <div id="rsvp-form-section" aria-label="RSVP Response Section" style={{ width: '100%' }}>
