@@ -1,23 +1,12 @@
 'use client';
 
+import { HanddrawnHeart, HanddrawnGuests, HanddrawnCheck } from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function GuestCountField({ value, onChange, error, disabled }) {
   const count = parseInt(value, 10) || 1;
 
-  const handleDecrement = () => {
-    if (count > 1 && !disabled) {
-      onChange(count - 1);
-    }
-  };
-
-  const handleIncrement = () => {
-    if (!disabled && count < 2) {
-      onChange(count + 1);
-    }
-  };
-
-  const handleQuickSelect = (num) => {
+  const handleSelect = (num) => {
     if (!disabled) {
       onChange(num);
     }
@@ -25,53 +14,60 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
 
   return (
     <div className={styles.formGroup}>
-      <label htmlFor="rsvp-guest-count" className={styles.label}>
+      <label className={styles.label}>
         Số lượng người tham dự (bao gồm bạn) <span className={styles.requiredStar}>*</span>
       </label>
 
-      <div className={styles.stepperContainer}>
-        {/* Stepper (- / count / +) */}
-        <div className={styles.stepperWrapper}>
-          <button
-            type="button"
-            onClick={handleDecrement}
-            disabled={disabled || count <= 1}
-            className={styles.stepperBtn}
-            aria-label="Giảm 1 người"
-          >
-            –
-          </button>
-
-          <div className={styles.stepperDisplay}>
-            <span className={styles.stepperNumber}>{count}</span>
-            <span className={styles.stepperUnit}>người</span>
+      <div className={styles.guestCountGrid} role="radiogroup" aria-label="Số lượng khách tham dự">
+        {/* Option 1: 1 Guest */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={count === 1}
+          disabled={disabled}
+          onClick={() => handleSelect(1)}
+          className={`${styles.guestCountCard} ${count === 1 ? styles.guestCountCardActive : ''}`}
+        >
+          <div className={styles.guestCountCardTop}>
+            <div className={styles.guestCountIcon} aria-hidden="true">
+              <HanddrawnHeart size={20} />
+            </div>
+            {count === 1 && (
+              <span className={styles.guestCountCheckMark}>
+                <HanddrawnCheck size={12} strokeWidth={2.4} />
+              </span>
+            )}
           </div>
+          <div className={styles.guestCountCardBody}>
+            <span className={styles.guestCountTitle}>1 người</span>
+            <span className={styles.guestCountDesc}>Tham dự một mình</span>
+          </div>
+        </button>
 
-          <button
-            type="button"
-            onClick={handleIncrement}
-            disabled={disabled || count >= 2}
-            className={styles.stepperBtn}
-            aria-label="Tăng 1 người"
-          >
-            +
-          </button>
-        </div>
-
-        {/* Quick count chips */}
-        <div className={styles.quickCountGroup} role="group" aria-label="Chọn nhanh số lượng khách">
-          {[1, 2].map((num) => (
-            <button
-              key={num}
-              type="button"
-              onClick={() => handleQuickSelect(num)}
-              disabled={disabled}
-              className={`${styles.quickCountBtn} ${count === num ? styles.quickCountBtnActive : ''}`}
-            >
-              {num} {num === 1 ? 'người' : 'khách'}
-            </button>
-          ))}
-        </div>
+        {/* Option 2: 2 Guests */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={count === 2}
+          disabled={disabled}
+          onClick={() => handleSelect(2)}
+          className={`${styles.guestCountCard} ${count === 2 ? styles.guestCountCardActive : ''}`}
+        >
+          <div className={styles.guestCountCardTop}>
+            <div className={styles.guestCountIcon} aria-hidden="true">
+              <HanddrawnGuests size={20} />
+            </div>
+            {count === 2 && (
+              <span className={styles.guestCountCheckMark}>
+                <HanddrawnCheck size={12} strokeWidth={2.4} />
+              </span>
+            )}
+          </div>
+          <div className={styles.guestCountCardBody}>
+            <span className={styles.guestCountTitle}>2 người</span>
+            <span className={styles.guestCountDesc}>Đi cùng người thương</span>
+          </div>
+        </button>
       </div>
 
       <div id="guest-count-hint" className={styles.fieldHint}>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { animate } from 'animejs';
+import { HanddrawnSparkles } from '@/components/icons/HanddrawnIcons';
 
 export default function WishSection() {
   const iconRef = useRef(null);
@@ -72,7 +73,9 @@ export default function WishSection() {
 
           {/* Subtle footer note */}
           <div className="wish-card__hint">
-            <span className="wish-card__hint-icon">✨</span>
+            <span className="wish-card__hint-icon" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <HanddrawnSparkles size={16} />
+            </span>
             <span>Lời chúc sẽ được lưu giữ trang trọng trên Bảng Chúc Phúc</span>
           </div>
         </div>

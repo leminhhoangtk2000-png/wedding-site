@@ -60,16 +60,25 @@ export async function GET(request) {
       );
     }
 
-    // Normalize raw list so guest_name and dietary_notes are consistent
+    // Normalize raw list so guest_name, arrival_time, and dietary_notes are consistent
     const rawList = (allData || []).map((item) => {
       const name = item.guest_name || item.full_name || '';
-      const notes = item.special_requests || item.dietary_notes || '';
+      let notes = item.special_requests || item.dietary_notes || '';
+      let arrivalTime = item.arrival_time || null;
+      if (!arrivalTime && notes && notes.startsWith('[Có mặt: ')) {
+        const match = notes.match(/^\[Có mặt: ([^\]]+)\]\s*/);
+        if (match) {
+          arrivalTime = match[1];
+          notes = notes.replace(/^\[Có mặt: [^\]]+\]\s*/, '');
+        }
+      }
       const safeItem = {
         id: item.id,
         guest_name: name,
         full_name: name,
         attendance: item.attendance,
         attendee_count: Number(item.attendee_count) || 0,
+        arrival_time: arrivalTime,
         special_requests: notes || null,
         dietary_notes: notes || null,
         message: item.message || null,
@@ -161,7 +170,7 @@ export async function PATCH(request) {
     }
 
     const body = await request.json();
-    const { id, full_name, guest_name, attendance, attendee_count, dietary_notes, special_requests, message } = body;
+    const { id, full_name, guest_name, attendance, attendee_count, arrival_time, dietary_notes, special_requests, message } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Thiếu ID của phản hồi cần sửa.' }, { status: 400 });
@@ -180,12 +189,17 @@ export async function PATCH(request) {
       updates.attendance = attendance;
       if (attendance === ATTENDANCE_VALUES.DECLINED) {
         updates.attendee_count = 0;
+        updates.arrival_time = null;
       }
     }
 
     if (typeof attendee_count !== 'undefined') {
       const parsed = parseInt(attendee_count, 10);
       updates.attendee_count = isNaN(parsed) ? 1 : Math.max(0, parsed);
+    }
+
+    if (typeof arrival_time !== 'undefined' && attendance !== ATTENDANCE_VALUES.DECLINED) {
+      updates.arrival_time = arrival_time ? arrival_time.trim() : null;
     }
 
     const rawNotes = special_requests || dietary_notes;
@@ -197,23 +211,55 @@ export async function PATCH(request) {
       updates.message = message ? message.trim() : null;
     }
 
-    const { data, error } = await supabaseServer
+    let { data, error } = await supabaseServer
       .from('rsvps')
       .update(updates)
       .eq('id', id)
-      .select('id, guest_name, attendance, attendee_count, special_requests, message, created_at, updated_at')
+      .select('*')
       .single();
+
+    // Fallback if arrival_time column does not exist yet on Supabase
+    if (
+      error &&
+      (error.code === '42703' ||
+        error.code === 'PGRST204' ||
+        error.message?.includes('arrival_time') ||
+        error.details?.includes('arrival_time'))
+    ) {
+      delete updates.arrival_time;
+      if (arrival_time && attendance !== ATTENDANCE_VALUES.DECLINED) {
+        updates.special_requests = `[Có mặt: ${arrival_time}] ${rawNotes || ''}`.trim();
+      }
+      const retry = await supabaseServer
+        .from('rsvps')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const name = data.guest_name || '';
-    const notes = data.special_requests || '';
+    let parsedArrivalTime = data.arrival_time || null;
+    let cleanNotes = data.special_requests || '';
+    if (!parsedArrivalTime && cleanNotes && cleanNotes.startsWith('[Có mặt: ')) {
+      const match = cleanNotes.match(/^\[Có mặt: ([^\]]+)\]\s*/);
+      if (match) {
+        parsedArrivalTime = match[1];
+        cleanNotes = cleanNotes.replace(/^\[Có mặt: [^\]]+\]\s*/, '');
+      }
+    }
+
     const normalizedData = {
       ...data,
-      full_name: name,
-      dietary_notes: notes,
+      full_name: data.guest_name || '',
+      arrival_time: parsedArrivalTime,
+      dietary_notes: cleanNotes,
+      special_requests: cleanNotes,
     };
 
     return NextResponse.json({ success: true, data: normalizedData });

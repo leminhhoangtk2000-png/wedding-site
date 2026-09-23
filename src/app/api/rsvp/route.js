@@ -22,6 +22,7 @@ function validatePayload(body) {
   const guestName = (body.guest_name || body.full_name || '').trim();
   const attendance = (body.attendance || '').trim();
   let attendeeCount = parseInt(body.attendee_count ?? body.guest_count, 10);
+  const arrivalTime = (body.arrival_time || body.attendance_time || '').trim().slice(0, 50);
   const specialRequests = (body.special_requests || body.dietary_notes || '').trim().slice(0, 500);
   const message = (body.message || body.wishes || '').trim().slice(0, 1000);
 
@@ -39,6 +40,9 @@ function validatePayload(body) {
     } else if (attendeeCount > 10) {
       errors.push('Maximum 10 guests allowed per party.');
     }
+    if (!arrivalTime) {
+      errors.push('Vui lòng chọn thời gian bạn sẽ có mặt.');
+    }
   } else {
     attendeeCount = 0;
   }
@@ -50,6 +54,7 @@ function validatePayload(body) {
       guest_name: guestName,
       attendance,
       attendee_count: attendeeCount,
+      arrival_time: attendance === ATTENDANCE_VALUES.ATTENDING && arrivalTime ? arrivalTime : null,
       special_requests: specialRequests || null,
       message: message || null,
     },
@@ -96,10 +101,30 @@ export async function POST(request) {
       updated_at: nowIso,
     };
 
+    if (validation.data.arrival_time) {
+      insertPayload.arrival_time = validation.data.arrival_time;
+    }
+
     // Attempt insert into rsvps table (insert without select to avoid RLS SELECT violations)
-    const { error } = await supabaseServer
+    let { error } = await supabaseServer
       .from('rsvps')
       .insert(insertPayload);
+
+    // Fallback: If arrival_time column does not exist yet on Supabase
+    if (
+      error &&
+      (error.code === '42703' ||
+        error.code === 'PGRST204' ||
+        error.message?.includes('arrival_time') ||
+        error.details?.includes('arrival_time'))
+    ) {
+      delete insertPayload.arrival_time;
+      if (validation.data.arrival_time) {
+        insertPayload.special_requests = `[Có mặt: ${validation.data.arrival_time}] ${validation.data.special_requests || ''}`.trim();
+      }
+      const retry = await supabaseServer.from('rsvps').insert(insertPayload);
+      error = retry.error;
+    }
 
     if (error) {
       console.error('Supabase insert RSVP error:', error);
@@ -132,6 +157,7 @@ export async function POST(request) {
       full_name: validation.data.guest_name,
       attendance: validation.data.attendance,
       attendee_count: validation.data.attendee_count,
+      arrival_time: validation.data.arrival_time,
       special_requests: validation.data.special_requests,
       dietary_notes: validation.data.special_requests,
       message: validation.data.message,
@@ -177,7 +203,7 @@ export async function GET(request) {
     // Query by token hash
     let { data, error } = await supabaseServer
       .from('rsvps')
-      .select('id, guest_name, attendance, attendee_count, special_requests, message, created_at, updated_at')
+      .select('*')
       .eq('edit_token_hash', tokenHash)
       .maybeSingle();
 
@@ -185,7 +211,7 @@ export async function GET(request) {
     if (!data && !error) {
       const fallbackQuery = await supabaseServer
         .from('rsvps')
-        .select('id, guest_name, attendance, attendee_count, special_requests, message, created_at, updated_at')
+        .select('*')
         .eq('edit_token', token)
         .maybeSingle();
       if (fallbackQuery.data) {
@@ -220,6 +246,16 @@ export async function GET(request) {
       );
     }
 
+    let parsedArrivalTime = data.arrival_time || null;
+    let cleanSpecialRequests = data.special_requests;
+    if (!parsedArrivalTime && cleanSpecialRequests && cleanSpecialRequests.startsWith('[Có mặt: ')) {
+      const match = cleanSpecialRequests.match(/^\[Có mặt: ([^\]]+)\]\s*/);
+      if (match) {
+        parsedArrivalTime = match[1];
+        cleanSpecialRequests = cleanSpecialRequests.replace(/^\[Có mặt: [^\]]+\]\s*/, '') || null;
+      }
+    }
+
     const canEdit = checkServerCanEdit();
     const normalizedData = {
       id: data.id,
@@ -227,8 +263,9 @@ export async function GET(request) {
       full_name: data.guest_name,
       attendance: data.attendance,
       attendee_count: data.attendee_count,
-      special_requests: data.special_requests,
-      dietary_notes: data.special_requests,
+      arrival_time: parsedArrivalTime,
+      special_requests: cleanSpecialRequests,
+      dietary_notes: cleanSpecialRequests,
       message: data.message,
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -292,12 +329,38 @@ export async function PUT(request) {
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabaseServer
+    if (validation.data.arrival_time) {
+      updatePayload.arrival_time = validation.data.arrival_time;
+    }
+
+    let { data, error } = await supabaseServer
       .from('rsvps')
       .update(updatePayload)
       .eq('edit_token_hash', tokenHash)
-      .select('id, guest_name, attendance, attendee_count, special_requests, message, created_at, updated_at')
+      .select('*')
       .maybeSingle();
+
+    // Fallback: If arrival_time column does not exist yet on Supabase
+    if (
+      error &&
+      (error.code === '42703' ||
+        error.code === 'PGRST204' ||
+        error.message?.includes('arrival_time') ||
+        error.details?.includes('arrival_time'))
+    ) {
+      delete updatePayload.arrival_time;
+      if (validation.data.arrival_time) {
+        updatePayload.special_requests = `[Có mặt: ${validation.data.arrival_time}] ${validation.data.special_requests || ''}`.trim();
+      }
+      const retry = await supabaseServer
+        .from('rsvps')
+        .update(updatePayload)
+        .eq('edit_token_hash', tokenHash)
+        .select('*')
+        .maybeSingle();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       return NextResponse.json(
@@ -313,6 +376,16 @@ export async function PUT(request) {
       );
     }
 
+    let parsedArrivalTime = data.arrival_time || null;
+    let cleanSpecialRequests = data.special_requests;
+    if (!parsedArrivalTime && cleanSpecialRequests && cleanSpecialRequests.startsWith('[Có mặt: ')) {
+      const match = cleanSpecialRequests.match(/^\[Có mặt: ([^\]]+)\]\s*/);
+      if (match) {
+        parsedArrivalTime = match[1];
+        cleanSpecialRequests = cleanSpecialRequests.replace(/^\[Có mặt: [^\]]+\]\s*/, '') || null;
+      }
+    }
+
     const canEdit = checkServerCanEdit();
     const normalizedData = {
       id: data.id,
@@ -320,8 +393,9 @@ export async function PUT(request) {
       full_name: data.guest_name,
       attendance: data.attendance,
       attendee_count: data.attendee_count,
-      special_requests: data.special_requests,
-      dietary_notes: data.special_requests,
+      arrival_time: parsedArrivalTime,
+      special_requests: cleanSpecialRequests,
+      dietary_notes: cleanSpecialRequests,
       message: data.message,
       created_at: data.created_at,
       updated_at: data.updated_at,

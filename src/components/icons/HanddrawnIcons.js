@@ -444,3 +444,20 @@ export function HanddrawnStar({ size = 18, className = '', ...props }) {
     </svg>
   );
 }
+
+// 22. Handdrawn Clock (replaces 🕒, ⏰)
+export function HanddrawnClock({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5v4.5l3.2 2" />
+    </svg>
+  );
+}
+

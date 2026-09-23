@@ -4,6 +4,18 @@ import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getAdminRsvps, updateAdminRsvp, deleteAdminRsvp } from '@/lib/rsvpApi';
 import { ATTENDANCE_VALUES, WEDDING_EVENT } from '@/lib/rsvpConstants';
+import {
+  HanddrawnLock,
+  HanddrawnAlert,
+  HanddrawnCalendar,
+  HanddrawnEnvelope,
+  HanddrawnSettings,
+  HanddrawnCelebration,
+  HanddrawnGuests,
+  HanddrawnDove,
+  HanddrawnLeaf,
+  HanddrawnStar,
+} from '@/components/icons/HanddrawnIcons';
 
 export default function AdminPage() {
   const [password, setPassword] = useState('');
@@ -58,6 +70,7 @@ export default function AdminPage() {
     phone: '',
     attendance: ATTENDANCE_VALUES.ATTENDING,
     attendee_count: 1,
+    arrival_time: '',
     dietary_notes: '',
     message: '',
   });
@@ -214,6 +227,7 @@ export default function AdminPage() {
       phone: rsvp.phone || '',
       attendance: rsvp.attendance || ATTENDANCE_VALUES.ATTENDING,
       attendee_count: rsvp.attendee_count || 1,
+      arrival_time: rsvp.arrival_time || '',
       dietary_notes: rsvp.dietary_notes || '',
       message: rsvp.message || '',
     });
@@ -235,6 +249,7 @@ export default function AdminPage() {
         phone: modalForm.phone,
         attendance: modalForm.attendance,
         attendee_count: modalForm.attendance === ATTENDANCE_VALUES.ATTENDING ? modalForm.attendee_count : 0,
+        arrival_time: modalForm.attendance === ATTENDANCE_VALUES.ATTENDING ? modalForm.arrival_time : null,
         dietary_notes: modalForm.dietary_notes,
         message: modalForm.message,
       });
@@ -271,6 +286,7 @@ export default function AdminPage() {
       'Số điện thoại',
       'Trạng thái',
       'Số lượng khách',
+      'Thời gian có mặt',
       'Yêu cầu ăn uống/dị ứng',
       'Lời nhắn gửi',
       'Ngày gửi phản hồi',
@@ -279,6 +295,7 @@ export default function AdminPage() {
     const rows = rsvps.map((item, index) => {
       const attendanceStr = item.attendance === ATTENDANCE_VALUES.ATTENDING ? 'Tham dự' : 'Không tham dự';
       const attendeeCountStr = item.attendance === ATTENDANCE_VALUES.ATTENDING ? item.attendee_count : 0;
+      const arrivalTimeStr = item.attendance === ATTENDANCE_VALUES.ATTENDING ? (item.arrival_time || '') : '';
       const createdAtStr = item.created_at ? new Date(item.created_at).toLocaleString('vi-VN') : '';
 
       const sanitize = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
@@ -289,6 +306,7 @@ export default function AdminPage() {
         sanitize(item.phone),
         sanitize(attendanceStr),
         attendeeCountStr,
+        sanitize(arrivalTimeStr),
         sanitize(item.dietary_notes),
         sanitize(item.message),
         sanitize(createdAtStr),
@@ -384,7 +402,9 @@ export default function AdminPage() {
     return (
       <div className="admin-login-wrapper">
         <form onSubmit={handleLogin} className="admin-login-card">
-          <div className="admin-login-icon">🔒</div>
+          <div className="admin-login-icon">
+            <HanddrawnLock size={36} />
+          </div>
           <h1 className="admin-login-title">Quản Trị Viên</h1>
           <p className="admin-login-sub">Đám Cưới Hoàng &amp; Duyên</p>
           <input
@@ -396,8 +416,9 @@ export default function AdminPage() {
             autoFocus
           />
           {loginError && (
-            <p className="admin-login-error" role="alert" style={{ color: '#d32f2f', fontSize: 13.5, margin: '8px 0 12px' }}>
-              ⚠️ {loginError}
+            <p className="admin-login-error" role="alert" style={{ color: '#d32f2f', fontSize: 13.5, margin: '8px 0 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <HanddrawnAlert size={16} />
+              <span>{loginError}</span>
             </p>
           )}
           <button type="submit" className="admin-login-btn" disabled={loginLoading}>
@@ -429,7 +450,7 @@ export default function AdminPage() {
           className={`admin-tab-btn ${activeTab === 'rsvp' ? 'admin-tab-btn--active' : ''}`}
           onClick={() => setActiveTab('rsvp')}
         >
-          <span className="admin-tab-icon">📋</span>
+          <span className="admin-tab-icon"><HanddrawnCalendar size={18} /></span>
           <span>Xác nhận tham dự (RSVP)</span>
           {rsvpMetrics.total_responses > 0 && (
             <span className="admin-tab-pill">{rsvpMetrics.total_responses}</span>
@@ -439,7 +460,7 @@ export default function AdminPage() {
           className={`admin-tab-btn ${activeTab === 'wishes' ? 'admin-tab-btn--active' : ''}`}
           onClick={() => setActiveTab('wishes')}
         >
-          <span className="admin-tab-icon">💌</span>
+          <span className="admin-tab-icon"><HanddrawnEnvelope size={18} /></span>
           <span>Sổ lưu bút &amp; Lời chúc</span>
           {wishes.length > 0 && <span className="admin-tab-pill">{wishes.length}</span>}
         </button>
@@ -447,7 +468,7 @@ export default function AdminPage() {
           className={`admin-tab-btn ${activeTab === 'settings' ? 'admin-tab-btn--active' : ''}`}
           onClick={() => setActiveTab('settings')}
         >
-          <span className="admin-tab-icon">⚙️</span>
+          <span className="admin-tab-icon"><HanddrawnSettings size={18} /></span>
           <span>Cài đặt hệ thống</span>
         </button>
       </nav>
@@ -458,7 +479,10 @@ export default function AdminPage() {
           {/* Database Missing Warning Banner */}
           {rsvpDbMissing && (
             <div className="admin-alert admin-alert--warning" role="alert">
-              <div className="admin-alert__title">⚠️ Bảng cơ sở dữ liệu `rsvps` chưa được khởi tạo</div>
+              <div className="admin-alert__title" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <HanddrawnAlert size={18} />
+                <span>Bảng cơ sở dữ liệu `rsvps` chưa được khởi tạo</span>
+              </div>
               <p>
                 Để lưu trữ và quản lý danh sách khách mời xác nhận tham dự, bạn cần mở Supabase Dashboard, vào mục{' '}
                 <strong>SQL Editor</strong> và dán nội dung từ file sau:
@@ -481,7 +505,7 @@ export default function AdminPage() {
             <div className="admin-metric-card">
               <div className="admin-metric-card__header">
                 <span className="admin-metric-card__label">Tổng lượt phản hồi</span>
-                <span className="admin-metric-card__icon">📝</span>
+                <span className="admin-metric-card__icon"><HanddrawnEnvelope size={22} /></span>
               </div>
               <div className="admin-metric-card__val">{rsvpMetrics.total_responses}</div>
               <span className="admin-metric-card__sub">Khách đã gửi biểu mẫu</span>
@@ -490,7 +514,7 @@ export default function AdminPage() {
             <div className="admin-metric-card admin-metric-card--success">
               <div className="admin-metric-card__header">
                 <span className="admin-metric-card__label">Lượt tham dự</span>
-                <span className="admin-metric-card__icon">🎉</span>
+                <span className="admin-metric-card__icon"><HanddrawnCelebration size={22} /></span>
               </div>
               <div className="admin-metric-card__val">{rsvpMetrics.total_attending_parties}</div>
               <span className="admin-metric-card__sub">Nhóm / cá nhân đồng ý</span>
@@ -499,7 +523,7 @@ export default function AdminPage() {
             <div className="admin-metric-card admin-metric-card--primary">
               <div className="admin-metric-card__header">
                 <span className="admin-metric-card__label">Tổng khách dự kiến</span>
-                <span className="admin-metric-card__icon">👥</span>
+                <span className="admin-metric-card__icon"><HanddrawnGuests size={22} /></span>
               </div>
               <div className="admin-metric-card__val">{rsvpMetrics.total_expected_attendees}</div>
               <span className="admin-metric-card__sub">Tổng người (để chốt tiệc)</span>
@@ -508,7 +532,7 @@ export default function AdminPage() {
             <div className="admin-metric-card admin-metric-card--muted">
               <div className="admin-metric-card__header">
                 <span className="admin-metric-card__label">Không thể tham gia</span>
-                <span className="admin-metric-card__icon">🕊️</span>
+                <span className="admin-metric-card__icon"><HanddrawnDove size={22} /></span>
               </div>
               <div className="admin-metric-card__val">{rsvpMetrics.total_declined_parties}</div>
               <span className="admin-metric-card__sub">Gửi lời chúc từ xa</span>
@@ -517,7 +541,7 @@ export default function AdminPage() {
             <div className="admin-metric-card admin-metric-card--amber">
               <div className="admin-metric-card__header">
                 <span className="admin-metric-card__label">Ăn kiêng / Dị ứng</span>
-                <span className="admin-metric-card__icon">🥗</span>
+                <span className="admin-metric-card__icon"><HanddrawnLeaf size={22} /></span>
               </div>
               <div className="admin-metric-card__val">{rsvpMetrics.total_special_requests}</div>
               <span className="admin-metric-card__sub">Cần chuẩn bị món riêng</span>
@@ -577,9 +601,13 @@ export default function AdminPage() {
                     marginRight: 4,
                   }}
                 >
-                  {isStale
-                    ? '⚠️ Dữ liệu cũ (lỗi tải mới)'
-                    : `Cập nhật: ${lastRefreshedAt.toLocaleTimeString('vi-VN')}`}
+                  {isStale ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <HanddrawnAlert size={14} /> Dữ liệu cũ (lỗi tải mới)
+                    </span>
+                  ) : (
+                    `Cập nhật: ${lastRefreshedAt.toLocaleTimeString('vi-VN')}`
+                  )}
                 </span>
               )}
               <button
@@ -627,6 +655,7 @@ export default function AdminPage() {
                       <th>Số điện thoại</th>
                       <th>Trạng thái</th>
                       <th>Số khách</th>
+                      <th>Giờ có mặt</th>
                       <th>Yêu cầu ăn uống</th>
                       <th>Lời nhắn</th>
                       <th>Thời gian gửi</th>
@@ -654,6 +683,25 @@ export default function AdminPage() {
                             </span>
                           ) : (
                             <span className="admin-text-muted">0</span>
+                          )}
+                        </td>
+                        <td>
+                          {rsvp.attendance === ATTENDANCE_VALUES.ATTENDING && rsvp.arrival_time ? (
+                            <span
+                              className="admin-badge"
+                              style={{
+                                background: '#f6f1e7',
+                                color: '#7a5a1e',
+                                border: '1px solid #e5d7c3',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              🕒 {rsvp.arrival_time}
+                            </span>
+                          ) : (
+                            <span className="admin-text-muted">—</span>
                           )}
                         </td>
                         <td className="admin-td-notes">
@@ -711,6 +759,13 @@ export default function AdminPage() {
                           <span className="admin-badge admin-badge--declined">Không tham gia</span>
                         )}
                       </div>
+
+                      {rsvp.attendance === ATTENDANCE_VALUES.ATTENDING && rsvp.arrival_time && (
+                        <div className="admin-guest-card__section">
+                          <span className="admin-guest-card__label">Giờ có mặt:</span>
+                          <span style={{ fontWeight: 600, color: '#7a5a1e' }}>🕒 {rsvp.arrival_time}</span>
+                        </div>
+                      )}
 
                       {rsvp.dietary_notes && (
                         <div className="admin-guest-card__section">
@@ -788,7 +843,12 @@ export default function AdminPage() {
                       {wish.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
                     </span>
                     {wish.is_highlighted && (
-                      <span className="admin-badge admin-badge--highlighted">⭐ Nổi bật</span>
+                      <span
+                        className="admin-badge admin-badge--highlighted"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <HanddrawnStar size={12} /> Nổi bật
+                      </span>
                     )}
                   </div>
                 </div>
@@ -983,19 +1043,32 @@ export default function AdminPage() {
               </div>
 
               {modalForm.attendance === ATTENDANCE_VALUES.ATTENDING && (
-                <div className="rsvp-field">
-                  <label className="rsvp-label">Số lượng khách (người)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={modalForm.attendee_count}
-                    onChange={(e) =>
-                      setModalForm({ ...modalForm, attendee_count: parseInt(e.target.value, 10) || 1 })
-                    }
-                    className="rsvp-input"
-                  />
-                </div>
+                <>
+                  <div className="rsvp-field">
+                    <label className="rsvp-label">Số lượng khách (người)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={modalForm.attendee_count}
+                      onChange={(e) =>
+                        setModalForm({ ...modalForm, attendee_count: parseInt(e.target.value, 10) || 1 })
+                      }
+                      className="rsvp-input"
+                    />
+                  </div>
+
+                  <div className="rsvp-field">
+                    <label className="rsvp-label">Thời gian có mặt dự kiến</label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: 16:00 (Đón khách & Tiệc trà)"
+                      value={modalForm.arrival_time}
+                      onChange={(e) => setModalForm({ ...modalForm, arrival_time: e.target.value })}
+                      className="rsvp-input"
+                    />
+                  </div>
+                </>
               )}
 
               <div className="rsvp-field">

@@ -4,6 +4,7 @@ import gsap from 'gsap';
 import { animate } from 'animejs';
 
 import { supabase } from '@/lib/supabase';
+import { HanddrawnHeart, HanddrawnCheck } from '@/components/icons/HanddrawnIcons';
 
 // Define shape matrices for different grid sizes
 const MATRICES = {
@@ -619,7 +620,15 @@ export default function WishesPage() {
             )}
 
             <button type="submit" className="submit-btn" disabled={submitting || !name.trim() || !message.trim()}>
-              {submitting ? 'Đang gửi...' : submitted ? '✓ Đã gửi, chờ duyệt!' : 'Gửi lời chúc'}
+              {submitting ? (
+                'Đang gửi...'
+              ) : submitted ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <HanddrawnCheck size={16} /> Đã gửi, chờ duyệt!
+                </span>
+              ) : (
+                'Gửi lời chúc'
+              )}
             </button>
           </form>
         </div>
@@ -671,7 +680,10 @@ export default function WishesPage() {
 
       {wishes.length === 0 && loaded && (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#999', width: '100%' }}>
-          <p style={{ fontSize: 18 }}>Chưa có lời chúc nào. Hãy là người đầu tiên! 💕</p>
+          <p style={{ fontSize: 18, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span>Chưa có lời chúc nào. Hãy là người đầu tiên!</span>
+            <HanddrawnHeart size={20} style={{ color: '#d97777' }} />
+          </p>
         </div>
       )}
 

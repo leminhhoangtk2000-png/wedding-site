@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { ATTENDANCE_VALUES, DIETARY_PRESETS, WEDDING_EVENT } from '@/lib/rsvpConstants';
-import { HanddrawnAlert, HanddrawnLock, HanddrawnCheck } from '@/components/icons/HanddrawnIcons';
+import { HanddrawnAlert, HanddrawnLock, HanddrawnCheck, HanddrawnEnvelope } from '@/components/icons/HanddrawnIcons';
 import AttendanceChoice from './AttendanceChoice';
 import GuestCountField from './GuestCountField';
+import ArrivalTimeField from './ArrivalTimeField';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function RsvpForm({
@@ -20,6 +21,7 @@ export default function RsvpForm({
   const [attendeeCount, setAttendeeCount] = useState(
     initialData.attendee_count && initialData.attendee_count > 0 ? initialData.attendee_count : 1
   );
+  const [arrivalTime, setArrivalTime] = useState(initialData.arrival_time || initialData.attendance_time || '');
   const [dietaryNotes, setDietaryNotes] = useState(initialData.dietary_notes || initialData.special_requests || '');
   const [message, setMessage] = useState(initialData.message || '');
   const [errors, setErrors] = useState({});
@@ -41,6 +43,9 @@ export default function RsvpForm({
       const count = parseInt(attendeeCount, 10);
       if (isNaN(count) || count < 1) {
         errs.attendeeCount = 'Số lượng khách phải từ 1 người trở lên.';
+      }
+      if (!arrivalTime || !arrivalTime.trim()) {
+        errs.arrivalTime = 'Vui lòng chọn thời gian bạn dự kiến sẽ có mặt.';
       }
     }
 
@@ -90,6 +95,7 @@ export default function RsvpForm({
       guest_name: fullName.trim(),
       attendance,
       attendee_count: attendance === ATTENDANCE_VALUES.ATTENDING ? parseInt(attendeeCount, 10) || 1 : 0,
+      arrival_time: attendance === ATTENDANCE_VALUES.ATTENDING && arrivalTime.trim() ? arrivalTime.trim() : null,
       dietary_notes: attendance === ATTENDANCE_VALUES.ATTENDING && dietaryNotes.trim() ? dietaryNotes.trim() : null,
       special_requests: attendance === ATTENDANCE_VALUES.ATTENDING && dietaryNotes.trim() ? dietaryNotes.trim() : null,
       message: message.trim() || null,
@@ -171,6 +177,17 @@ export default function RsvpForm({
               value={attendeeCount}
               onChange={(val) => setAttendeeCount(val)}
               error={errors.attendeeCount}
+              disabled={submitting}
+            />
+
+            {/* Arrival Time Selection */}
+            <ArrivalTimeField
+              value={arrivalTime}
+              onChange={(val) => {
+                setArrivalTime(val);
+                if (errors.arrivalTime) setErrors((prev) => ({ ...prev, arrivalTime: null }));
+              }}
+              error={errors.arrivalTime}
               disabled={submitting}
             />
 
@@ -271,7 +288,7 @@ export default function RsvpForm({
             ) : (
               <span className={styles.submitBtnContent}>
                 <span>{isEditing ? 'Lưu phản hồi tiếc nuối' : 'Gửi phản hồi tiếc nuối'}</span>
-                <span>💌</span>
+                <HanddrawnEnvelope size={16} />
               </span>
             )}
           </button>

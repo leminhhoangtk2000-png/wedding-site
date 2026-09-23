@@ -8,6 +8,7 @@ import {
   HanddrawnCelebration,
   HanddrawnEnvelope,
   HanddrawnLeaf,
+  HanddrawnClock,
 } from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
@@ -76,6 +77,16 @@ export default function RsvpConfirmation({
                   <strong>Địa điểm:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}
                 </div>
               </div>
+              {rsvpData?.arrival_time && (
+                <div className={styles.eventInfoItem}>
+                  <span className={styles.eventInfoIcon}>
+                    <HanddrawnClock size={18} />
+                  </span>
+                  <div>
+                    <strong>Thời gian có mặt dự kiến:</strong> {rsvpData.arrival_time}
+                  </div>
+                </div>
+              )}
               {rsvpData?.dietary_notes && (
                 <div className={styles.eventInfoItem}>
                   <span className={styles.eventInfoIcon}>

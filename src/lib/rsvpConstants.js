@@ -24,6 +24,31 @@ export const DIETARY_PRESETS = [
   'Dị ứng hải sản',
 ];
 
+export const ARRIVAL_TIME_OPTIONS = [
+  {
+    id: 'welcome',
+    value: '16:00 (Đón khách & Tiệc trà)',
+    time: '16:00',
+    title: 'Đón khách & Tiệc trà',
+    desc: 'Đến sớm cùng chụp ảnh & thưởng trà với dâu rể',
+  },
+  {
+    id: 'ceremony',
+    value: '17:00 - 17:30 (Nghi lễ thành hôn)',
+    time: '17:00 - 17:30',
+    title: 'Nghi lễ thành hôn',
+    desc: 'Có mặt trước giờ cử hành hôn lễ thiêng liêng',
+  },
+  {
+    id: 'banquet',
+    value: '18:00 - 18:30 (Khai tiệc thân mật)',
+    time: '18:00 - 18:30',
+    title: 'Khai tiệc thân mật',
+    desc: 'Có mặt dùng tiệc tối ấm cúng & nâng ly chúc phúc',
+  },
+];
+
+
 export function isDeadlinePassed() {
   try {
     return new Date().getTime() > new Date(WEDDING_EVENT.cutoffIso).getTime();
