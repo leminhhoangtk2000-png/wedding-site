@@ -323,7 +323,7 @@ export default function RsvpForm({
           <div
             className={styles.stepSlide}
             aria-hidden={safeStepIndex !== 0}
-            inert={safeStepIndex !== 0 ? '' : undefined}
+            inert={safeStepIndex !== 0}
           >
             <div className={styles.stepCardHeader}>
               <h3 className={styles.stepCardQuestion}>What is your full name?</h3>
@@ -369,7 +369,7 @@ export default function RsvpForm({
           <div
             className={styles.stepSlide}
             aria-hidden={safeStepIndex !== 1}
-            inert={safeStepIndex !== 1 ? '' : undefined}
+            inert={safeStepIndex !== 1}
           >
             <div className={styles.stepCardHeader}>
               <h3 className={styles.stepCardQuestion}>Will you be able to celebrate with us?</h3>
@@ -392,7 +392,7 @@ export default function RsvpForm({
               <div
                 className={styles.stepSlide}
                 aria-hidden={safeStepIndex !== 2}
-                inert={safeStepIndex !== 2 ? '' : undefined}
+                inert={safeStepIndex !== 2}
               >
                 <div className={styles.stepCardHeader}>
                   <h3 className={styles.stepCardQuestion}>How many guests will be attending?</h3>
@@ -413,7 +413,7 @@ export default function RsvpForm({
               <div
                 className={styles.stepSlide}
                 aria-hidden={safeStepIndex !== 3}
-                inert={safeStepIndex !== 3 ? '' : undefined}
+                inert={safeStepIndex !== 3}
               >
                 <div className={styles.stepCardHeader}>
                   <h3 className={styles.stepCardQuestion}>What time do you plan to arrive?</h3>
@@ -437,7 +437,7 @@ export default function RsvpForm({
               <div
                 className={styles.stepSlide}
                 aria-hidden={safeStepIndex !== 4}
-                inert={safeStepIndex !== 4 ? '' : undefined}
+                inert={safeStepIndex !== 4}
               >
                 <div className={styles.stepCardHeader}>
                   <h3 className={styles.stepCardQuestion}>Dietary restrictions &amp; special requests</h3>
@@ -495,7 +495,7 @@ export default function RsvpForm({
           <div
             className={styles.stepSlide}
             aria-hidden={safeStepIndex !== activeSteps.length - 1}
-            inert={safeStepIndex !== activeSteps.length - 1 ? '' : undefined}
+            inert={safeStepIndex !== activeSteps.length - 1}
           >
             <div className={styles.stepCardHeader}>
               <h3 className={styles.stepCardQuestion}>
@@ -517,7 +517,7 @@ export default function RsvpForm({
                 </h4>
                 <div className={styles.stepReviewRow}>
                   <span className={styles.stepReviewLabel}>Full Name:</span>
-                  <span className={styles.stepReviewValue}>
+                  <span className={styles.stepReviewValue} suppressHydrationWarning>
                     {fullName || 'Not entered'}
                     <button
                       type="button"
@@ -530,7 +530,7 @@ export default function RsvpForm({
                 </div>
                 <div className={styles.stepReviewRow}>
                   <span className={styles.stepReviewLabel}>Attendance:</span>
-                  <span className={styles.stepReviewValue}>
+                  <span className={styles.stepReviewValue} suppressHydrationWarning>
                     {isAttending ? 'Joyfully Attending 🎉' : 'Regretfully Declining 💌'}
                     <button
                       type="button"
@@ -545,7 +545,7 @@ export default function RsvpForm({
                   <>
                     <div className={styles.stepReviewRow}>
                       <span className={styles.stepReviewLabel}>Guest Count:</span>
-                      <span className={styles.stepReviewValue}>
+                      <span className={styles.stepReviewValue} suppressHydrationWarning>
                         {attendeeCount} {attendeeCount === 1 ? 'guest' : 'guests'}
                         <button
                           type="button"
@@ -558,7 +558,7 @@ export default function RsvpForm({
                     </div>
                     <div className={styles.stepReviewRow}>
                       <span className={styles.stepReviewLabel}>Arrival Time:</span>
-                      <span className={styles.stepReviewValue}>
+                      <span className={styles.stepReviewValue} suppressHydrationWarning>
                         {arrivalTime || 'Not selected'}
                         <button
                           type="button"
@@ -572,7 +572,7 @@ export default function RsvpForm({
                     {dietaryNotes && (
                       <div className={styles.stepReviewRow}>
                         <span className={styles.stepReviewLabel}>Dietary &amp; Allergies:</span>
-                        <span className={styles.stepReviewValue}>{dietaryNotes}</span>
+                        <span className={styles.stepReviewValue} suppressHydrationWarning>{dietaryNotes}</span>
                       </div>
                     )}
                   </>

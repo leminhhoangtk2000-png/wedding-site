@@ -14,11 +14,11 @@ export default function GuestCountField({ value, onChange, error, disabled }) {
 
   return (
     <div className={styles.formGroup}>
-      <label className={styles.label}>
+      <div id="guest-count-label" className={styles.label}>
         How many guests should we prepare seats for, including yourself? <span className={styles.requiredStar}>*</span>
-      </label>
+      </div>
 
-      <div className={styles.guestCountGrid} role="radiogroup" aria-label="Number of guests attending">
+      <div className={styles.guestCountGrid} role="radiogroup" aria-labelledby="guest-count-label">
         {/* Option 1: 1 Guest */}
         <button
           type="button"

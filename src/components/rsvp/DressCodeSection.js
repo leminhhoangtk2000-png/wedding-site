@@ -82,9 +82,6 @@ export default function DressCodeSection() {
                 )}
               </div>
               <span className={styles.cleanSwatchName}>{color.name}</span>
-              <span className={styles.cleanSwatchHex}>
-                {isCopied ? '✓ Copied' : color.hex}
-              </span>
             </button>
           );
         })}

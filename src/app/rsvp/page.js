@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import RsvpHero from '@/components/rsvp/RsvpHero';
 import InvitationPanel from '@/components/rsvp/InvitationPanel';
 import EventTimeline from '@/components/rsvp/EventTimeline';
@@ -19,9 +19,16 @@ import {
 } from '@/lib/rsvpApi';
 import styles from './rsvp.module.css';
 
+const emptySubscribe = () => () => {};
+
 export default function RsvpPage() {
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
   const [offline, setOffline] = useState(false);
-  const [existingToken, setExistingToken] = useState(() => getStoredEditToken());
   const [persistedRsvp, setPersistedRsvp] = useState(null);
   const [canEdit, setCanEdit] = useState(true);
   const [isEditingMode, setIsEditingMode] = useState(false);
@@ -31,10 +38,17 @@ export default function RsvpPage() {
   const [submitError, setSubmitError] = useState('');
   const [noticeState, setNoticeState] = useState(null); // { type: 'warn' | 'error', title, message }
 
-  // Draft form data
-  const [formData, setFormData] = useState(() => {
-    return getLastRsvpData() || {};
-  });
+  // Manual token from submit action (if new)
+  const [manualToken, setManualToken] = useState(null);
+
+  // Active token (client-only stored token or just submitted token)
+  const activeToken = manualToken || (isClient ? getStoredEditToken() : null);
+
+  // Custom updated form data (from submission or editing)
+  const [customFormData, setCustomFormData] = useState(null);
+
+  // Draft cached data from localStorage (client only to prevent hydration mismatch)
+  const activeFormData = customFormData || persistedRsvp || (isClient ? getLastRsvpData() : null) || {};
 
   // Track online/offline status
   useEffect(() => {
@@ -68,14 +82,13 @@ export default function RsvpPage() {
 
   // Fetch existing RSVP if token is present
   useEffect(() => {
-    if (!existingToken) return;
+    if (!activeToken) return;
 
-    getRsvpByToken(existingToken)
+    getRsvpByToken(activeToken)
       .then((res) => {
         if (res && (res.rsvp || res.data)) {
           const record = res.rsvp || res.data;
           setPersistedRsvp(record);
-          setFormData(record);
           setCanEdit(res.can_edit !== false);
         }
       })
@@ -89,7 +102,7 @@ export default function RsvpPage() {
           });
         }
       });
-  }, [existingToken]);
+  }, [activeToken]);
 
   // Scroll smoothly down to the form card
   const handleScrollToForm = () => {
@@ -106,12 +119,12 @@ export default function RsvpPage() {
     setNoticeState(null);
 
     try {
-      if (existingToken && isEditingMode) {
+      if (activeToken && isEditingMode) {
         // Update existing record
-        const res = await updateRsvp(existingToken, payload);
+        const res = await updateRsvp(activeToken, payload);
         const record = res.rsvp || res.data;
         setPersistedRsvp(record);
-        setFormData(record);
+        setCustomFormData(record);
         setCanEdit(res.can_edit !== false);
         setIsEditingMode(false);
       } else {
@@ -119,9 +132,9 @@ export default function RsvpPage() {
         const res = await submitRsvp(payload);
         const record = res.rsvp || res.data;
         setPersistedRsvp(record);
-        setFormData(record);
+        setCustomFormData(record);
         if (res.edit_token) {
-          setExistingToken(res.edit_token);
+          setManualToken(res.edit_token);
         }
         setCanEdit(res.can_edit !== false);
         setIsEditingMode(false);
@@ -190,9 +203,16 @@ export default function RsvpPage() {
             />
           ) : (
             <RsvpForm
-              key={formData?.id || (isEditingMode ? 'edit' : 'new')}
-              initialData={formData}
-              isEditing={Boolean(existingToken && isEditingMode)}
+              key={
+                persistedRsvp?.id ||
+                (isClient
+                  ? (activeFormData?.full_name || activeFormData?.guest_name
+                      ? `client-${activeFormData.full_name || activeFormData.guest_name}`
+                      : 'client')
+                  : 'ssr') + (isEditingMode ? '-edit' : '-new')
+              }
+              initialData={activeFormData}
+              isEditing={Boolean(activeToken && isEditingMode)}
               submitting={submitting}
               submitError={submitError}
               offline={offline}

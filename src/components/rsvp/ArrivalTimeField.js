@@ -44,13 +44,16 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
       <div className={styles.arrivalTimeList} role="radiogroup" aria-label="Select expected arrival time">
         {ARRIVAL_TIME_OPTIONS.map((opt) => {
           const isSelected = !isCustom && value === opt.value;
+          const inputId = `arrival-time-${opt.id}`;
           return (
             <label
               key={opt.id}
+              htmlFor={inputId}
               className={`${styles.arrivalTimeCard} ${isSelected ? styles.arrivalTimeCardActive : ''}`}
             >
               <input
                 type="radio"
+                id={inputId}
                 name="arrival_time"
                 value={opt.value}
                 checked={isSelected}
@@ -76,10 +79,12 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
 
         {/* Custom time option */}
         <label
+          htmlFor="arrival-time-custom"
           className={`${styles.arrivalTimeCard} ${isCustom ? styles.arrivalTimeCardActive : ''}`}
         >
           <input
             type="radio"
+            id="arrival-time-custom"
             name="arrival_time"
             value="custom"
             checked={isCustom}
@@ -105,7 +110,11 @@ export default function ArrivalTimeField({ value, onChange, error, disabled }) {
       {/* Custom time text input */}
       {isCustom && (
         <div className={styles.customTimeWrapper}>
+          <label htmlFor="custom-arrival-time-input" className={styles.visuallyHidden}>
+            Specify arrival time
+          </label>
           <input
+            id="custom-arrival-time-input"
             type="text"
             placeholder="Please specify your arrival time (e.g., 4:30 PM, after 7:00 PM...)"
             maxLength={50}
