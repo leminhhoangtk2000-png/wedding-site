@@ -7,6 +7,7 @@ import EventTimeline from '@/components/rsvp/EventTimeline';
 import RsvpForm from '@/components/rsvp/RsvpForm';
 import RsvpConfirmation from '@/components/rsvp/RsvpConfirmation';
 import RsvpStatusNotice from '@/components/rsvp/RsvpStatusNotice';
+import RsvpNavSection from '@/components/rsvp/RsvpNavSection';
 import {
   submitRsvp,
   updateRsvp,
@@ -195,6 +196,9 @@ export default function RsvpPage() {
             />
           )}
         </div>
+
+        {/* PANEL 6: EXPLORE & CONNECT (OUR STORY & WISHES BOARD) */}
+        <RsvpNavSection />
       </main>
     </div>
   );

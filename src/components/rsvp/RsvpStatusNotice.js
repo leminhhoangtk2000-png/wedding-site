@@ -1,5 +1,6 @@
 'use client';
 
+import { HanddrawnAlert, HanddrawnInfo } from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function RsvpStatusNotice({ type = 'warn', title, message, actionLabel, onAction }) {
@@ -11,7 +12,7 @@ export default function RsvpStatusNotice({ type = 'warn', title, message, action
       role="alert"
     >
       <div className={styles.statusNoticeIcon} aria-hidden="true">
-        {isError ? '⚠️' : 'ℹ️'}
+        {isError ? <HanddrawnAlert size={22} /> : <HanddrawnInfo size={22} />}
       </div>
       <div style={{ flex: 1 }}>
         {title && <strong style={{ display: 'block', marginBottom: 4 }}>{title}</strong>}

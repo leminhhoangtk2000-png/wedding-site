@@ -1,6 +1,14 @@
 'use client';
 
-import { WEDDING_EVENT, ATTENDANCE_VALUES, generateGoogleCalendarUrl, downloadIcsFile } from '@/lib/rsvpConstants';
+import Link from 'next/link';
+import { WEDDING_EVENT, ATTENDANCE_VALUES, generateGoogleCalendarUrl } from '@/lib/rsvpConstants';
+import {
+  HanddrawnCalendar,
+  HanddrawnMapPin,
+  HanddrawnCelebration,
+  HanddrawnEnvelope,
+  HanddrawnLeaf,
+} from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function RsvpConfirmation({
@@ -10,51 +18,72 @@ export default function RsvpConfirmation({
 }) {
   const isAttending = rsvpData?.attendance === ATTENDANCE_VALUES.ATTENDING;
   const guestCount = rsvpData?.attendee_count || 1;
-  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Guest';
+  const guestName = rsvpData?.full_name || rsvpData?.guest_name || 'Quý khách';
 
   return (
     <div className={styles.banquetCard} aria-live="polite">
-      {/* Gilded Corner Filigree Accents */}
-      <div className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomLeft}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomRight}`} aria-hidden="true" />
+      <div className={styles.formHeader}>
+        <div className={styles.badgePill}>
+          <span className={styles.badgeSparkle}>✦</span>
+          <span>{isAttending ? 'ĐÃ GHI NHẬN PHẢN HỒI' : 'CẢM ƠN LỜI HỒI ĐÁP'}</span>
+          <span className={styles.badgeSparkle}>✦</span>
+        </div>
 
-      <div className={styles.confirmationBadge} aria-hidden="true">
-        {isAttending ? '🕊️' : '💌'}
-      </div>
+        <h2 className={styles.cardTitleScript}>
+          {isAttending ? 'Hẹn Gặp Bạn Tại Buổi Tiệc!' : 'Cảm Ơn Tình Cảm Của Bạn'}
+        </h2>
 
-      <span className={styles.cardEyebrow}>Response Confirmed</span>
-      <h2 className={styles.cardTitleScript}>
-        {isAttending ? 'See You There!' : 'Thank You!'}
-      </h2>
-
-      <div className={styles.goldFiligreeDivider} aria-hidden="true">
-        <div className={styles.goldFiligreeLine} />
-        <span className={styles.goldFiligreeKnot}>❧</span>
-        <div className={styles.goldFiligreeLine} />
+        <div className={styles.goldFiligreeDivider} aria-hidden="true">
+          <div className={styles.goldFiligreeLine} />
+          <span className={styles.goldFiligreeKnot}>✦</span>
+          <div className={styles.goldFiligreeLine} />
+        </div>
       </div>
 
       {isAttending ? (
         <div className={styles.confirmationBlock}>
-          <div className={styles.invitationDateBig}>
-            {guestName} · {guestCount} {guestCount === 1 ? 'guest attending' : 'guests attending'}
+          <div className={styles.guestHighlightBox}>
+            <span className={styles.guestHighlightIcon}>
+              <HanddrawnCelebration size={28} />
+            </span>
+            <div>
+              <strong className={styles.guestHighlightName}>{guestName}</strong>
+              <div className={styles.guestHighlightCount}>
+                Xác nhận tham dự: <strong>{guestCount}</strong> {guestCount === 1 ? 'người' : 'khách'}
+              </div>
+            </div>
           </div>
-          <p className={styles.cardSubtitle}>
-            Your RSVP has been saved. We cannot wait to celebrate our special day together with you!
+
+          <p className={styles.cardSubtitle} style={{ marginTop: 14 }}>
+            Hoàng &amp; Duyên rất hạnh phúc và mong chờ được đón tiếp bạn trong ngày vui trọng đại của tụi mình!
           </p>
 
           <div className={styles.invitationVenueCard}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div>
-                <strong>📅 Date &amp; Time:</strong> {WEDDING_EVENT.dateDisplay} ({WEDDING_EVENT.timeDisplay})
+            <div className={styles.eventInfoList}>
+              <div className={styles.eventInfoItem}>
+                <span className={styles.eventInfoIcon}>
+                  <HanddrawnCalendar size={18} />
+                </span>
+                <div>
+                  <strong>Thời gian:</strong> {WEDDING_EVENT.dateDisplay} ({WEDDING_EVENT.timeDisplay})
+                </div>
               </div>
-              <div>
-                <strong>📍 Venue:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}
+              <div className={styles.eventInfoItem}>
+                <span className={styles.eventInfoIcon}>
+                  <HanddrawnMapPin size={18} />
+                </span>
+                <div>
+                  <strong>Địa điểm:</strong> {WEDDING_EVENT.venueName} — {WEDDING_EVENT.venueAddress}
+                </div>
               </div>
               {rsvpData?.dietary_notes && (
-                <div>
-                  <strong>🥗 Special Requests:</strong> {rsvpData.dietary_notes}
+                <div className={styles.eventInfoItem}>
+                  <span className={styles.eventInfoIcon}>
+                    <HanddrawnLeaf size={18} />
+                  </span>
+                  <div>
+                    <strong>Khẩu phần ăn riêng:</strong> {rsvpData.dietary_notes}
+                  </div>
                 </div>
               )}
             </div>
@@ -68,16 +97,9 @@ export default function RsvpConfirmation({
               rel="noopener noreferrer"
               className={styles.invitationButtonOutline}
             >
-              <span>📅 Google Calendar</span>
+              <HanddrawnCalendar size={18} />
+              <span>Thêm vào Google Calendar</span>
             </a>
-
-            <button
-              type="button"
-              onClick={downloadIcsFile}
-              className={styles.invitationButtonOutline}
-            >
-              <span>🗓️ Download (.ics)</span>
-            </button>
 
             <a
               href={WEDDING_EVENT.googleMapsUrl}
@@ -85,43 +107,57 @@ export default function RsvpConfirmation({
               rel="noopener noreferrer"
               className={styles.invitationButtonOutline}
             >
-              <span>📍 Directions &amp; Map</span>
+              <HanddrawnMapPin size={18} />
+              <span>Xem chỉ đường Google Maps</span>
             </a>
           </div>
+
+          {/* Edit action */}
+          {canEdit && (
+            <div className={styles.editPrompt}>
+              <button
+                type="button"
+                onClick={onEdit}
+                className={styles.textLinkBtn}
+              >
+                Cần thay đổi thông tin hoặc số lượng người? Bấm vào đây để chỉnh sửa
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className={styles.confirmationBlock}>
-          <div className={styles.invitationDateBig}>
-            {guestName}
+          <div className={styles.guestHighlightBox}>
+            <span className={styles.guestHighlightIcon}>
+              <HanddrawnEnvelope size={28} />
+            </span>
+            <div>
+              <strong className={styles.guestHighlightName}>{guestName}</strong>
+              <div className={styles.guestHighlightCount}>Đã gửi lời chúc phúc từ xa</div>
+            </div>
           </div>
-          <p className={styles.cardSubtitle} style={{ maxWidth: 480 }}>
-            We have received your response. Thank you so much for letting us know! Although you won&apos;t be able to join us in person, your warm wishes and thoughtful love mean the world to us.
+
+          <p className={styles.cardSubtitle} style={{ maxWidth: 520, margin: '16px auto 24px' }}>
+            Dù rất tiếc vì không thể gặp bạn trong ngày vui, Hoàng &amp; Duyên vô cùng trân trọng tình cảm và lời chúc phúc của bạn trên chặng đường mới này.
           </p>
+
+          <div className={styles.invitationActions}>
+            <Link href="/wishes" className={styles.submitBtn} style={{ textDecoration: 'none', display: 'inline-flex' }}>
+              <span>Gửi lời chúc vào Sổ Lưu Bút →</span>
+            </Link>
+
+            {canEdit && (
+              <button
+                type="button"
+                onClick={onEdit}
+                className={styles.invitationButtonOutline}
+              >
+                <span>Thay đổi ý định? Cập nhật lại phản hồi</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
-
-      {/* Edit availability check */}
-      <div style={{ marginTop: 28, textAlign: 'center' }}>
-        {canEdit ? (
-          <>
-            <button
-              type="button"
-              onClick={onEdit}
-              className={styles.invitationButtonOutline}
-              style={{ padding: '10px 24px', fontSize: 16 }}
-            >
-              ✏️ Edit Your Response
-            </button>
-            <p style={{ fontSize: 12, color: '#728495', marginTop: 8 }}>
-              You may update your response anytime until {WEDDING_EVENT.cutoffDisplay}.
-            </p>
-          </>
-        ) : (
-          <div style={{ fontSize: 14, color: '#888', fontStyle: 'italic', marginTop: 12 }}>
-            RSVP responses are now finalized for event preparation. If you need any urgent changes, please contact the couple directly.
-          </div>
-        )}
-      </div>
     </div>
   );
 }

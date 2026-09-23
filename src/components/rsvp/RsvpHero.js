@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { WEDDING_EVENT } from '@/lib/rsvpConstants';
 import '@/app/hero-animated.css';
 
 export default function RsvpHero({ onScrollToForm }) {
@@ -56,16 +57,15 @@ export default function RsvpHero({ onScrollToForm }) {
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress;
-            if (p < 0.28) setActiveChapter(0);
-            else if (p < 0.55) setActiveChapter(1);
-            else if (p < 0.85) setActiveChapter(2);
-            else setActiveChapter(3);
+            if (p < 0.38) setActiveChapter(0);
+            else if (p < 0.76) setActiveChapter(1);
+            else setActiveChapter(2);
           },
         },
       });
 
       // ----------------------------------------------------
-      // PHASE 1: THE APPROACH & RING VOW (0.0 -> 0.28)
+      // PHASE 1: THE APPROACH & RING VOW (0.0 -> 0.38)
       // ----------------------------------------------------
 
       // Initial Cue fades out immediately upon scrolling
@@ -80,143 +80,108 @@ export default function RsvpHero({ onScrollToForm }) {
       tl.to('.hero-s1-bg', {
         scale: 1.15,
         yPercent: 4,
-        duration: 0.28,
+        duration: 0.38,
         ease: 'none',
       }, 0);
 
       // Groom walks from left toward center
       tl.fromTo('.hero-char-groom',
         { xPercent: -120, opacity: 0 },
-        { xPercent: 0, opacity: 1, duration: 0.18, ease: 'power2.out' },
+        { xPercent: 0, opacity: 1, duration: 0.20, ease: 'power2.out' },
         0
       );
 
       // Bride walks from right toward center
       tl.fromTo('.hero-char-bride',
         { xPercent: 120, opacity: 0 },
-        { xPercent: 0, opacity: 1, duration: 0.18, ease: 'power2.out' },
+        { xPercent: 0, opacity: 1, duration: 0.20, ease: 'power2.out' },
         0
       );
 
-      // Camera cut/focus: Characters dissolve gracefully as hands close-up reveals
+      // Characters dissolve gracefully as hands close-up reveals
       tl.to(['.hero-char-groom', '.hero-char-bride'], {
         opacity: 0,
         scale: 1.06,
         duration: 0.08,
         ease: 'power2.inOut',
-      }, 0.18);
+      }, 0.20);
 
       // Hands & Rings Close-up reveals as the focal point
       tl.fromTo('.hero-s1-hands-wrap',
-        { scale: 0.8, opacity: 0, y: 20 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.10, ease: 'power2.out' },
-        0.18
+        { scale: 0.82, opacity: 0, y: 20 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' },
+        0.20
       );
 
       // Sparkle & Flare animation on wedding rings
       tl.fromTo('.hero-ring-sparkle',
         { scale: 0, rotation: -60, opacity: 0 },
-        { scale: 1.5, rotation: 45, opacity: 1, duration: 0.09, stagger: 0.03, ease: 'back.out(2)' },
-        0.21
+        { scale: 1.5, rotation: 45, opacity: 1, duration: 0.10, stagger: 0.03, ease: 'back.out(2)' },
+        0.24
       );
 
-      // ----------------------------------------------------
-      // PHASE 2: RADIANT BLOOM & MONOGRAM PORTAL (0.28 -> 0.52)
-      // ----------------------------------------------------
-
-      // Golden Bloom explosion
-      tl.to('.hero-bloom-overlay', {
-        opacity: 0.98,
-        duration: 0.08,
-        ease: 'power2.in',
-      }, 0.28);
-
-      // Fade out hands and Scene 1 background
-      tl.to(['.hero-s1-hands-wrap', '.hero-s1-bg-wrap'], {
+      // Seamless cross-fade from Hands to Twilight Garden (0.34 -> 0.44)
+      tl.to('.hero-s1-hands-wrap', {
         opacity: 0,
         scale: 1.08,
-        duration: 0.08,
+        duration: 0.09,
         ease: 'power2.in',
-      }, 0.29);
-
-      // Bloom softens
-      tl.to('.hero-bloom-overlay', {
-        opacity: 0.4,
-        duration: 0.08,
-        ease: 'power2.out',
       }, 0.34);
 
-      // Monogram card rises and glows
-      tl.fromTo('.hero-monogram-stage',
-        { scale: 0.85, opacity: 0, y: 40 },
-        { scale: 1, opacity: 1, y: 0, duration: 0.12, ease: 'power3.out' },
-        0.29
-      );
-
-      // Monogram zooms in like a portal (Dolly-through)
-      tl.to('.hero-monogram-stage', {
-        scale: 2.2,
+      tl.to('.hero-s1-bg-wrap', {
         opacity: 0,
-        filter: 'blur(10px)',
-        duration: 0.12,
-        ease: 'power2.in',
-      }, 0.42);
-
-      // Bloom fades away completely
-      tl.to('.hero-bloom-overlay', {
-        opacity: 0,
-        duration: 0.06,
-        ease: 'power1.out',
-      }, 0.44);
+        duration: 0.10,
+        ease: 'power2.inOut',
+      }, 0.35);
 
       // ----------------------------------------------------
-      // PHASE 3: THE ENCHANTED TWILIGHT BANQUET (0.44 -> 0.82)
+      // PHASE 2: THE ENCHANTED TWILIGHT BANQUET (0.36 -> 0.78)
       // ----------------------------------------------------
 
-      // Scene 2 container fades in
+      // Twilight Scene container fades in
       tl.to('.hero-s2', {
         opacity: 1,
-        duration: 0.08,
+        duration: 0.10,
         ease: 'power2.out',
-      }, 0.44);
+      }, 0.36);
 
       // Starry sky background drift
       tl.fromTo('.hero-s2-bg',
         { scale: 1.15, yPercent: -4 },
-        { scale: 1.0, yPercent: 2, duration: 0.38, ease: 'none' },
-        0.44
+        { scale: 1.0, yPercent: 2, duration: 0.42, ease: 'none' },
+        0.36
       );
 
       // Grand Tree settles in with subtle depth
       tl.fromTo('.hero-s2-tree',
         { scale: 1.12, opacity: 0, y: -30 },
-        { scale: 1.0, opacity: 1, y: 0, duration: 0.16, ease: 'power2.out' },
-        0.46
+        { scale: 1.0, opacity: 1, y: 0, duration: 0.18, ease: 'power2.out' },
+        0.38
       );
 
       // Foreground arch hangs in from top
       tl.fromTo('.hero-s2-arch',
         { yPercent: -25, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.16, ease: 'power2.out' },
-        0.47
+        { yPercent: 0, opacity: 1, duration: 0.18, ease: 'power2.out' },
+        0.40
       );
 
       // Banquet Table glides up from bottom
       tl.fromTo('.hero-s2-table',
         { yPercent: 40, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.18, ease: 'power3.out' },
-        0.50
+        { yPercent: 0, opacity: 1, duration: 0.20, ease: 'power3.out' },
+        0.44
       );
 
       // Cheering Guests pop up joyfully
       tl.fromTo('.hero-s2-guests',
         { yPercent: 30, scale: 0.9, opacity: 0 },
-        { yPercent: 0, scale: 1, opacity: 1, duration: 0.18, ease: 'back.out(1.2)' },
-        0.54
+        { yPercent: 0, scale: 1, opacity: 1, duration: 0.20, ease: 'back.out(1.2)' },
+        0.48
       );
 
       // ----------------------------------------------------
-      // PHASE 4: GRAND WELCOME & RSVP CTA (0.78 -> 1.0)
+      // PHASE 3: GRAND WELCOME & RSVP CTA (0.74 -> 1.0)
       // ----------------------------------------------------
 
       // Settle the party layers slightly deeper for focus
@@ -225,13 +190,13 @@ export default function RsvpHero({ onScrollToForm }) {
         yPercent: 4,
         duration: 0.20,
         ease: 'power1.out',
-      }, 0.78);
+      }, 0.74);
 
       // RSVP Floating Card glides into view
       tl.fromTo('.hero-rsvp-stage',
         { y: 50, opacity: 0, scale: 0.92 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.18, ease: 'back.out(1.3)' },
-        0.78
+        { y: 0, opacity: 1, scale: 1, duration: 0.20, ease: 'back.out(1.3)' },
+        0.74
       );
 
     }, containerRef);
@@ -327,10 +292,9 @@ export default function RsvpHero({ onScrollToForm }) {
   }, []);
 
   const chapters = [
-    { label: 'Gặp Gỡ & Kết Duyên', ratio: 0.15 },
-    { label: '69 Project', ratio: 0.36 },
-    { label: 'Tiệc Cưới Sân Vườn', ratio: 0.65 },
-    { label: 'Xác Nhận Tham Dự', ratio: 0.95 },
+    { label: 'Gặp Gỡ & Kết Duyên', ratio: 0.18 },
+    { label: 'Tiệc Cưới Sân Vườn', ratio: 0.58 },
+    { label: 'Xác Nhận Tham Dự', ratio: 0.92 },
   ];
 
   return (
@@ -415,26 +379,7 @@ export default function RsvpHero({ onScrollToForm }) {
         </div>
 
         {/* ---------------------------------------------------------------- */}
-        {/* SCENE 2: RADIANT BLOOM & MONOGRAM PORTAL */}
-        {/* ---------------------------------------------------------------- */}
-        <div className="hero-bloom-overlay" />
-
-        <div className="hero-monogram-stage">
-          <div className="hero-monogram-card">
-            <span className="hero-monogram-tag">✦ Câu Chuyện Của Tụi Mình ✦</span>
-            <h1 className="hero-monogram-names">Hoàng &amp; Duyên</h1>
-            <div className="hero-monogram-project">69 Project</div>
-            <div className="hero-monogram-divider" />
-            <div className="hero-monogram-quotes">
-              <span>6 năm bạn học...</span>
-              <span>9 năm bạn gái...</span>
-              <span>69 năm bạn đời, bạn nhậu, bạn làm ăn, bạn chung nhà, bạn già...</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* SCENE 3: ENCHANTED TWILIGHT GARDEN BANQUET */}
+        {/* SCENE 2: ENCHANTED TWILIGHT GARDEN BANQUET */}
         {/* ---------------------------------------------------------------- */}
         <div className="hero-layer hero-s2">
           {/* Starry Night Sky Background */}
@@ -502,7 +447,7 @@ export default function RsvpHero({ onScrollToForm }) {
                 Bạn Sẽ Đến Chung Vui Cùng Tụi Mình Chứ?
               </h2>
               <p className="hero-rsvp-subtitle">
-                Thứ Bảy, 08 Tháng 11, 2026 · Khu Du Lịch Bình Quới, TP. Hồ Chí Minh
+                {WEDDING_EVENT.dateDisplay} · {WEDDING_EVENT.venueName}, TP. Hồ Chí Minh
               </p>
               <div className="hero-rsvp-btn-row">
                 <button

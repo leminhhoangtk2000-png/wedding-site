@@ -1,28 +1,29 @@
 'use client';
 
-import { WEDDING_EVENT, generateGoogleCalendarUrl, downloadIcsFile } from '@/lib/rsvpConstants';
+import { WEDDING_EVENT, generateGoogleCalendarUrl } from '@/lib/rsvpConstants';
+import { HanddrawnCalendar, HanddrawnMapPin } from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 export default function InvitationPanel() {
   return (
-    <section className={styles.banquetCard} aria-label="Wedding Save The Date invitation details">
-      {/* Gilded Corner Filigree Accents */}
-      <div className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomLeft}`} aria-hidden="true" />
-      <div className={`${styles.cardCornerFoil} ${styles.cornerBottomRight}`} aria-hidden="true" />
-
+    <section className={styles.banquetCard} aria-label="Thông tin thiệp mời hôn lễ">
       {/* Header */}
-      <span className={styles.cardEyebrow}>Wedding Celebration</span>
+      <div className={styles.badgePill}>
+        <span className={styles.badgeSparkle}>✦</span>
+        <span>THIỆP MỜI LỄ THÀNH HÔN</span>
+        <span className={styles.badgeSparkle}>✦</span>
+      </div>
+
       <h2 className={styles.cardTitleScript}>{WEDDING_EVENT.couple}</h2>
+
       <p className={styles.cardSubtitle}>
-        Together with their families, invite you to celebrate their union
+        Trân trọng kính mời quý người thân, bạn bè đến chung vui trong ngày hạnh phúc của tụi mình
       </p>
 
       {/* Gold Filigree Divider */}
       <div className={styles.goldFiligreeDivider} aria-hidden="true">
         <div className={styles.goldFiligreeLine} />
-        <span className={styles.goldFiligreeKnot}>❧</span>
+        <span className={styles.goldFiligreeKnot}>✦</span>
         <div className={styles.goldFiligreeLine} />
       </div>
 
@@ -44,28 +45,21 @@ export default function InvitationPanel() {
             target="_blank"
             rel="noopener noreferrer"
             className={styles.invitationButtonOutline}
-            aria-label="Add wedding to Google Calendar"
+            aria-label="Thêm đám cưới vào Google Calendar"
           >
-            <span>📅 Add to Google Calendar</span>
+            <HanddrawnCalendar size={18} />
+            <span>Google Calendar</span>
           </a>
-
-          <button
-            type="button"
-            onClick={downloadIcsFile}
-            className={styles.invitationButtonOutline}
-            aria-label="Download ICS calendar file for Apple Calendar or Outlook"
-          >
-            <span>🗓️ Download .ICS</span>
-          </button>
 
           <a
             href={WEDDING_EVENT.googleMapsUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.invitationButtonOutline}
-            aria-label="Open venue address on Google Maps"
+            aria-label="Mở địa chỉ tiệc cưới trên Google Maps"
           >
-            <span>📍 View on Google Maps</span>
+            <HanddrawnMapPin size={18} />
+            <span>Chỉ đường Google Maps</span>
           </a>
         </div>
       </div>

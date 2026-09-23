@@ -4459,3 +4459,15 @@ body::after {
   margin-top: 8px;
 }
 
+/* ============================================
+   HANDDRAWN LINE-ART ICONS
+   ============================================ */
+.handdrawn-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  stroke: currentColor;
+  transition: transform 0.2s ease, stroke 0.2s ease;
+}
+
+
