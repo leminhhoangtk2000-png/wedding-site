@@ -1,0 +1,785 @@
+/* =======================================================
+   ANIMATED STORYTELLING HERO SECTION
+   Style: Whimsical Fairytale Tuscany Garden Wedding
+   Couple: Hoàng & Duyên (69 Project)
+   ======================================================= */
+
+.hero-story-container {
+  position: relative;
+  width: 100%;
+  height: 480vh; /* Generous scroll distance for 4 story beats */
+  background-color: #0b0f14;
+}
+
+.hero-sticky-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  user-select: none;
+  background-color: #0d131a;
+}
+
+/* Base layer fills */
+.hero-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =======================================================
+   SCENE 1: THE SUNSET ENCOUNTER & RING VOW
+   ======================================================= */
+.hero-s1 {
+  z-index: 10;
+  will-change: opacity, transform;
+}
+
+.hero-s1-bg-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-s1-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+  transform: scale(1.06);
+  filter: saturate(1.1) contrast(1.03);
+}
+
+.hero-s1-warm-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 60%,
+    rgba(255, 220, 160, 0.25) 0%,
+    rgba(224, 158, 85, 0.3) 50%,
+    rgba(35, 20, 10, 0.45) 100%
+  );
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* Initial title and scroll indicator */
+.hero-s1-intro-cue {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  z-index: 25;
+  transition: opacity 0.4s ease;
+  pointer-events: auto;
+}
+
+.hero-s1-intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--font-nav);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.hero-s1-intro-hint {
+  font-family: var(--font-body);
+  font-size: 14px;
+  opacity: 0.9;
+  letter-spacing: 1px;
+}
+
+.hero-s1-scroll-arrow {
+  animation: heroBounce 1.8s infinite;
+}
+
+@keyframes heroBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* Characters Walking In */
+.hero-characters-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.hero-char {
+  position: absolute;
+  bottom: 3%;
+  height: 85vh;
+  max-height: 850px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.35));
+  will-change: transform, opacity;
+}
+
+.hero-char-groom {
+  left: 18%;
+  transform-origin: bottom center;
+}
+
+.hero-char-bride {
+  right: 18%;
+  transform-origin: bottom center;
+}
+
+/* Hands & Wedding Rings Close-up */
+.hero-s1-hands-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+}
+
+.hero-s1-hands-card {
+  position: relative;
+  max-width: 780px;
+  width: 90vw;
+  max-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Soft dreamy circular vignette mask so no harsh rectangular edges */
+  mask-image: radial-gradient(ellipse 65% 65% at 50% 52%, black 42%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 65% 65% at 50% 52%, black 42%, transparent 72%);
+}
+
+.hero-s1-hands-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 35px rgba(255, 220, 150, 0.45));
+}
+
+/* Magical Ring Sparkle & Lens Flare */
+.hero-ring-sparkle {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  z-index: 30;
+}
+
+.hero-ring-sparkle--groom {
+  top: 61%;
+  left: 36%;
+}
+
+.hero-ring-sparkle--bride {
+  top: 59%;
+  left: 55%;
+}
+
+.sparkle-cross {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 230, 130, 0.95) 25%,
+    rgba(240, 180, 50, 0.5) 55%,
+    transparent 75%
+  );
+  border-radius: 50%;
+  filter: blur(1px);
+}
+
+.sparkle-flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 245, 200, 1) 50%,
+    transparent 100%
+  );
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(255, 220, 130, 0.8);
+}
+
+.sparkle-flare--vert {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.sparkle-flare--diag {
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 120px;
+}
+
+/* =======================================================
+   SCENE 2: RADIANT BLOOM & MONOGRAM TRANSITION
+   ======================================================= */
+.hero-bloom-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 250, 235, 1) 0%,
+    rgba(250, 225, 160, 0.92) 40%,
+    rgba(195, 145, 65, 0.75) 70%,
+    rgba(15, 12, 8, 0.95) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-monogram-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 35;
+  color: #ffffff;
+  text-align: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+}
+
+.hero-monogram-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 840px;
+  padding: 52px 46px;
+  background: rgba(14, 22, 18, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(245, 205, 125, 0.6);
+  border-radius: 32px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.65), 0 0 60px rgba(220, 175, 90, 0.35);
+}
+
+.hero-monogram-tag {
+  font-family: var(--font-nav);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #f7d28e;
+  margin-bottom: 14px;
+  text-shadow: 0 0 15px rgba(247, 210, 142, 0.5);
+}
+
+.hero-monogram-names {
+  font-family: var(--font-heading);
+  font-size: clamp(46px, 7vw, 82px);
+  font-weight: 400;
+  line-height: 1.1;
+  color: #fffaf0;
+  margin-bottom: 14px;
+  text-shadow: 0 4px 30px rgba(235, 195, 120, 0.5), 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.hero-monogram-project {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 3.8vw, 44px);
+  color: #f5c369;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 2px 15px rgba(245, 195, 105, 0.4);
+}
+
+.hero-monogram-divider {
+  width: 140px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #f5c369, transparent);
+  margin-bottom: 24px;
+}
+
+.hero-monogram-quotes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.9vw, 20px);
+  color: #fbf6ee;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.hero-monogram-quotes span {
+  opacity: 0.95;
+}
+
+.hero-monogram-quotes span:last-child {
+  color: #ffd899;
+  font-weight: 400;
+}
+
+/* =======================================================
+   SCENE 3: ENCHANTED TWILIGHT GARDEN BANQUET
+   ======================================================= */
+.hero-s2 {
+  z-index: 40;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.hero-s2-bg-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-s2-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  transform: scale(1.05);
+  filter: saturate(1.15) brightness(1.02);
+}
+
+/* Grand Ancient Tree */
+.hero-s2-tree-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 42;
+}
+
+.hero-s2-tree {
+  width: 100%;
+  max-width: 1550px;
+  height: auto;
+  max-height: 92vh;
+  object-fit: contain;
+  object-position: center 30%;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4));
+  transform-origin: center top;
+}
+
+/* Banquet Table */
+.hero-s2-table-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 46;
+  pointer-events: none;
+}
+
+.hero-s2-table {
+  width: 88vw;
+  max-width: 1350px;
+  height: auto;
+  max-height: 52vh;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 18px 35px rgba(0, 0, 0, 0.5));
+}
+
+/* Cheering Guests */
+.hero-s2-guests-wrap {
+  position: absolute;
+  bottom: 24vh;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 44;
+  pointer-events: none;
+}
+
+.hero-s2-guests {
+  width: 78vw;
+  max-width: 1100px;
+  height: auto;
+  max-height: 44vh;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+}
+
+/* Dancing guest accent */
+.hero-s2-dancing-wrap {
+  position: absolute;
+  bottom: 22vh;
+  right: 8%;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+.hero-s2-dancing {
+  width: 280px;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+}
+
+/* Foreground Arch */
+.hero-s2-arch-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 48;
+}
+
+.hero-s2-arch {
+  width: 100%;
+  height: auto;
+  max-height: 48vh;
+  object-fit: cover;
+  object-position: top center;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+}
+
+/* Firefly Particle Canvas */
+.hero-firefly-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 47;
+  pointer-events: none;
+}
+
+/* Lantern Glow Pulsing Animation */
+.hero-lantern-ambient-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 215, 120, 0.18) 0%,
+    transparent 35%
+  ),
+  radial-gradient(
+    circle at 65% 38%,
+    rgba(255, 215, 120, 0.15) 0%,
+    transparent 35%
+  );
+  z-index: 43;
+  pointer-events: none;
+  animation: heroLanternPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes heroLanternPulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* =======================================================
+   SCENE 4: GRAND WELCOME & RSVP CALL-TO-ACTION
+   ======================================================= */
+.hero-rsvp-stage {
+  position: absolute;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 660px;
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  pointer-events: auto;
+}
+
+.hero-rsvp-card {
+  width: 100%;
+  padding: 32px 36px;
+  background: rgba(16, 26, 21, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(229, 195, 135, 0.5);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(212, 168, 83, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-rsvp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  border-radius: 999px;
+  background: rgba(229, 195, 135, 0.15);
+  border: 1px solid rgba(229, 195, 135, 0.4);
+  font-family: var(--font-nav);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #ffd899;
+  margin-bottom: 12px;
+}
+
+.hero-rsvp-title {
+  font-family: var(--font-heading);
+  font-size: clamp(24px, 3.2vw, 36px);
+  font-weight: 400;
+  line-height: 1.25;
+  color: #fffbf2;
+  margin-bottom: 8px;
+}
+
+.hero-rsvp-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(13px, 1.4vw, 15px);
+  color: #e4d8c6;
+  opacity: 0.9;
+  margin-bottom: 24px;
+}
+
+.hero-rsvp-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Primary RSVP CTA Button with Shimmer */
+.hero-rsvp-btn-main {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #d4a853 0%, #f3c773 50%, #b08d4f 100%);
+  color: #1a1712;
+  font-family: var(--font-nav);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(212, 168, 83, 0.45);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.hero-rsvp-btn-main:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(212, 168, 83, 0.6);
+}
+
+.hero-rsvp-btn-main:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* Golden Shimmer sweep effect */
+.hero-rsvp-btn-shimmer {
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  animation: heroShimmerSweep 3s infinite;
+}
+
+@keyframes heroShimmerSweep {
+  0% { left: -120%; }
+  35%, 100% { left: 180%; }
+}
+
+.hero-rsvp-btn-sec {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #f7eee2;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-family: var(--font-nav);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.hero-rsvp-btn-sec:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* =======================================================
+   STORY PROGRESS INDICATOR DOTS
+   ======================================================= */
+.hero-progress-nav {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 60;
+  pointer-events: auto;
+}
+
+.hero-progress-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hero-progress-dot--active {
+  background: #f5c369;
+  border-color: #ffd899;
+  transform: scale(1.3);
+  box-shadow: 0 0 10px #f5c369;
+}
+
+.hero-progress-dot-tooltip {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 20, 18, 0.85);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-nav);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border: 1px solid rgba(229, 195, 135, 0.3);
+}
+
+.hero-progress-dot:hover .hero-progress-dot-tooltip {
+  opacity: 1;
+}
+
+/* =======================================================
+   RESPONSIVE DESIGN (MOBILE & TABLET)
+   ======================================================= */
+@media (max-width: 900px) {
+  .hero-char {
+    height: 68vh;
+    max-height: 520px;
+    bottom: 4%;
+  }
+  .hero-char-groom {
+    left: 8%;
+  }
+  .hero-char-bride {
+    right: 8%;
+  }
+  .hero-s1-hands-card {
+    max-width: 92vw;
+  }
+  .hero-s2-table {
+    width: 96vw;
+    max-height: 40vh;
+  }
+  .hero-s2-guests {
+    width: 94vw;
+    max-height: 34vh;
+  }
+  .hero-s2-guests-wrap {
+    bottom: 20vh;
+  }
+  .hero-s2-dancing-wrap {
+    display: none; /* Hide extra accent on small screens */
+  }
+  .hero-monogram-card {
+    padding: 32px 20px;
+    width: 92vw;
+  }
+  .hero-rsvp-card {
+    padding: 24px 20px;
+  }
+  .hero-progress-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-char {
+    height: 58vh;
+    max-height: 420px;
+  }
+  .hero-char-groom {
+    left: 2%;
+  }
+  .hero-char-bride {
+    right: 2%;
+  }
+  .hero-rsvp-btn-row {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-rsvp-btn-main,
+  .hero-rsvp-btn-sec {
+    width: 100%;
+  }
+}

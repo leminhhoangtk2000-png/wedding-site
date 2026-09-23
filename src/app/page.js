@@ -101,7 +101,7 @@ export default function HomePage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && window.scrollY > 1500) {
           const currentIndex = phases.findIndex(p => p.key === activePhase);
           if (currentIndex >= 0 && currentIndex < phases.length - 1) {
             const nextPhaseKey = phases[currentIndex + 1].key;
