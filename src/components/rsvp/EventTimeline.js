@@ -3,43 +3,43 @@
 import Image from 'next/image';
 import {
   HanddrawnChampagne,
-  HanddrawnDove,
-  HanddrawnCamera,
+  HanddrawnRings,
+  HanddrawnTeaCup,
   HanddrawnDinner,
-  HanddrawnCake,
+  HanddrawnCelebration,
 } from '@/components/icons/HanddrawnIcons';
 import styles from '@/app/rsvp/rsvp.module.css';
 
 const TIMELINE_EVENTS = [
   {
     time: '16:00',
-    title: 'Welcome & Afternoon Tea',
-    desc: 'Enjoy welcome drinks, delicate treats, and soft acoustic melodies.',
+    title: 'Meet & Greet',
+    desc: 'Welcome drinks, light refreshments, and warm greetings with Hoàng & Duyên.',
     icon: HanddrawnChampagne,
   },
   {
-    time: '17:30',
-    title: 'Wedding Ceremony',
+    time: '16:30',
+    title: 'The Ceremony',
     desc: 'The sacred moment of exchanging rings and vows under the open sky.',
-    icon: HanddrawnDove,
+    icon: HanddrawnRings,
   },
   {
-    time: '18:00',
-    title: 'Golden Hour & Photos',
-    desc: 'Capture memorable moments and golden hour portraits with Hoàng & Duyên.',
-    icon: HanddrawnCamera,
+    time: '17:30',
+    title: 'Tea Break',
+    desc: 'Delicate treats, fragrant tea, sweet mingling, and golden hour photos.',
+    icon: HanddrawnTeaCup,
   },
   {
     time: '18:30',
-    title: 'Intimate Dinner Banquet',
-    desc: 'Savor an exquisite candlelit dinner and raise a celebratory toast.',
+    title: 'Dinner',
+    desc: 'Savor an exquisite candlelit wedding banquet and raise a celebratory toast.',
     icon: HanddrawnDinner,
   },
   {
     time: '19:30',
-    title: 'Cake Cutting & After Party',
-    desc: 'Dance under the stars, enjoy wedding games, and celebrate together!',
-    icon: HanddrawnCake,
+    title: "Let's Party!",
+    desc: 'Dance under the stars, enjoy wedding games, music, and celebrate together!',
+    icon: HanddrawnCelebration,
   },
 ];
 

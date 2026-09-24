@@ -1044,7 +1044,7 @@ export default function AdminPage() {
                     <label className="rsvp-label">Thời gian có mặt dự kiến</label>
                     <input
                       type="text"
-                      placeholder="Ví dụ: 16:00 (Đón khách & Tiệc trà)"
+                      placeholder="Ví dụ: 16:00 (Meet & Greet)"
                       value={modalForm.arrival_time}
                       onChange={(e) => setModalForm({ ...modalForm, arrival_time: e.target.value })}
                       className="rsvp-input"

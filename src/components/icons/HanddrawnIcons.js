@@ -495,5 +495,24 @@ export function HanddrawnHanger({ size = 20, className = '', ...props }) {
     </svg>
   );
 }
-
-
+// 25. Handdrawn Tea Cup & Saucer (for Tea Break)
+export function HanddrawnTeaCup({ size = 22, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Saucer */}
+      <path d="M4 19c2.5 1 13.5 1 16 0" />
+      {/* Tea cup bowl */}
+      <path d="M5 8.5h11.5c-.3 4.8-2 8-5.8 8S5.3 13.3 5 8.5z" />
+      {/* Cup handle */}
+      <path d="M16.5 9.8c1.8-.2 3.2.7 3.2 2 0 1.5-1.4 2.4-3.2 2.2" />
+      {/* Gentle steam wisps */}
+      <path d="M8.5 3.2c0 1.2-.8 2-1 2.8M12 2.5c0 1.2-.8 2-1 2.8M15 3.5c0 1-.6 1.8-.8 2.3" strokeWidth={1.2} />
+    </svg>
+  );
+}

@@ -5,7 +5,7 @@ export const WEDDING_EVENT = {
   couple: 'Hoàng & Duyên',
   dateFormatted: '03 · 10 · 2026',
   dateDisplay: 'Saturday, October 3rd, 2026',
-  timeDisplay: '4:00 PM Welcome · 5:30 PM Ceremony',
+  timeDisplay: '4:00 PM Meet & Greet · 4:30 PM Ceremony',
   venueName: 'Hidden Haven',
   venueAddress: '393/21 Binh Quoi Street, Ward 28, Binh Thanh District, Ho Chi Minh City',
   googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Hidden+Haven+393%2F21+B%C3%ACnh+Qu%E1%BB%9Bi+Ph%C6%B0%E1%BB%9Dng+28+B%C3%ACnh+Th%E1%BA%A1nh+TP+HCM',
@@ -43,25 +43,25 @@ export const DRESSCODE_PALETTE = [
 
 export const ARRIVAL_TIME_OPTIONS = [
   {
-    id: 'welcome',
-    value: '16:00 (Welcome & Afternoon Tea)',
+    id: 'meet-greet',
+    value: '16:00 (Meet & Greet)',
     time: '16:00',
-    title: 'Welcome & Afternoon Tea',
-    desc: 'Arrive early to take photos & enjoy tea with the couple',
+    title: 'Meet & Greet',
+    desc: 'Arrive early to greet the couple & take photos before the ceremony',
   },
   {
     id: 'ceremony',
-    value: '17:00 - 17:30 (Wedding Ceremony)',
-    time: '17:00 - 17:30',
-    title: 'Wedding Ceremony',
-    desc: 'Arrive before the sacred exchange of vows',
+    value: '16:15 - 16:30 (The Ceremony)',
+    time: '16:15 - 16:30',
+    title: 'The Ceremony',
+    desc: 'Arrive in time for the sacred exchange of vows and rings',
   },
   {
-    id: 'banquet',
-    value: '18:00 - 18:30 (Dinner Banquet)',
+    id: 'dinner',
+    value: '18:00 - 18:30 (Dinner)',
     time: '18:00 - 18:30',
-    title: 'Dinner Banquet',
-    desc: 'Join our intimate dinner & raise a toast',
+    title: 'Dinner',
+    desc: 'Join our intimate dinner banquet & celebrate together',
   },
 ];
 
