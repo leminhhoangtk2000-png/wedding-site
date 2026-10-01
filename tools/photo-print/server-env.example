@@ -1,0 +1,7 @@
+# Server deployment environment only. Never use NEXT_PUBLIC_ for private keys.
+SUPABASE_SERVICE_ROLE_KEY=replace_with_supabase_service_role_key
+ADMIN_PASSWORD=replace_with_strong_password_at_least_8_characters
+PHOTO_PRINT_STATION_TOKEN=replace_with_random_secret_at_least_32_characters
+# Keep false until physical tests pass; initial database session is paused too.
+PHOTO_PRINT_HARDWARE_VERIFIED=false
+# Existing NEXT_PUBLIC_SUPABASE_URL must point to the same Supabase project.

@@ -25,13 +25,14 @@ const fraunces = Fraunces({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://wedding-site-tawny-chi.vercel.app'),
   title: 'Hoàng & Duyên - 69 Project',
   description: 'Câu chuyện tình yêu của Hoàng và Duyên - 69 Project Wedding',
   keywords: ['wedding', 'hoàng', 'duyên', '69 project'],
   openGraph: {
     title: 'Hoàng & Duyên - 69 Project',
     description: 'Câu chuyện tình yêu của Hoàng và Duyên',
-    url: 'https://project69hd.xyz',
+    url: 'https://wedding-site-tawny-chi.vercel.app',
     type: 'website',
     images: [
       {
@@ -63,9 +64,13 @@ export default function RootLayout({ children }) {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-V5NR1YESMV', {
-                page_path: window.location.pathname,
-              });
+              // Photo tracking fragments contain private access tokens.
+              // Disable analytics on the private photo/printing surfaces.
+              if (!/^\\/(photo|admin\\/printing)(\\/|$)/.test(window.location.pathname)) {
+                gtag('config', 'G-V5NR1YESMV', {
+                  page_path: window.location.pathname,
+                });
+              }
             `,
           }}
         />

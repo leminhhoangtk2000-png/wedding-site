@@ -1,0 +1,8 @@
+{
+  "server_url": "https://www.project69hd.xyz",
+  "station_id": "REPLACE_WITH_CRYPTO_RANDOM_UUID",
+  "token": "REPLACE_WITH_SERVER_PHOTO_PRINT_STATION_TOKEN",
+  "printer": "REPLACE_WITH_LPSTAT_PRINTER_NAME",
+  "options": { "media": "REPLACE_WITH_VERIFIED_POSTCARD_MEDIA_VALUE", "print-scaling": "fit" },
+  "hardware_verified": false
+}

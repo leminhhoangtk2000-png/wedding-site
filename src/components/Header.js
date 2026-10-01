@@ -42,6 +42,13 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
+  // Hide global header on photo guest experience and admin printing dashboard
+  const isPhotoRoute = pathname === '/photo' || pathname?.startsWith('/photo/');
+  const isAdminPrintingRoute = pathname === '/admin/printing' || pathname?.startsWith('/admin/printing');
+  if (isPhotoRoute || isAdminPrintingRoute) {
+    return null;
+  }
+
   const navLinks = [
     { href: '/', label: 'Our Story' },
     { href: '/rsvp', label: 'RSVP' },

@@ -1,0 +1,592 @@
+/* =========================================================
+   WEDDING PHOTO PRINTING — CSS MODULE
+   Palette: Luxury dark banquet (#0E1217), Warm Gold (#D4AF37),
+   Cream Paper (#FDFAF5), Forest Green (#2B4C3F).
+   Mobile-first, responsive, accessible >= 44px touch targets.
+   ========================================================= */
+
+.pageContainer {
+  min-height: 100vh;
+  min-height: 100svh;
+  background-color: #0E1217;
+  color: #FDFAF5;
+  font-family: var(--font-body), sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.12) 0%, rgba(14, 18, 23, 0.98) 60%),
+    radial-gradient(circle at 10% 90%, rgba(43, 76, 63, 0.15) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  flex: 1;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* --- BANNER ALERTS --- */
+.alertBanner {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: 1px solid;
+}
+
+.alertPaused {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.35);
+  color: #fef08a;
+}
+
+.alertFull {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.alertUnavailable {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+
+.alertError {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fecaca;
+}
+
+.alertIcon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* --- HERO CARD --- */
+.card {
+  background: rgba(24, 30, 39, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(232, 223, 200, 0.18);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.cardHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.badgePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #d4af37;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  font-family: var(--font-heading), 'Fraunces', Georgia, serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  font-weight: 600;
+  color: #FDFAF5;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.cardSubtitle {
+  font-size: 0.95rem;
+  color: rgba(253, 250, 245, 0.75);
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.filigreeDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px auto 0;
+  max-width: 280px;
+}
+
+.filigreeLine {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+}
+
+.filigreeKnot {
+  color: #d4af37;
+  font-size: 0.85rem;
+}
+
+/* Quota meter */
+.quotaBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+}
+
+.quotaLabel {
+  color: rgba(253, 250, 245, 0.7);
+}
+
+.quotaValue {
+  color: #d4af37;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --- STEP 1: PICK PHOTO --- */
+.pickerSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 16px;
+  border: 2px dashed rgba(212, 175, 55, 0.3);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  text-align: center;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pickerSection:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: rgba(212, 175, 55, 0.04);
+}
+
+.pickerIconBox {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #d4af37;
+}
+
+.pickerPrompt {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #FDFAF5;
+}
+
+.pickerHint {
+  font-size: 0.82rem;
+  color: rgba(253, 250, 245, 0.6);
+  max-width: 400px;
+}
+
+.pickerButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.btnPrimary {
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #d4af37 0%, #b08d4f 100%);
+  color: #0E1217;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.btnPrimary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btnSecondary {
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(232, 223, 200, 0.25);
+  color: #FDFAF5;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+}
+
+.btnSecondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.btnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- UPLOADING STATE --- */
+.uploadingNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(212, 175, 55, 0.2);
+  border-top-color: #d4af37;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.uploadingText {
+  font-size: 0.95rem;
+  color: #FDFAF5;
+}
+
+.uploadingSubtext {
+  font-size: 0.82rem;
+  color: rgba(253, 250, 245, 0.6);
+}
+
+/* --- STEP 2: CROP & DETAILS --- */
+.cropperWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.88rem;
+  color: rgba(253, 250, 245, 0.9);
+  font-weight: 500;
+}
+
+.charCounter {
+  font-size: 0.78rem;
+  color: rgba(253, 250, 245, 0.5);
+  font-family: monospace;
+}
+
+.textInput {
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(232, 223, 200, 0.25);
+  color: #FDFAF5;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.textInput:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.textInput::placeholder {
+  color: rgba(253, 250, 245, 0.35);
+}
+
+.fieldError {
+  font-size: 0.82rem;
+  color: #f87171;
+}
+
+.submitBar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* --- STEP 3: SUCCESS STATE --- */
+.successCard {
+  text-align: center;
+  padding: 12px 4px;
+}
+
+.pickupHighlight {
+  background: rgba(212, 175, 55, 0.1);
+  border: 2px dashed rgba(212, 175, 55, 0.5);
+  border-radius: 16px;
+  padding: 24px 16px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pickupTitle {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(253, 250, 245, 0.7);
+}
+
+.pickupCode {
+  font-family: monospace;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 700;
+  color: #d4af37;
+  letter-spacing: 0.15em;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 18px;
+  border-radius: 8px;
+  user-select: all;
+}
+
+.pickupCopyBtn {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FDFAF5;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.pickupCopyBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.successInstructions {
+  font-size: 0.92rem;
+  color: rgba(253, 250, 245, 0.8);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.successActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- TRACKING PAGE (/photo/status) --- */
+.trackingStatusBox {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(232, 223, 200, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.trackingMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+}
+
+.trackingMetaGuest {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #FDFAF5;
+}
+
+.trackingTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  padding-left: 28px;
+}
+
+.trackingTimeline::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 9px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.timelineStep {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timelineStepDot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #181E27;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.timelineStep.active .timelineStepDot {
+  background: #d4af37;
+  border-color: #FDFAF5;
+  color: #0E1217;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+}
+
+.timelineStep.completed .timelineStepDot {
+  background: #2e7d32;
+  border-color: #4ade80;
+  color: #FDFAF5;
+}
+
+.timelineStepTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(253, 250, 245, 0.6);
+}
+
+.timelineStep.active .timelineStepTitle {
+  color: #d4af37;
+}
+
+.timelineStep.completed .timelineStepTitle {
+  color: #4ade80;
+}
+
+.timelineStepDesc {
+  font-size: 0.82rem;
+  color: rgba(253, 250, 245, 0.5);
+}
+
+.pollingNotice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: rgba(253, 250, 245, 0.5);
+  margin-top: 16px;
+}
+
+.pollingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.4; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.4; }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  .pickerButtons {
+    flex-direction: column;
+  }
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+  }
+  .quotaBox {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

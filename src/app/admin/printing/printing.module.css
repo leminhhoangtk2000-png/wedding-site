@@ -1,0 +1,543 @@
+/* =========================================================
+   ADMIN PHOTO PRINTING DASHBOARD — CSS MODULE
+   Dark elegance with cream and gold accents.
+   Mobile-friendly, responsive tables/cards, >=44px buttons.
+   ========================================================= */
+
+.adminContainer {
+  min-height: 100vh;
+  min-height: 100svh;
+  background-color: #0c1015;
+  color: #fdfaf5;
+  font-family: var(--font-body), sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainWrapper {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+/* --- LOGIN SCREEN --- */
+.loginCard {
+  max-width: 460px;
+  margin: 60px auto 0;
+  background: rgba(22, 28, 36, 0.85);
+  border: 1px solid rgba(232, 223, 200, 0.2);
+  border-radius: 20px;
+  padding: 36px 28px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  text-align: center;
+}
+
+.loginIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 16px;
+  color: #d4af37;
+}
+
+.loginTitle {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #fdfaf5;
+  margin-bottom: 8px;
+}
+
+.loginSubtitle {
+  font-size: 0.88rem;
+  color: rgba(253, 250, 245, 0.7);
+  margin-bottom: 24px;
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.loginInput {
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(232, 223, 200, 0.25);
+  color: #fdfaf5;
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.loginInput:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+/* --- DASHBOARD HEADER & STATS --- */
+.dashHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashTitleBlock h1 {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: clamp(1.4rem, 2.8vw, 1.9rem);
+  font-weight: 600;
+  color: #fdfaf5;
+  margin-bottom: 4px;
+}
+
+.dashTitleBlock p {
+  font-size: 0.88rem;
+  color: rgba(253, 250, 245, 0.65);
+}
+
+.dashHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Top Stats Overview Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: rgba(22, 28, 36, 0.6);
+  border: 1px solid rgba(232, 223, 200, 0.15);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.statCardLabel {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(253, 250, 245, 0.6);
+}
+
+.statCardValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fdfaf5;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.statCardDesc {
+  font-size: 0.8rem;
+  color: rgba(253, 250, 245, 0.5);
+}
+
+/* Station status indicators */
+.stationOnline {
+  color: #4ade80;
+}
+
+.stationOffline {
+  color: #f87171;
+}
+
+.stationBanner {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #fca5a5;
+}
+
+/* Error Banner */
+.errorBanner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fecaca;
+  font-size: 0.92rem;
+}
+
+.errorCloseBtn {
+  background: transparent;
+  border: none;
+  color: #fecaca;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 4px;
+  line-height: 1;
+}
+
+/* Toolbar: Filters & Actions */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.filterTabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 4px;
+}
+
+.filterTab {
+  min-height: 40px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(253, 250, 245, 0.7);
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.filterTab:hover {
+  color: #fdfaf5;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.filterTab.active {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #d4af37;
+  font-weight: 600;
+}
+
+.searchInput {
+  min-height: 40px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fdfaf5;
+  font-size: 0.88rem;
+  outline: none;
+  width: 240px;
+}
+
+.searchInput:focus {
+  border-color: #d4af37;
+}
+
+/* --- REQUESTS TABLE & CARDS --- */
+.tableContainer {
+  background: rgba(22, 28, 36, 0.5);
+  border: 1px solid rgba(232, 223, 200, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.requestsTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.requestsTable th {
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(253, 250, 245, 0.7);
+  padding: 14px 16px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.requestsTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+.requestsTable tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Thumbnails */
+.thumbnailWrapper {
+  width: 52px;
+  height: 68px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.thumbnailWrapper.landscape {
+  width: 68px;
+  height: 52px;
+}
+
+.thumbnailImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pickupCodeCell {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #d4af37;
+  letter-spacing: 0.06em;
+}
+
+/* Action button group in table */
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btnAction {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.btnApprove {
+  background: #d4af37;
+  color: #0E1217;
+  font-weight: 600;
+}
+
+.btnApprove:hover:not(:disabled) {
+  background: #e2be4a;
+}
+
+.btnReject {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.btnReject:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+.btnReady {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.btnReady:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+.btnReprint {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #fb923c;
+}
+
+.btnReprint:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.25);
+}
+
+.btnAction:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- MOBILE CARDS VIEW --- */
+.mobileCardsList {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobileCard {
+  background: rgba(22, 28, 36, 0.8);
+  border: 1px solid rgba(232, 223, 200, 0.15);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobileCardTop {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.mobileCardInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emptyState {
+  padding: 48px 20px;
+  text-align: center;
+  color: rgba(253, 250, 245, 0.5);
+  font-size: 0.95rem;
+}
+
+/* --- MODAL DIALOGS --- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modalContent {
+  background: #181E27;
+  border: 1px solid rgba(232, 223, 200, 0.25);
+  border-radius: 18px;
+  padding: 24px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modalTitle {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 1.3rem;
+  color: #fdfaf5;
+}
+
+.modalBody {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(253, 250, 245, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* Image preview modal */
+.lightboxModal {
+  max-width: 90vw;
+  max-height: 90vh;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxImg {
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+.lightboxCloseBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .tableContainer {
+    display: none;
+  }
+  .mobileCardsList {
+    display: flex;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .searchInput {
+    width: 100%;
+  }
+}
