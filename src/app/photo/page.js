@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import PhotoHeader from '@/components/photo/PhotoHeader';
+import {
+  HanddrawnCamera,
+  HanddrawnSparkles,
+  HanddrawnCheck,
+  HanddrawnBook,
+  HanddrawnEnvelope,
+  HanddrawnHeart,
+  HanddrawnAlert,
+  HanddrawnInfo,
+} from '@/components/icons/HanddrawnIcons';
 import PhotoCropper, { computeNormalizedCrop } from '@/components/photo/PhotoCropper';
 import { processImageForUpload } from '@/components/photo/imageCompressor';
 import { getPhotoSession, uploadPhoto, createPhotoRequest } from '@/lib/photo/client';
@@ -452,7 +461,7 @@ export default function PhotoPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <PhotoHeader subtitle="Trạm In Ảnh Kỷ Niệm" />
+      <div className={styles.heroCandlelightGlow} aria-hidden="true" />
 
       <main className={styles.mainContent}>
         {/* Hidden File Inputs */}
@@ -477,7 +486,9 @@ export default function PhotoPage() {
         {/* Unavailable Banner */}
         {sessionUnavailable && (
           <div className={`${styles.alertBanner} ${styles.alertUnavailable}`} role="alert">
-            <span className={styles.alertIcon} aria-hidden="true">⚙️</span>
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnInfo size={22} />
+            </span>
             <div>
               <strong>Trạm in chưa sẵn sàng</strong>
               <div>Hệ thống in ảnh hiện đang được chuẩn bị hoặc máy chủ tạm gián đoạn. Bạn vẫn có thể thử chọn ảnh trước.</div>
@@ -488,7 +499,9 @@ export default function PhotoPage() {
         {/* Paused Banner */}
         {sessionData && !sessionData.accepting && (
           <div className={`${styles.alertBanner} ${styles.alertPaused}`} role="alert">
-            <span className={styles.alertIcon} aria-hidden="true">⏸</span>
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnAlert size={22} />
+            </span>
             <div>
               <strong>Tạm dừng nhận ảnh</strong>
               <div>Trạm in đang tạm thời ngưng nhận yêu cầu để xử lý các ảnh trước đó. Vui lòng chờ người trực mở lại.</div>
@@ -499,7 +512,9 @@ export default function PhotoPage() {
         {/* Full Banner */}
         {sessionData && sessionData.remaining <= 0 && (
           <div className={`${styles.alertBanner} ${styles.alertFull}`} role="alert">
-            <span className={styles.alertIcon} aria-hidden="true">🚫</span>
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnAlert size={22} />
+            </span>
             <div>
               <strong>Đã đủ số lượng ảnh in</strong>
               <div>Hôm nay trạm in đã đạt tối đa {sessionData.capacity} ảnh. Cảm ơn bạn đã gửi những khoảnh khắc đẹp!</div>
@@ -510,7 +525,9 @@ export default function PhotoPage() {
         {/* Recovered Draft Notice */}
         {hasSubmittedDraft && !submissionSuccess && (
           <div className={`${styles.alertBanner} ${styles.alertPaused}`} role="status">
-            <span className={styles.alertIcon} aria-hidden="true">🔄</span>
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnInfo size={22} />
+            </span>
             <div>
               <strong>Đang giữ yêu cầu in ảnh trước đó</strong>
               <div>
@@ -523,18 +540,44 @@ export default function PhotoPage() {
         {/* Error Banner */}
         {errorMessage && (
           <div className={`${styles.alertBanner} ${styles.alertError}`} role="alert">
-            <span className={styles.alertIcon} aria-hidden="true">⚠️</span>
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnAlert size={22} />
+            </span>
             <div>{errorMessage}</div>
           </div>
         )}
 
         {/* MAIN CARD */}
         <div className={styles.card}>
+          {/* Corner Gilded Filigree Flourishes */}
+          <svg className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+            <path d="M8 8l4 4" strokeDasharray="1 2" />
+            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+          </svg>
+          <svg className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+            <path d="M8 8l4 4" strokeDasharray="1 2" />
+            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+          </svg>
+          <svg className={`${styles.cardCornerFoil} ${styles.cornerBottomLeft}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+            <path d="M8 8l4 4" strokeDasharray="1 2" />
+            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+          </svg>
+          <svg className={`${styles.cardCornerFoil} ${styles.cornerBottomRight}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+            <path d="M8 8l4 4" strokeDasharray="1 2" />
+            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+          </svg>
+
           {/* SUCCESS STATE */}
           {submissionSuccess ? (
             <div className={styles.successCard}>
               <div className={styles.badgePill}>
-                <span>✦ YÊU CẦU ĐÃ ĐƯỢC GỬI ✦</span>
+                <span className={styles.badgeSparkle}>✦</span>
+                <span>YÊU CẦU ĐÃ ĐƯỢC GỬI</span>
+                <span className={styles.badgeSparkle}>✦</span>
               </div>
 
               <h1 className={styles.cardTitle}>In Ảnh Kỷ Niệm</h1>
@@ -556,8 +599,16 @@ export default function PhotoPage() {
                   type="button"
                   className={styles.pickupCopyBtn}
                   onClick={() => handleCopyCode(submissionSuccess.request.pickup_code)}
+                  aria-label="Sao chép mã nhận ảnh"
                 >
-                  <span>{copiedCode ? '✓ Đã sao chép' : '📋 Sao chép mã'}</span>
+                  {copiedCode ? (
+                    <>
+                      <HanddrawnCheck size={16} />
+                      <span>Đã sao chép</span>
+                    </>
+                  ) : (
+                    <span>📋 Sao chép mã</span>
+                  )}
                 </button>
               </div>
 
@@ -605,7 +656,9 @@ export default function PhotoPage() {
             <div>
               <div className={styles.cardHeader}>
                 <div className={styles.badgePill}>
-                  <span>✦ CHỤP &amp; IN ẢNH LẤY LIỀN ✦</span>
+                  <span className={styles.badgeSparkle}>✦</span>
+                  <span>CHỤP &amp; IN ẢNH LẤY LIỀN</span>
+                  <span className={styles.badgeSparkle}>✦</span>
                 </div>
                 <h1 className={styles.cardTitle}>In Ảnh Kỷ Niệm</h1>
                 <p className={styles.cardSubtitle}>
@@ -632,7 +685,7 @@ export default function PhotoPage() {
               {!uploadData && !isUploading && (
                 <div className={styles.pickerSection}>
                   <div className={styles.pickerIconBox} aria-hidden="true">
-                    📷
+                    <HanddrawnCamera size={38} />
                   </div>
                   <div className={styles.pickerPrompt}>
                     Chụp ảnh mới hoặc chọn ảnh từ máy của bạn
@@ -648,7 +701,8 @@ export default function PhotoPage() {
                       onClick={() => cameraInputRef.current?.click()}
                       disabled={isBlocked}
                     >
-                      <span>📸 Chụp ảnh ngay</span>
+                      <HanddrawnCamera size={18} />
+                      <span>Chụp ảnh ngay</span>
                     </button>
                     <button
                       type="button"
@@ -656,7 +710,8 @@ export default function PhotoPage() {
                       onClick={() => galleryInputRef.current?.click()}
                       disabled={isBlocked}
                     >
-                      <span>🖼️ Chọn ảnh có sẵn</span>
+                      <HanddrawnSparkles size={18} />
+                      <span>Chọn ảnh có sẵn</span>
                     </button>
                   </div>
                 </div>
@@ -729,7 +784,10 @@ export default function PhotoPage() {
                           <span>{hasSubmittedDraft ? 'Đang gửi lại yêu cầu in...' : 'Đang gửi yêu cầu in...'}</span>
                         </>
                       ) : (
-                        <span>{hasSubmittedDraft ? '🔄 Thử gửi lại yêu cầu in ảnh' : '🖨️ Gửi yêu cầu in ảnh'}</span>
+                        <>
+                          <HanddrawnSparkles size={18} />
+                          <span>{hasSubmittedDraft ? 'Thử gửi lại yêu cầu in ảnh' : 'Gửi yêu cầu in ảnh'}</span>
+                        </>
                       )}
                     </button>
                   </div>
@@ -737,6 +795,65 @@ export default function PhotoPage() {
               )}
             </div>
           )}
+        </div>
+
+        {/* BOTTOM EXPLORE NAVIGATION CARDS (Matching RSVP) */}
+        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Khám phá trang đám cưới">
+          <div className={styles.badgePill}>
+            <span className={styles.badgeSparkle}>✦</span>
+            <span>KHÁM PHÁ ĐÁM CƯỚI</span>
+            <span className={styles.badgeSparkle}>✦</span>
+          </div>
+
+          <h2 className={styles.cardTitle}>Chuyện Tình Yêu &amp; Lời Chúc</h2>
+          <p className={styles.cardSubtitle}>
+            Cùng đón xem hành trình 10 năm của Hoàng &amp; Duyên, xác nhận tham dự hoặc gửi lời chúc mừng.
+          </p>
+
+          <div className={styles.filigreeDivider} aria-hidden="true">
+            <div className={styles.filigreeLine} />
+            <span className={styles.filigreeKnot}>✦</span>
+            <div className={styles.filigreeLine} />
+          </div>
+
+          <div className={styles.navButtonGroup}>
+            <Link href="/" className={styles.navActionCard} aria-label="Xem câu chuyện tình yêu">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnBook size={24} />
+                </div>
+                <div className={styles.navCardTitle}>Our Story</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+
+            <Link href="/rsvp" className={styles.navActionCard} aria-label="Xác nhận tham dự">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnEnvelope size={24} />
+                </div>
+                <div className={styles.navCardTitle}>RSVP</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+
+            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Gửi lời chúc mừng">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnHeart size={24} />
+                </div>
+                <div className={styles.navCardTitle}>Wishes Board</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+          </div>
+        </section>
+
+        {/* Discreet admin link */}
+        <div className={styles.adminFootnote}>
+          <Link href="/admin/printing" className={styles.adminFootnoteLink}>
+            ⚙️ Quản trị trạm in ảnh
+          </Link>
         </div>
       </main>
     </div>

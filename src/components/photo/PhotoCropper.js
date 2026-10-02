@@ -404,13 +404,14 @@ export default function PhotoCropper({
           gap: 12px;
         }
         .orientation-btn {
-          min-height: 48px;
-          padding: 10px 14px;
-          border-radius: 10px;
-          border: 1px solid rgba(232, 223, 200, 0.25);
-          background: rgba(255, 255, 255, 0.04);
-          color: #fdfaf5;
-          font-size: 0.92rem;
+          min-height: 52px;
+          padding: 12px 16px;
+          border-radius: 14px;
+          border: 1.5px solid #ded6c9;
+          background: #ffffff;
+          color: #231d16;
+          font-family: var(--font-body), sans-serif;
+          font-size: 0.94rem;
           font-weight: 500;
           cursor: pointer;
           display: flex;
@@ -418,17 +419,18 @@ export default function PhotoCropper({
           justify-content: center;
           gap: 10px;
           transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
         .orientation-btn:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(212, 175, 55, 0.4);
+          background: #fffdf9;
+          border-color: #c9a96e;
         }
         .orientation-btn.active {
-          background: rgba(212, 175, 55, 0.15);
-          border-color: #d4af37;
-          color: #d4af37;
-          font-weight: 600;
-          box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+          background: #fffcf6;
+          border-color: #b08d4f;
+          color: #8c6720;
+          font-weight: 700;
+          box-shadow: 0 4px 14px rgba(176, 141, 79, 0.18);
         }
         .orientation-btn:focus-visible {
           outline: 2px solid #d4af37;
@@ -451,27 +453,28 @@ export default function PhotoCropper({
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           width: 100%;
         }
         .crop-panel-title {
           display: flex;
           justify-content: space-between;
           width: 100%;
-          font-size: 0.85rem;
-          color: rgba(253, 250, 245, 0.7);
+          font-size: 0.88rem;
+          color: #5d564f;
+          font-family: var(--font-body), sans-serif;
         }
         .crop-hint {
-          color: #d4af37;
+          color: #8c6720;
           font-weight: 600;
         }
         .crop-viewport {
           position: relative;
-          background: #000;
-          border-radius: 12px;
+          background: #111;
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-          border: 2px solid rgba(212, 175, 55, 0.4);
+          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25), 0 0 20px rgba(212, 175, 55, 0.2);
+          border: 2.5px solid #d4af37;
           touch-action: none;
           user-select: none;
           cursor: grab;
@@ -511,7 +514,7 @@ export default function PhotoCropper({
         }
         .grid-line {
           position: absolute;
-          background: rgba(255, 255, 255, 0.25);
+          background: rgba(255, 255, 255, 0.35);
         }
         .grid-line.horizontal {
           left: 0;
@@ -540,23 +543,27 @@ export default function PhotoCropper({
           bottom: 10px;
           left: 50%;
           transform: translateX(-50%);
-          background: rgba(0, 0, 0, 0.7);
-          backdrop-filter: blur(4px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: rgba(14, 18, 23, 0.82);
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(212, 175, 55, 0.4);
           color: #fdfaf5;
-          font-size: 0.75rem;
-          padding: 4px 12px;
+          font-size: 0.78rem;
+          font-weight: 500;
+          padding: 5px 14px;
           border-radius: 9999px;
           pointer-events: none;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
         .crop-controls {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(232, 223, 200, 0.12);
-          border-radius: 12px;
-          padding: 16px;
+          background: #fdfbf8;
+          border: 1px solid #eae3d7;
+          border-radius: 16px;
+          padding: 18px 20px;
           display: flex;
           flex-direction: column;
           gap: 16px;
+          width: 100%;
+          box-sizing: border-box;
         }
         .control-row {
           display: flex;
@@ -566,13 +573,15 @@ export default function PhotoCropper({
         .control-label-row {
           display: flex;
           justify-content: space-between;
-          font-size: 0.85rem;
-          color: rgba(253, 250, 245, 0.85);
+          font-size: 0.88rem;
+          color: #251e18;
+          font-weight: 500;
         }
         .control-value {
-          color: #d4af37;
+          color: #8c6720;
           font-family: monospace;
-          font-size: 0.82rem;
+          font-size: 0.85rem;
+          font-weight: 600;
         }
         .control-grid-sliders {
           display: grid;
@@ -582,7 +591,7 @@ export default function PhotoCropper({
         .slider-input {
           width: 100%;
           min-height: 44px;
-          accent-color: #d4af37;
+          accent-color: #b08d4f;
           cursor: pointer;
         }
         .crop-action-bar {
@@ -590,39 +599,46 @@ export default function PhotoCropper({
           align-items: center;
           gap: 12px;
           flex-wrap: wrap;
-          padding-top: 6px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          padding-top: 14px;
+          border-top: 1px solid #ebd9bf;
+          width: 100%;
         }
         .crop-btn {
           min-height: 44px;
-          padding: 8px 16px;
-          border-radius: 8px;
-          font-size: 0.88rem;
-          font-weight: 500;
+          padding: 10px 20px;
+          border-radius: 100px;
+          font-family: var(--font-body), sans-serif;
+          font-size: 0.9rem;
+          font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 6px;
           border: 1px solid transparent;
-          transition: all 0.15s ease;
+          transition: all 0.2s ease;
         }
         .crop-btn.secondary {
-          background: rgba(255, 255, 255, 0.08);
-          color: #fdfaf5;
-          border-color: rgba(255, 255, 255, 0.15);
+          background: #ffffff;
+          color: #4a4135;
+          border: 1.5px solid #dcd5c7;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
         .crop-btn.secondary:hover {
-          background: rgba(255, 255, 255, 0.14);
-          border-color: rgba(212, 175, 55, 0.4);
+          background: #fbf9f5;
+          border-color: #b08d4f;
+          color: #231d16;
+          transform: translateY(-1px);
         }
         .crop-btn.tertiary {
           background: transparent;
-          color: rgba(253, 250, 245, 0.7);
+          color: #6b5c47;
+          border: 1.5px solid transparent;
         }
         .crop-btn.tertiary:hover {
-          color: #fdfaf5;
-          background: rgba(255, 255, 255, 0.06);
+          color: #231d16;
+          background: #f6f1e7;
+          border-color: #ebd9bf;
         }
         .crop-btn:focus-visible {
           outline: 2px solid #d4af37;

@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import PhotoHeader from '@/components/photo/PhotoHeader';
+import {
+  HanddrawnCheck,
+  HanddrawnCamera,
+  HanddrawnSparkles,
+  HanddrawnBook,
+  HanddrawnEnvelope,
+  HanddrawnHeart,
+  HanddrawnAlert,
+  HanddrawnInfo,
+} from '@/components/icons/HanddrawnIcons';
 import StatusBadge from '@/components/photo/StatusBadge';
 import { getPhotoRequest, PHOTO_STATUS_LABELS } from '@/lib/photo/client';
 import styles from '../photo.module.css';
@@ -133,15 +142,28 @@ export default function PhotoStatusPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <PhotoHeader subtitle="Theo Dõi Trạng Thái In Ảnh" />
+      <div className={styles.heroCandlelightGlow} aria-hidden="true" />
 
       <main className={styles.mainContent}>
         {/* Missing or Malformed Fragment */}
         {paramsLoaded && !authParams && (
           <div className={styles.card}>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
-                <span>✦ THÔNG TIN KHÔNG KHẢ DỤNG ✦</span>
+                <span className={styles.badgeSparkle}>✦</span>
+                <span>THÔNG TIN KHÔNG KHẢ DỤNG</span>
+                <span className={styles.badgeSparkle}>✦</span>
               </div>
               <h1 className={styles.cardTitle}>Không Tìm Thấy Yêu Cầu</h1>
               <p className={styles.cardSubtitle}>
@@ -251,13 +273,36 @@ export default function PhotoStatusPage() {
         {/* Active Status Display */}
         {!loading && authParams && requestData && !isNotFound && (
           <div className={styles.card}>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerTopLeft}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerTopRight}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerBottomLeft}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+            <svg className={`${styles.cardCornerFoil} ${styles.cornerBottomRight}`} viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M4 24V8a4 4 0 0 1 4-4h16" />
+              <path d="M8 8l4 4" strokeDasharray="1 2" />
+              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+            </svg>
+
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
-                <span>✦ TIẾN ĐỘ IN ẢNH ✦</span>
+                <span className={styles.badgeSparkle}>✦</span>
+                <span>TIẾN ĐỘ IN ẢNH</span>
+                <span className={styles.badgeSparkle}>✦</span>
               </div>
               <h1 className={styles.cardTitle}>Trạng Thái Ảnh Của Bạn</h1>
               <p className={styles.cardSubtitle}>
-                Hệ thống tự động cập nhật tiến độ thực tế từ trạm in ảnh.
+                Hệ thống tự động cập nhật tiến độ thực tế từ trạm in ảnh tại tiệc cưới.
               </p>
               <div className={styles.filigreeDivider} aria-hidden="true">
                 <div className={styles.filigreeLine} />
@@ -269,7 +314,9 @@ export default function PhotoStatusPage() {
             {/* Error banner if poll fails */}
             {errorMessage && (
               <div className={`${styles.alertBanner} ${styles.alertError}`} role="alert">
-                <span className={styles.alertIcon} aria-hidden="true">⚠️</span>
+                <span className={styles.alertIcon} aria-hidden="true">
+                  <HanddrawnAlert size={22} />
+                </span>
                 <div>{errorMessage}</div>
               </div>
             )}
@@ -282,8 +329,16 @@ export default function PhotoStatusPage() {
                 type="button"
                 className={styles.pickupCopyBtn}
                 onClick={() => handleCopyCode(requestData.pickup_code)}
+                aria-label="Sao chép mã nhận ảnh"
               >
-                <span>{copiedCode ? '✓ Đã sao chép' : '📋 Sao chép mã'}</span>
+                {copiedCode ? (
+                  <>
+                    <HanddrawnCheck size={16} />
+                    <span>Đã sao chép</span>
+                  </>
+                ) : (
+                  <span>📋 Sao chép mã</span>
+                )}
               </button>
             </div>
 
@@ -291,15 +346,15 @@ export default function PhotoStatusPage() {
             <div className={styles.trackingStatusBox}>
               <div className={styles.trackingMetaRow}>
                 <div>
-                  <span style={{ fontSize: '0.82rem', color: 'rgba(253,250,245,0.6)' }}>Trạng thái hiện tại:</span>
-                  <div style={{ marginTop: 4 }}>
+                  <span style={{ fontSize: '0.85rem', color: '#6b5c47', fontWeight: 500 }}>Trạng thái hiện tại:</span>
+                  <div style={{ marginTop: 6 }}>
                     <StatusBadge status={requestData.status} />
                   </div>
                 </div>
                 {requestData.created_at && (
-                  <div style={{ textAlign: 'right', fontSize: '0.82rem', color: 'rgba(253,250,245,0.6)' }}>
+                  <div style={{ textAlign: 'right', fontSize: '0.85rem', color: '#6b5c47' }}>
                     Thời gian gửi:
-                    <div style={{ color: '#FDFAF5', fontWeight: 500, marginTop: 2 }}>
+                    <div style={{ color: '#231d16', fontWeight: 600, marginTop: 2 }}>
                       {new Date(requestData.created_at).toLocaleTimeString('vi-VN', {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -399,17 +454,18 @@ export default function PhotoStatusPage() {
                 <div
                   style={{
                     marginTop: 20,
-                    padding: '14px 18px',
-                    borderRadius: 12,
-                    background: 'rgba(34, 197, 94, 0.15)',
-                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                    color: '#86efac',
-                    fontSize: '0.92rem',
+                    padding: '16px 20px',
+                    borderRadius: 14,
+                    background: '#EDF7ED',
+                    border: '1.5px solid #2E7D32',
+                    color: '#1E4620',
+                    fontSize: '0.95rem',
                     textAlign: 'center',
+                    lineHeight: 1.5,
                   }}
                 >
                   🎉 <strong>Ảnh của bạn đã in xong!</strong> Hãy đến bàn in ảnh và xuất trình mã{' '}
-                  <strong style={{ color: '#d4af37' }}>{requestData.pickup_code}</strong> để nhận ảnh nhé!
+                  <strong style={{ color: '#8c6720' }}>{requestData.pickup_code}</strong> để nhận ảnh nhé!
                 </div>
               )}
 
@@ -417,13 +473,14 @@ export default function PhotoStatusPage() {
                 <div
                   style={{
                     marginTop: 20,
-                    padding: '14px 18px',
-                    borderRadius: 12,
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid rgba(239, 68, 68, 0.4)',
-                    color: '#fca5a5',
-                    fontSize: '0.92rem',
+                    padding: '16px 20px',
+                    borderRadius: 14,
+                    background: '#FDEDEC',
+                    border: '1.5px solid #E74C3C',
+                    color: '#78281F',
+                    fontSize: '0.95rem',
                     textAlign: 'center',
+                    lineHeight: 1.5,
                   }}
                 >
                   Yêu cầu in này đã bị từ chối bởi người trực trạm. Bạn có thể chọn và gửi một ảnh khác phù hợp hơn.
@@ -434,13 +491,14 @@ export default function PhotoStatusPage() {
                 <div
                   style={{
                     marginTop: 20,
-                    padding: '14px 18px',
-                    borderRadius: 12,
-                    background: 'rgba(249, 115, 22, 0.15)',
-                    border: '1px solid rgba(249, 115, 22, 0.4)',
-                    color: '#fdba74',
-                    fontSize: '0.92rem',
+                    padding: '16px 20px',
+                    borderRadius: 14,
+                    background: '#FEF9E7',
+                    border: '1.5px solid #F39C12',
+                    color: '#7D5A00',
+                    fontSize: '0.95rem',
                     textAlign: 'center',
+                    lineHeight: 1.5,
                   }}
                 >
                   ⚠️ Yêu cầu đang cần người trực trạm kiểm tra máy in. Bạn không cần gửi lại ảnh, người trực sẽ tiếp tục xử lý.
@@ -459,15 +517,75 @@ export default function PhotoStatusPage() {
 
             {/* Navigation Actions */}
             <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/photo" className={styles.btnSecondary}>
-                <span>📸 Gửi thêm ảnh khác</span>
+              <Link href="/photo" className={styles.btnPrimary}>
+                <HanddrawnCamera size={18} />
+                <span>Gửi thêm ảnh khác</span>
               </Link>
               <Link href="/" className={styles.btnSecondary}>
-                <span>Về trang chủ tiệc cưới</span>
+                <span>Về trang chủ</span>
               </Link>
             </div>
           </div>
         )}
+
+        {/* BOTTOM EXPLORE NAVIGATION CARDS (Matching RSVP) */}
+        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Khám phá trang đám cưới">
+          <div className={styles.badgePill}>
+            <span className={styles.badgeSparkle}>✦</span>
+            <span>KHÁM PHÁ ĐÁM CƯỚI</span>
+            <span className={styles.badgeSparkle}>✦</span>
+          </div>
+
+          <h2 className={styles.cardTitle}>Chuyện Tình Yêu &amp; Lời Chúc</h2>
+          <p className={styles.cardSubtitle}>
+            Cùng đón xem hành trình 10 năm của Hoàng &amp; Duyên, xác nhận tham dự hoặc gửi lời chúc mừng.
+          </p>
+
+          <div className={styles.filigreeDivider} aria-hidden="true">
+            <div className={styles.filigreeLine} />
+            <span className={styles.filigreeKnot}>✦</span>
+            <div className={styles.filigreeLine} />
+          </div>
+
+          <div className={styles.navButtonGroup}>
+            <Link href="/" className={styles.navActionCard} aria-label="Xem câu chuyện tình yêu">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnBook size={24} />
+                </div>
+                <div className={styles.navCardTitle}>Our Story</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+
+            <Link href="/rsvp" className={styles.navActionCard} aria-label="Xác nhận tham dự">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnEnvelope size={24} />
+                </div>
+                <div className={styles.navCardTitle}>RSVP</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+
+            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Gửi lời chúc mừng">
+              <div className={styles.navCardMain}>
+                <div className={styles.navCardIcon} aria-hidden="true">
+                  <HanddrawnHeart size={24} />
+                </div>
+                <div className={styles.navCardTitle}>Wishes Board</div>
+              </div>
+              <div className={styles.navCardArrow} aria-hidden="true">→</div>
+            </Link>
+          </div>
+        </section>
+
+        {/* Discreet admin link */}
+        <div className={styles.adminFootnote}>
+          <Link href="/admin/printing" className={styles.adminFootnoteLink}>
+            ⚙️ Quản trị trạm in ảnh
+          </Link>
+        </div>
       </main>
     </div>
   );

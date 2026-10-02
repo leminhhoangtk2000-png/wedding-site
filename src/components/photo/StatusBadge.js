@@ -8,22 +8,22 @@ export default function StatusBadge({ status, className = '' }) {
   const getStatusConfig = (st) => {
     switch (st) {
       case 'pending':
-        return { bg: 'rgba(212, 175, 55, 0.15)', text: '#d4af37', border: 'rgba(212, 175, 55, 0.4)', icon: '⏳' };
+        return { bg: '#FEF9E7', text: '#8C6720', border: '#E8CB93', icon: '⏳' };
       case 'approved':
-        return { bg: 'rgba(56, 189, 248, 0.15)', text: '#38bdf8', border: 'rgba(56, 189, 248, 0.4)', icon: '📥' };
+        return { bg: '#F0F9FF', text: '#0369A1', border: '#BAE6FD', icon: '📥' };
       case 'claimed':
       case 'submitting':
-        return { bg: 'rgba(168, 85, 247, 0.15)', text: '#c084fc', border: 'rgba(168, 85, 247, 0.4)', icon: '🔄' };
+        return { bg: '#FAF5FF', text: '#7E22CE', border: '#E9D5FF', icon: '🔄' };
       case 'submitted':
-        return { bg: 'rgba(99, 102, 241, 0.15)', text: '#818cf8', border: 'rgba(99, 102, 241, 0.4)', icon: '🖨️' };
+        return { bg: '#EEF2FF', text: '#4338CA', border: '#C7D2FE', icon: '🖨️' };
       case 'review':
-        return { bg: 'rgba(249, 115, 22, 0.18)', text: '#fb923c', border: 'rgba(249, 115, 22, 0.45)', icon: '⚠️' };
+        return { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA', icon: '⚠️' };
       case 'ready':
-        return { bg: 'rgba(34, 197, 94, 0.18)', text: '#4ade80', border: 'rgba(34, 197, 94, 0.45)', icon: '✨' };
+        return { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0', icon: '✨' };
       case 'rejected':
-        return { bg: 'rgba(239, 68, 68, 0.15)', text: '#f87171', border: 'rgba(239, 68, 68, 0.4)', icon: '✕' };
+        return { bg: '#FEF2F2', text: '#B91C1C', border: '#FECACA', icon: '✕' };
       default:
-        return { bg: 'rgba(255, 255, 255, 0.1)', text: '#e5e7eb', border: 'rgba(255, 255, 255, 0.2)', icon: '•' };
+        return { bg: '#F9FAFB', text: '#4B5563', border: '#E5E7EB', icon: '•' };
     }
   };
 

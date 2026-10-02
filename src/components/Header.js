@@ -42,10 +42,9 @@ export default function Header() {
     };
   }, [mobileOpen]);
 
-  // Hide global header on photo guest experience and admin printing dashboard
-  const isPhotoRoute = pathname === '/photo' || pathname?.startsWith('/photo/');
+  // Hide global header only on admin printing dashboard
   const isAdminPrintingRoute = pathname === '/admin/printing' || pathname?.startsWith('/admin/printing');
-  if (isPhotoRoute || isAdminPrintingRoute) {
+  if (isAdminPrintingRoute) {
     return null;
   }
 
@@ -53,6 +52,7 @@ export default function Header() {
     { href: '/', label: 'Our Story' },
     { href: '/rsvp', label: 'RSVP' },
     { href: '/wishes', label: 'Wishes Board' },
+    { href: '/photo', label: 'In Ảnh' },
   ];
 
   const isStoryPage = pathname === '/';
