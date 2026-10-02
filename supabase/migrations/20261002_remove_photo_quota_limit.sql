@@ -117,6 +117,39 @@ begin
     end if;
     insert into public.photo_print_operations values(key,p_action,rid);
     return '{}'::jsonb;
+  elsif p_action = 'edit' then
+    rid := (p_payload->>'id')::uuid;
+    key := (p_payload->>'operation_key')::uuid;
+    if key is not null then
+      select * into op from public.photo_print_operations where operation_key=key;
+      if found then
+        if op.action not in ('edit','approve') or op.request_id <> rid then raise exception 'IDEMPOTENCY_CONFLICT'; end if;
+        return (select to_jsonb(r_exist) from public.photo_print_requests r_exist where id = rid);
+      end if;
+    end if;
+    select * into r from public.photo_print_requests where id = rid for update;
+    if not found then raise exception 'NOT_FOUND'; end if;
+    if r.status not in ('pending','review') then raise exception 'STATE_CONFLICT'; end if;
+    if p_payload ? 'guest_name' and p_payload->>'guest_name' is not null and length(trim(p_payload->>'guest_name')) between 1 and 80 then
+      update public.photo_print_requests set guest_name = trim(p_payload->>'guest_name') where id = rid;
+    end if;
+    if p_payload ? 'orientation' and p_payload->>'orientation' in ('portrait','landscape') then
+      update public.photo_print_requests set orientation = p_payload->>'orientation' where id = rid;
+    end if;
+    if p_payload ? 'storage_path' and length(p_payload->>'storage_path') > 0 then
+      update public.photo_print_requests set storage_path = p_payload->>'storage_path' where id = rid;
+    end if;
+    if p_payload ? 'filter_snapshot' and p_payload->'filter_snapshot' is not null then
+      update public.photo_print_requests set filter_snapshot = p_payload->'filter_snapshot' where id = rid;
+    end if;
+    if (p_payload->>'approve')::boolean is true then
+      insert into public.photo_print_attempts(request_id,operation_key) values(rid,key);
+      update public.photo_print_requests set status='approved' where id=rid;
+      insert into public.photo_print_operations values(key,'approve',rid);
+    elsif key is not null then
+      insert into public.photo_print_operations values(key,'edit',rid);
+    end if;
+    return (select to_jsonb(r_updated) from public.photo_print_requests r_updated where id = rid);
   elsif p_action = 'heartbeat' then
     sid := (p_payload->>'station_id')::uuid;
     -- One physical station: do not silently replace a recently active Mac.

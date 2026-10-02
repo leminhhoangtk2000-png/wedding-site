@@ -45,14 +45,6 @@ function readStoredDraft() {
   }
 }
 
-function getInitialSubmittedDraft() {
-  const draft = readStoredDraft();
-  if (draft?.submitted && draft?.upload_id && draft?.request_key && draft?.crop) {
-    return draft;
-  }
-  return null;
-}
-
 export default function PhotoPage() {
   // Session / Quota state
   const [sessionData, setSessionData] = useState(null);
@@ -65,60 +57,25 @@ export default function PhotoPage() {
   const [localPreviewUrl, setLocalPreviewUrl] = useState(null);
 
   // Immutable submitted payload ref for idempotent retry across network loss/reloads
-  const submittedPayloadRef = useRef(getInitialSubmittedDraft());
+  const submittedPayloadRef = useRef(null);
+  const [hasSubmittedDraft, setHasSubmittedDraft] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
 
-  const [hasSubmittedDraft, setHasSubmittedDraft] = useState(() =>
-    Boolean(getInitialSubmittedDraft())
-  );
-
-  // Restore draft from sessionStorage using lazy initializers
-  const [uploadData, setUploadData] = useState(() => {
-    const draft = readStoredDraft();
-    if (draft?.upload_id && draft?.upload_token && draft?.preview_url) {
-      return {
-        id: draft.upload_id,
-        token: draft.upload_token,
-        preview_url: draft.preview_url,
-        width: draft.width,
-        height: draft.height,
-      };
-    }
-    return null;
-  });
-
-  const [guestName, setGuestName] = useState(() => {
-    const draft = readStoredDraft();
-    return draft?.guest_name || '';
-  });
-
-  const [orientation, setOrientation] = useState(() => {
-    const draft = readStoredDraft();
-    return draft?.orientation || 'portrait';
-  });
-
-  const [crop, setCrop] = useState(() => {
-    const draft = readStoredDraft();
-    return draft?.crop || null;
-  });
+  // Identical SSR/first-client state. Browser-only drafts are restored after hydration.
+  const [uploadData, setUploadData] = useState(null);
+  const [guestName, setGuestName] = useState('');
+  const [orientation, setOrientation] = useState('portrait');
+  const [crop, setCrop] = useState(null);
 
   // Presets & Filter state
   const [presets,setPresets]=useState(DEFAULT_PRESETS);
-  const [configVersion,setConfigVersion]=useState(()=>readStoredDraft()?.config_version??null);
+  const [configVersion,setConfigVersion]=useState(null);
   const [colorPreviewState,setColorPreviewState]=useState('loading');
-  const [selectedPresetId,setSelectedPresetId]=useState(()=>readStoredDraft()?.preset_id||'soft_wedding');
-  const [guestAdjustments, setGuestAdjustments] = useState(() => {
-    const draft = readStoredDraft();
-    return draft?.adjustments || DEFAULT_GUEST_ADJUSTMENTS;
-  });
+  const [selectedPresetId,setSelectedPresetId]=useState('soft_wedding');
+  const [guestAdjustments, setGuestAdjustments] = useState(DEFAULT_GUEST_ADJUSTMENTS);
 
-  // Current Step in 3-step photobooth flow:
-  // 1: Framing (Orientation & Crop)
-  // 2: Film Tone (Presets & Sliders)
-  // 3: Review & Submit (Review & Print)
-  const [currentStep, setCurrentStep] = useState(() => {
-    const draft = readStoredDraft();
-    return draft?.step || 1;
-  });
+  // 1: Framing, 2: Film Tone, 3: Review & Submit
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Compute active effective filter
   const activePreset =
@@ -138,16 +95,42 @@ export default function PhotoPage() {
     upload_id: null,
   });
 
-  // Restore keys to ref on mount
+  // Restore the draft as one batch, including pinned color config and retry keys.
   useEffect(() => {
-    const draft = readStoredDraft();
-    if (draft?.request_key && draft?.tracking_token) {
-      draftKeysRef.current = {
-        request_key: draft.request_key,
-        tracking_token: draft.tracking_token,
-        upload_id: draft.upload_id,
-      };
-    }
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const draft = readStoredDraft();
+      if (draft) {
+        if (draft.upload_id && draft.upload_token && draft.preview_url) {
+          setUploadData({id:draft.upload_id,token:draft.upload_token,
+            preview_url:draft.preview_url,width:draft.width,height:draft.height});
+        }
+        setGuestName(draft.guest_name || '');
+        setOrientation(draft.orientation || 'portrait');
+        setCrop(draft.crop || null);
+        setConfigVersion(draft.config_version ?? null);
+        setSelectedPresetId(draft.preset_id || 'soft_wedding');
+        setGuestAdjustments(draft.adjustments || DEFAULT_GUEST_ADJUSTMENTS);
+        setCurrentStep(draft.step || 1);
+        const config=draft.preset_config;
+        if (config?.version != null && Array.isArray(config.presets)) {
+          const legacy=LEGACY_PRESETS.find(p=>p.id===draft.preset_id);
+          setPresets([...config.presets.filter(p=>p.enabled),
+            ...(legacy&&!config.presets.some(p=>p.id===legacy.id)?[legacy]:[])]);
+        }
+        if (draft.request_key && draft.tracking_token) {
+          draftKeysRef.current = {request_key:draft.request_key,
+            tracking_token:draft.tracking_token,upload_id:draft.upload_id};
+        }
+        if (draft.submitted && draft.upload_id && draft.request_key && draft.crop) {
+          submittedPayloadRef.current = draft;
+          setHasSubmittedDraft(true);
+        }
+      }
+      setDraftRestored(true);
+    });
+    return () => { active = false; };
   }, []);
 
   // File input refs
@@ -193,7 +176,7 @@ export default function PhotoPage() {
 
   // Sync draft changes to sessionStorage - ONLY when NOT in submitted/immutable state!
   useEffect(() => {
-    if (hasSubmittedDraft || submittedPayloadRef.current) return;
+    if (!draftRestored || hasSubmittedDraft || submittedPayloadRef.current) return;
     if (!uploadData?.id) return;
     try {
       const { request_key, tracking_token } = draftKeysRef.current;
@@ -221,7 +204,7 @@ export default function PhotoPage() {
     } catch {
       // ignore
     }
-  }, [uploadData, guestName, orientation, crop, selectedPresetId, guestAdjustments, currentStep, hasSubmittedDraft, configVersion, presets]);
+  }, [draftRestored, uploadData, guestName, orientation, crop, selectedPresetId, guestAdjustments, currentStep, hasSubmittedDraft, configVersion, presets]);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -909,9 +892,9 @@ export default function PhotoPage() {
                   {currentStep === 2 && (
                     <div className={styles.presetSection}>
                       <div style={{ textAlign: 'center', marginBottom: 2 }}>
-                        <h2 className={styles.presetSectionTitle}>Choose Film Tone Style</h2>
+                        <h2 className={styles.presetSectionTitle}>Choose Your Film Stock</h2>
                         <p style={{ fontSize: '0.88rem', color: '#635b52', marginTop: 4 }}>
-                          Filters apply only to your photo; the vintage floral border and typography remain pristine.
+                          Explore vivid, retro, amber, silver and sepia looks. Adjust intensity to taste; the floral frame keeps its original colors.
                         </p>
                       </div>
 

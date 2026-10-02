@@ -38,7 +38,7 @@ export async function command(client, action, payload = {}) {
   }
   if (error) {
     console.error(`[command error: ${action}]`, error);
-    const code = ['PAUSED','FULL','STATE_CONFLICT','IDEMPOTENCY_CONFLICT','NOT_FOUND','UPLOAD_NOT_FOUND','STATION_BUSY','STATION_OFFLINE','INVALID_JOB','INVALID_ACTION','UPLOAD_LIMIT','CONFIG_NOT_FOUND','CONFIG_STALE'].find(k => error.message === k);
+    const code = ['INVALID_INPUT','PAUSED','FULL','STATE_CONFLICT','IDEMPOTENCY_CONFLICT','NOT_FOUND','UPLOAD_NOT_FOUND','STATION_BUSY','STATION_OFFLINE','INVALID_JOB','INVALID_ACTION','UPLOAD_LIMIT','CONFIG_NOT_FOUND','CONFIG_STALE'].find(k => error.message === k);
     if (code) fail(code, code.includes('NOT_FOUND') ? 404 : 409);
     // No provider error/details or secrets in public response.
     fail('DATABASE_UNAVAILABLE', 503);

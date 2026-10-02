@@ -1,10 +1,10 @@
 // Pure, deterministic sRGB transform shared by browser Canvas and server Sharp.
 // Inspired looks, not Fujifilm's proprietary film simulations.
-export const ENGINE_VERSION = 'wedding-film-v2';
+export const ENGINE_VERSION = 'wedding-film-v3';
 export const FRAME_VERSION = 'wedding-floral-v1';
 export const FRAMES = {
   portrait: { width:1181, height:1748, left:178, top:264, photoWidth:824, photoHeight:1220 },
-  landscape: { width:1748, height:1181, left:245, top:205, photoWidth:1258, photoHeight:850 },
+  landscape: { width:1748, height:1181, left:275, top:180, photoWidth:1198, photoHeight:810 },
 };
 const settings = (brightness=0,warmth=0,contrast=0,saturation=0,fade=0,grain=0) => ({brightness,warmth,contrast,saturation,fade,grain});
 const preset = (id,name,subtitle,tags,profile,defaultIntensity,values,isDefault=false,monochrome=false) =>
@@ -27,9 +27,20 @@ const revisedSubtitles = {
   classic_story:'Deep documentary contrast with muted blues and greens',
   timeless_bw:'Rich monochrome contrast with fine film grain',
 };
-export const DEFAULT_PRESETS = V1_PRESETS.map(p => p.id === 'natural' ? {...p} : {
+export const V2_PRESETS = V1_PRESETS.map(p => p.id === 'natural' ? {...p} : {
   ...p, profile:p.profile+'_v2', subtitle:revisedSubtitles[p.id],
 });
+// New IDs distinguish expressive film stocks from earlier gentle wedding looks.
+// These are our sRGB interpretations, not official camera LUTs.
+export const FILM_STOCK_PRESETS = [
+  preset('velvia_vivid','Velvia Vivid','Rich jewel colors, deep greens and vivid slide-film contrast',['Afternoon','Vivid'],'velvia_v3',100,settings(0,0,0,0,0,3)),
+  preset('classic_negative','Classic Neg. Retro','Cyan greens, warm reds and punchy color-negative shadows',['Afternoon','Retro'],'classic_neg_v3',100,settings(0,0,0,0,0,5)),
+  preset('nostalgic_amber','Nostalgic Neg. Amber','Honey highlights, warm browns and a luminous vintage finish',['Afternoon','Warm'],'nostalgic_v3',100,settings(0,0,0,0,0,4)),
+  preset('bleach_bypass','ETERNA Bleach Bypass','Silver shadows, very muted colors and bold cinema contrast',['Evening','Cinema'],'bleach_v3',100,settings(0,0,0,0,0,4)),
+  preset('sepia_archive','Sepia Archive','Warm brown monochrome for an antique keepsake feel',['Evening','Vintage'],'sepia_v3',100,settings(0,0,0,0,0,4)),
+];
+// Put the distinct stock choices before the remaining gentle alternatives.
+export const DEFAULT_PRESETS = [...V2_PRESETS.slice(0,2), ...FILM_STOCK_PRESETS, ...V2_PRESETS.slice(2)];
 // Old IDs stay distinct. Never remap a restored draft to a different look.
 export const LEGACY_PRESETS = [
   preset('warm_film','Warm Film (Legacy)','Previous draft preset',[],'legacy',100,settings(5,26,8,-6,10,16)),
@@ -48,6 +59,9 @@ const curves = {
   astia_v2:[0,.34,.60,.82,1],nostalgic_v2:[.025,.28,.55,.80,1],
   pro_neg_v2:[0,.20,.49,.80,1],eterna_v2:[.07,.31,.48,.69,.97],
   chrome_v2:[.005,.15,.40,.74,1],acros_v2:[0,.17,.50,.82,1],
+  velvia_v3:[0,.17,.52,.83,1],classic_neg_v3:[.025,.15,.44,.80,1],
+  nostalgic_v3:[.045,.34,.63,.86,1],bleach_v3:[.01,.12,.49,.87,1],
+  sepia_v3:[.04,.27,.53,.79,1],
 };
 function curve(v,points) {const n=clamp(v)*4,i=Math.min(3,Math.floor(n));return points[i]+(points[i+1]-points[i])*(n-i);}
 export function computeEffectiveFilter(p,adjustments=defaultAdjustments(p)) {
@@ -93,6 +107,32 @@ export function transformPixels(data,width,height,filter={},seed=0,referenceWidt
       const cool=shadows*skinProtection*t;
       r-=.035*cool;g+=.015*cool;b+=.04*cool;
     }
+    // Stock-specific hue masks: strong palette changes, restrained skin, neutral whites.
+    const stock=f.profile.endsWith('_v3');
+    const greenMask=smooth(.01,.15,g-Math.max(r,b));
+    const blueMask=smooth(.01,.15,b-Math.max(r,g));
+    const redMask=smooth(.01,.15,r-Math.max(g,b));
+    if(f.profile==='velvia_v3') {
+      r+=.045*redMask*skinProtection*t; b+=.025*redMask*skinProtection*t;
+      r-=.035*greenMask*t; b-=.025*greenMask*t;
+      r-=.025*blueMask*t;
+    }
+    if(f.profile==='classic_neg_v3') {
+      r-=.075*greenMask*t; g-=.025*greenMask*t; b+=.08*greenMask*t;
+      r+=.065*redMask*skinProtection*t; g-=.025*redMask*skinProtection*t;
+      const split=shadows*(1-highlights)*skinProtection*t;
+      r-=.035*split; g+=.015*split; b+=.045*split;
+    }
+    if(f.profile==='nostalgic_v3') {
+      const amber=(.075+.14*highlights)*colorful*(1-.45*skin)*t;
+      r+=amber; g+=amber*.3; b-=amber*.8;
+      const brown=.035*shadows*colorful*skinProtection*t;
+      r+=brown; b-=brown;
+    }
+    if(f.profile==='bleach_v3') {
+      const steel=.045*shadows*skinProtection*t;
+      r-=steel; g+=steel*.25; b+=steel;
+    }
     // Selective foliage and blue saturation; skin receives a gentler adjustment.
     const foliage=(g>r&&g>b)?1:0, blue=(b>r&&b>g)?1:0;
     const sat=clamp(1+f.saturation*.01,0,1.5);
@@ -100,7 +140,11 @@ export function transformPixels(data,width,height,filter={},seed=0,referenceWidt
     const lookSat=f.profile==='astia_v2'?.78:f.profile==='nostalgic_v2'?.82:
       f.profile==='pro_neg_v2'?.96:f.profile==='eterna_v2'?.48:f.profile==='chrome_v2'?.60:1;
     const revisedGroup=revised?1+(lookSat-1)*t*(1-.6*skin):1;
-    const saturation=(1+(sat-1)*(1-.45*skin))*group*revisedGroup;
+    const stockSat=f.profile==='velvia_v3'?1.60:f.profile==='classic_neg_v3'?.82:
+      f.profile==='nostalgic_v3'?.80:f.profile==='bleach_v3'?.12:1;
+    const stockGroup=stock?1+(stockSat-1)*t*(1-(f.profile==='bleach_v3'?.12:.55)*skin)
+      *(1-smooth(.6,.94,l)*(1-colorful)):1;
+    const saturation=(1+(sat-1)*(1-.45*skin))*group*revisedGroup*stockGroup;
     let lum=.2126*r+.7152*g+.0722*b;
     r=lum+(r-lum)*saturation;g=lum+(g-lum)*saturation;b=lum+(b-lum)*saturation;
     // Temperature is an RGB balance adjustment, not hue rotation or sepia.
@@ -110,6 +154,15 @@ export function transformPixels(data,width,height,filter={},seed=0,referenceWidt
     const lift=f.fade*.0008*(1-smooth(.05,.65,l));
     r=r*exposure+lift;g=g*exposure+lift;b=b*exposure+lift;
     if(f.monochrome) {lum=.2126*r+.7152*g+.0722*b;r=g=b=lum;}
+    if(f.profile==='sepia_v3') {
+      lum=.2126*r+.7152*g+.0722*b;
+      // Tone a monochrome base, then blend intensity with the original color.
+      // Neutral bright fabric stays neutral; temperature remains a guest control.
+      const tone=smooth(.015,.22,lum)*(1-smooth(.65,.91,lum));
+      r=r*(1-t)+(lum+.16*tone)*t;
+      g=g*(1-t)+(lum+.045*tone)*t;
+      b=b*(1-t)+(lum-.13*tone)*t;
+    }
     // Fine luminance grain at final print coordinates; suppressed in dark inputs.
     const n=noise(Math.floor(x*referenceWidth/width),Math.floor(y*referenceHeight/height),seed)*f.grain*.0008*smooth(.08,.4,l);
     data[i]=Math.round(clamp(r+n)*255);data[i+1]=Math.round(clamp(g+n)*255);data[i+2]=Math.round(clamp(b+n)*255);

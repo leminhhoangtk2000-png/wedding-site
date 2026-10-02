@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
-import { DEFAULT_PRESETS, V1_PRESETS, LEGACY_PRESETS, defaultAdjustments, computeEffectiveFilter, transformPixels, validatePresets, canonicalFilter, FRAMES } from '../../src/lib/photo/film.mjs';
+import { DEFAULT_PRESETS, V1_PRESETS, V2_PRESETS, FILM_STOCK_PRESETS, LEGACY_PRESETS, defaultAdjustments, computeEffectiveFilter, transformPixels, validatePresets, canonicalFilter, FRAMES } from '../../src/lib/photo/film.mjs';
 import { renderPrintPhoto } from '../../src/lib/photo/image.mjs';
 const pixels=()=>new Uint8ClampedArray([246,246,246,255,186,124,94,255,40,65,110,255,15,16,18,255]);
 
@@ -26,7 +26,7 @@ test('grain is reproducible, shadows suppress grain, white highlights resist amb
   const dark=new Uint8ClampedArray([5,5,5,255]),noGrain=dark.slice();
   transformPixels(dark,1,1,{...f,grain:50},123);transformPixels(noGrain,1,1,{...f,grain:0},123);assert.deepEqual(dark,noGrain);
   const signatures=DEFAULT_PRESETS.map(p=>{const d=pixels();transformPixels(d,4,1,computeEffectiveFilter(p,defaultAdjustments(p)),99);return String(d);});
-  assert.equal(new Set(signatures).size,7,'looks must be visibly distinct on skin/color swatches');
+  assert.equal(new Set(signatures).size,DEFAULT_PRESETS.length,'looks must be visibly distinct on skin/color swatches');
 });
 test('preset validation prevents profile injection, invalid ranges, disabled defaults and forged computed values',()=>{
   const cloned=structuredClone(DEFAULT_PRESETS);cloned[1].profile='invented';
@@ -43,7 +43,7 @@ test('framed print uses the shared transform and preserves floral pixels across 
     const input=await sharp({create:{width:w,height:h,channels:3,background:'#ba7c5e'}}).png().toBuffer();
     const crop={x:0,y:0,width:1,height:1};
     const prints=[];
-    for(const p of [DEFAULT_PRESETS[0],DEFAULT_PRESETS[1],DEFAULT_PRESETS[6]]) {
+    for(const p of DEFAULT_PRESETS.filter(p=>['natural','soft_wedding','timeless_bw',...FILM_STOCK_PRESETS.map(stock=>stock.id)].includes(p.id))) {
       const computed=computeEffectiveFilter(p,defaultAdjustments(p));
       const jpeg=await renderPrintPhoto(input,crop,orientation,w,h,{computed,seed:99});
       const meta=await sharp(jpeg).metadata();assert.equal(meta.width,f.width);assert.equal(meta.height,f.height);assert.equal(meta.density,300);
@@ -63,16 +63,19 @@ test('versioned config keeps history, blocks anonymous use, and protects stale a
     const cmd=async(action,payload={})=>(await pg.query('select photo_print_film_command($1,$2::jsonb) result',[action,JSON.stringify(payload)])).rows[0].result;
     const historical=await cmd('preset_config');assert.deepEqual(historical.presets,V1_PRESETS);
     await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_looks_v2.sql',import.meta.url),'utf8'));
-    const first=await cmd('preset_config');assert.deepEqual(first.presets,DEFAULT_PRESETS);assert.equal(first.version,2);
+    const previous=await cmd('preset_config');assert.deepEqual(previous.presets,V2_PRESETS);
+    await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_stocks_v3.sql',import.meta.url),'utf8'));
+    const first=await cmd('preset_config');assert.deepEqual(first.presets,DEFAULT_PRESETS);assert.equal(first.version,3);
+    assert.deepEqual(await cmd('preset_config',{version:2}),previous);
     assert.deepEqual(await cmd('preset_config',{version:1}),historical);
     const next=structuredClone(first.presets);next[1].settings.brightness=10;
-    const payload={presets:next,expected_version:2,operation_key:randomUUID()};
-    assert.equal((await cmd('save_presets',payload)).version,3);
-    assert.equal((await cmd('save_presets',payload)).version,3);
-    assert.deepEqual(await cmd('preset_config',{version:2}),first);
+    const payload={presets:next,expected_version:3,operation_key:randomUUID()};
+    assert.equal((await cmd('save_presets',payload)).version,4);
+    assert.equal((await cmd('save_presets',payload)).version,4);
+    assert.deepEqual(await cmd('preset_config',{version:3}),first);
     await assert.rejects(cmd('save_presets',{...payload,operation_key:randomUUID()}),/CONFIG_STALE/);
     await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_remove_photo_quota_limit.sql',import.meta.url),'utf8'));
-    assert.equal((await cmd('preset_config')).version,3);
+    assert.equal((await cmd('preset_config')).version,4);
     await pg.exec('set role anon');
     await assert.rejects(cmd('preset_config'),/permission denied/);
     await assert.rejects(pg.query('select * from photo_print_preset_versions'),/permission denied/);
@@ -82,7 +85,7 @@ test('versioned config keeps history, blocks anonymous use, and protects stale a
 test('revised color presets have meaningful separation at default guest strengths',()=>{
   // Skin, blue decor, foliage, amber lighting and neutral midtone: avoid mere uniqueness.
   const source=new Uint8ClampedArray([186,124,94,255,40,65,110,255,60,125,70,255,160,120,65,255,100,100,100,255]);
-  const looks=DEFAULT_PRESETS.filter(p=>!p.monochrome&&p.id!=='natural').map(p=>{
+  const looks=V2_PRESETS.filter(p=>!p.monochrome&&p.id!=='natural').map(p=>{
     const data=source.slice();transformPixels(data,5,1,{...computeEffectiveFilter(p),grain:0});return {p,data};
   });
   for(let i=0;i<looks.length;i++)for(let j=i+1;j<looks.length;j++){
@@ -110,5 +113,35 @@ test('catalog upgrade preserves operator settings, default selection and histori
     for(let i=0;i<custom.length;i++)for(const key of ['settings','enabled','isDefault','defaultIntensity'])assert.deepEqual(rows[2].presets[i][key],custom[i][key]);
     assert.equal(rows[2].presets[1].profile,'astia_v2');
     const restored=pixels();transformPixels(restored,4,1,computeEffectiveFilter(rows[1].presets[1]),42);assert.deepEqual(restored,oldPixels);
+    await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_stocks_v3.sql',import.meta.url),'utf8'));
+    const expanded=(await pg.query('select presets from photo_print_preset_versions where version=4')).rows[0].presets;
+    assert.equal(expanded.length,12);assert.equal(expanded.filter(p=>p.isDefault).length,1);
+    for(const p of rows[2].presets)assert.deepEqual(expanded.find(item=>item.id===p.id),p);
+    for(const stock of FILM_STOCK_PRESETS)assert.deepEqual(expanded.find(item=>item.id===stock.id),stock);
+    assert.deepEqual((await pg.query('select presets from photo_print_preset_versions where version=3')).rows[0].presets,rows[2].presets);
   }finally{await pg.close();}
+});
+
+test('expressive film stocks separate palettes, preserve highlights and restore original at zero',()=>{
+  const source=new Uint8ClampedArray([186,124,94,255,40,65,110,255,60,125,70,255,160,120,65,255,100,100,100,255]);
+  const results=FILM_STOCK_PRESETS.map(p=>{
+    const data=source.slice();transformPixels(data,5,1,{...computeEffectiveFilter(p),grain:0});
+    const zero=source.slice();transformPixels(zero,5,1,computeEffectiveFilter(p,{intensity:0,brightness:0,warmth:0}));assert.deepEqual(zero,source);
+    const whites=new Uint8ClampedArray([235,235,235,255,246,246,246,255,255,255,255,255]);
+    transformPixels(whites,3,1,{...computeEffectiveFilter(p),grain:0});
+    for(let i=0;i<12;i+=4)assert.ok(Math.max(...whites.slice(i,i+3))-Math.min(...whites.slice(i,i+3))<=1,`${p.id} tints white highlights`);
+    assert.ok(whites[0]<whites[4]&&whites[4]<whites[8],`${p.id} loses white detail`);
+    return data;
+  });
+  for(let i=0;i<results.length;i++)for(let j=i+1;j<results.length;j++){
+    let difference=0;for(let c=0;c<source.length;c++)if(c%4!==3)difference+=Math.abs(results[i][c]-results[j][c]);
+    assert.ok(difference/15>=18,`${FILM_STOCK_PRESETS[i].id} and ${FILM_STOCK_PRESETS[j].id} are too similar`);
+  }
+  const blue=4,green=8,gray=16;
+  const velvia=results[0],retro=results[1],amber=results[2],bleach=results[3],sepia=results[4];
+  assert.ok(velvia[green+1]-velvia[green]>source[green+1]-source[green],'Velvia should enrich greens');
+  assert.ok(retro[green+2]>source[green+2]&&retro[green]<source[green],'Classic Neg should shift greens toward cyan');
+  assert.ok(amber[0]>source[0]&&amber[blue]>source[blue],'Nostalgic should lift warm tones');
+  assert.ok(Math.max(...bleach.slice(0,3))-Math.min(...bleach.slice(0,3))<30,'Bleach Bypass should strongly mute skin chroma');
+  assert.ok(sepia[gray]>sepia[gray+1]&&sepia[gray+1]>sepia[gray+2],'Sepia should tone gray into brown');
 });

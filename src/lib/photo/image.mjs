@@ -54,3 +54,67 @@ export async function renderPrintPhoto(bytes, crop, orientation, width, height, 
   return sharp(bytes).extract(region).resize(output[0], output[1], { fit: 'fill' })
     .withMetadata({ density: 300 }).jpeg({ quality: 96 }).toBuffer();
 }
+
+export async function editPrintPhoto({ existingPrintBytes, existingOrientation, existingFramed = true, newBytes, targetOrientation = 'portrait', adjustments = null }) {
+  const targetF = FRAMES[targetOrientation];
+  if (!targetF) throw new Error('INVALID_INPUT');
+  let photoSharp;
+
+  if (newBytes && newBytes.length > 0) {
+    const normalized = await normalizePhoto(newBytes);
+    photoSharp = sharp(normalized.bytes).resize(targetF.photoWidth, targetF.photoHeight, { fit: 'cover', position: 'center' });
+  } else if (existingPrintBytes && existingPrintBytes.length > 0) {
+    const curF = FRAMES[existingOrientation || targetOrientation];
+    if (!curF) throw new Error('INVALID_INPUT');
+    if (!existingFramed) {
+      photoSharp = sharp(existingPrintBytes).resize(targetF.photoWidth, targetF.photoHeight, { fit: 'cover', position: 'center' });
+    } else {
+      photoSharp = sharp(existingPrintBytes).extract({
+        left: curF.left,
+        top: curF.top,
+        width: curF.photoWidth,
+        height: curF.photoHeight,
+      });
+      if (targetOrientation !== existingOrientation) {
+        photoSharp = photoSharp.resize(targetF.photoWidth, targetF.photoHeight, { fit: 'cover', position: 'center' });
+      }
+    }
+  } else {
+    throw new Error('INVALID_INPUT');
+  }
+
+  if (adjustments) {
+    if (adjustments.monochrome) {
+      photoSharp = photoSharp.grayscale();
+    }
+    if (typeof adjustments.brightness === 'number' && adjustments.brightness !== 0) {
+      const bFactor = Math.max(0.2, Math.min(2.0, 1 + adjustments.brightness / 100));
+      photoSharp = photoSharp.modulate({ brightness: bFactor });
+    }
+    if (typeof adjustments.contrast === 'number' && adjustments.contrast !== 0) {
+      const slope = Math.max(0.2, Math.min(2.5, 1 + adjustments.contrast / 100));
+      photoSharp = photoSharp.linear(slope, -(128 * slope) + 128);
+    }
+    if (typeof adjustments.warmth === 'number' && adjustments.warmth !== 0) {
+      const wVal = Math.max(-100, Math.min(100, adjustments.warmth));
+      const rFactor = 1 + wVal / 250;
+      const bFactor = 1 - wVal / 250;
+      photoSharp = photoSharp.recomb([[rFactor, 0, 0], [0, 1.0, 0], [0, 0, bFactor]]);
+    }
+  }
+
+  const photo = await photoSharp.toColourspace('srgb').png().toBuffer();
+  const frame = fileURLToPath(new URL(`./assets/photobooth-frame-${targetOrientation}.png`, import.meta.url));
+
+  return sharp({
+    create: { width: targetF.width, height: targetF.height, channels: 4, background: '#fdfaf5' },
+  })
+    .composite([
+      { input: photo, left: targetF.left, top: targetF.top },
+      { input: frame, left: 0, top: 0 },
+    ])
+    .toColourspace('srgb')
+    .withMetadata({ density: 300 })
+    .jpeg({ quality: 96 })
+    .toBuffer();
+}

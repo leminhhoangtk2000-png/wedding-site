@@ -4,7 +4,7 @@
 
 Seven choices: Original, Soft Wedding (ASTIA inspired), Golden Memory (NOSTALGIC Neg. inspired), Clean Portrait (PRO Neg. Std inspired), Evening Cinema (ETERNA inspired), Classic Story (CLASSIC CHROME inspired), and Timeless B&W (ACROS inspired). These are original approximations for sRGB phone images, not official Fujifilm profiles or camera recipes.
 
-Soft Wedding defaults to 70% intensity, other color looks to 60%, B&W to 100%. The shared `film.mjs` engine uses luminance curves, selective foliage/blue saturation, selective amber highlights/cool shadows, temperature channel balance, soft shadow lift and deterministic luminance grain. Neutral highlights resist amber tint; grain is suppressed in dark source pixels. Neither clipped whites nor severe mixed lighting can be recovered by these looks. Monochrome remains monochrome even at 0% intensity, and the guest warmth slider is hidden.
+Soft Wedding defaults to 70% intensity, other gentle color looks to 60%, B&W and expressive film stocks to 100%. The shared `film.mjs` engine uses luminance curves, selective foliage/blue saturation, selective amber highlights/cool shadows, temperature channel balance, soft shadow lift and deterministic luminance grain. Neutral highlights resist amber tint; grain is suppressed in dark source pixels. Neither clipped whites nor severe mixed lighting can be recovered by these looks. Monochrome remains monochrome even at 0% intensity, and the guest warmth slider is hidden.
 
 - `GET /api/photo/status` and authenticated `GET /api/admin/printing` include `preset_config: {version, presets}`. Guest drafts pin the version they previewed; previously published versions remain valid.
 - Authenticated `PATCH /api/admin/printing` accepts `{action:'save_presets', expected_version, operation_key, presets}`. Settings are validated against the server catalog. One enabled default is required; Original remains enabled and neutral. Saves are idempotent and reject stale writes with `CONFIG_STALE`; the admin draft stays intact until explicitly reloaded/discarded.
@@ -22,7 +22,7 @@ Deploy the application and migration together. Do not open intake or set hardwar
 
 ## Validation
 
-`npm run test:photo`: shared transform identity/monochrome invariants, deterministic grain, white neutrality, seven distinct swatch outputs, both framed orientations at 300 dpi, unaffected border pixels, server/preview transform agreement, immutable config history, stale saves, RLS and existing queue/worker tests.
+`npm run test:photo`: shared transform identity/monochrome invariants, deterministic grain, white neutrality, distinct swatch outputs across the catalog, both framed orientations at 300 dpi, unaffected border pixels, server/preview transform agreement, immutable config history, stale saves, RLS and existing queue/worker tests.
 
 `npm run test:photo:api`: actual Next HTTP handlers with PGlite + private Storage fixture, ignored forged computed color, config publication/retry/stale save, invalid settings/presets, snapshot persistence, approval/station/report/reprint and exact worker JPEG bytes. It does not contact production Supabase or CP1500. `node tests/photo/api.integration.mjs --preview` exposes a temporary `/photo/film-qa` bootstrap for browser QA; this route never enters production source.
 
@@ -45,6 +45,28 @@ Fujifilm character descriptions are source facts; suitability labels and all coe
 
 The v2 profiles separate the looks at the existing 70% / 60% starting strengths: Soft Wedding lifts midtones into airy pastels, Golden Memory adds selective amber/olive split tones, Clean Portrait stays neutral with clearer contrast, Evening Cinema combines desaturation with cool matte shadows, Classic Story deepens midtones with muted cool colors, and Timeless B&W adds a stronger tonal curve. Neutral highlights remain untinted; the floral frame uses no film processing.
 
-Apply `20261002_photo_film_looks_v2.sql` after the initial film migration alongside the updated application. It publishes the new profile IDs in a new catalog version, retaining operator settings, enabled flags and default choice. Historical catalog rows and v1 transform coefficients remain unchanged, so pinned drafts keep their earlier appearance and accepted requests keep their existing JPEG. Saving presets from admin publishes the current v2 definitions. This migration has not been applied to production by Codex.
+Apply `20261002_photo_film_looks_v2.sql` after the initial film migration alongside the updated application. It publishes the new profile IDs in a new catalog version, retaining operator settings, enabled flags and default choice. Historical catalog rows and v1 transform coefficients remain unchanged, so pinned drafts keep their earlier appearance and accepted requests keep their existing JPEG. Saving presets from admin publishes the current catalog definitions. This migration has not been applied to production by Codex.
 
 The revised regression check requires a mean RGB separation of at least six levels across representative skin, blue, green, amber and gray swatches for every pair of color presets at default intensity. This is a regression guard, not a perceptual or printer calibration claim. The comparison sheet uses the same website photo plus simulated evening lighting.
+
+## Expressive stock expansion (2026-10-02)
+
+Added five separate IDs rather than changing earlier preset identities. All five start at 100% so their character is apparent on selection; the guest can reduce intensity. Original, the Soft Wedding default, and the previous gentle choices remain available. Stock choices appear ahead of the remaining gentle alternatives in both guest and admin catalogs.
+
+| Website name | Inspiration from Fujifilm | Website interpretation |
+| --- | --- | --- |
+| Velvia Vivid | Velvia: vibrant colors | Saturated greens/blues, richer reds, slide-film contrast with gentler skin saturation |
+| Classic Neg. Retro | CLASSIC Neg.: enhanced color and hard tonality | Deep contrast, cyan greens, warm reds and cooler shadows |
+| Nostalgic Neg. Amber | NOSTALGIC Neg.: amber highlights and rich shadows | Strong honey highlights, lifted midtones and warm brown shadows |
+| ETERNA Bleach Bypass | ETERNA BLEACH BYPASS: low saturation and high contrast | Very muted colors, steel shadows and strong contrast |
+| Sepia Archive | SEPIA: sepia tone | Brown-toned monochrome base blended by intensity, with neutral bright fabric |
+
+Primary reference: https://www.fujifilm-x.com/global/products/film-simulation/ (checked 2026-10-02). Fujifilm descriptions are source facts; the coefficients, hue choices, intensity and event suitability are our interpretation. These are not official Fujifilm LUTs or an exact camera/film match. Sepia is a tone mode, and Bleach Bypass is a processing aesthetic; the stock picker groups these looks for guests without claiming each is a physical film roll.
+
+Apply `20261002_photo_film_stocks_v3.sql` after `20261002_photo_film_looks_v2.sql` alongside this application revision. It appends a new immutable catalog version, preserves earlier preset definitions/settings/default/enabled state, and enables the five new IDs. Pinned historical drafts do not gain new choices until starting a new photo; accepted prints retain their original JPEG. No production migration or deployment was performed by Codex.
+
+Reproduce comparisons with `node tools/photo-film/compare.mjs [local-image-path] [output-directory]`. Defaults use the website's existing indoor couple photo; `public/images/000040.webp` provides an outdoor comparison. The tool renders the actual framed server JPEG, then extracts only its photo area for a larger comparison. Photos are already edited source images and do not substitute for real evening/LED or CP1500 calibration.
+
+The stock regression gate requires at least 18 RGB levels of mean pairwise separation on representative skin/blue/green/amber/gray swatches at default strengths, plus characteristic palette checks, neutral white highlights, zero-intensity identity and shared-renderer print agreement. This is a regression metric, not proof of equal visual difference for every input photograph.
+
+Stock expansion verified locally: 19 photo tests and actual Next HTTP integration passed; browser fixture at 390px showed 12 choices without horizontal overflow, Bleach Bypass starting/resetting to 100%, retained selection after reload, and review using the new stock. See `docs/photobooth-open-source-references.md` for open-source source/asset provenance and adoption recommendations.

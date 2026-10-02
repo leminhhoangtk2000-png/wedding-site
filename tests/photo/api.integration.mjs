@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import sharp from 'sharp';
 import { PGlite } from '@electric-sql/pglite';
+import {FILM_STOCK_PRESETS,computeEffectiveFilter} from '../../src/lib/photo/film.mjs';
 
 const preview=process.argv.includes('--preview');
 const intakeOnly=process.argv.includes('--intake-only');
@@ -19,6 +20,8 @@ await pg.exec("create role anon;create role authenticated;create role service_ro
 await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_printing.sql'),'utf8'));
 await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_presets.sql'),'utf8'));
 await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_looks_v2.sql'),'utf8'));
+await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_stocks_v3.sql'),'utf8'));
+await pg.exec(await readFile(join(project,'supabase/migrations/20261002180000_photo_admin_edit_safe.sql'),'utf8'));
 const provider=createServer(async(req,res)=>{
   res.setHeader('Access-Control-Allow-Origin','*');
   const chunks=[];for await(const chunk of req)chunks.push(chunk);const bytes=Buffer.concat(chunks);
@@ -56,7 +59,7 @@ const provider=createServer(async(req,res)=>{
       for(const path of JSON.parse(bytes).prefixes)objects.delete(`photo_print_private/${path}`);return json([]);
     }
     if(url.pathname.startsWith('/storage/v1/object/')){
-      const path=url.pathname.replace('/storage/v1/object/','');
+      const path=url.pathname.replace('/storage/v1/object/','').replace(/^authenticated\//,'');
       if(req.method==='POST'){objects.set(path,bytes);return json({Key:path});}
       if(!objects.has(path))return json({error:'not found'},404);
       res.writeHead(200,{'Content-Type':'image/jpeg'});return res.end(objects.get(path));
@@ -128,13 +131,14 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   const uploadResult=await call('/api/photo/uploads','POST',form);assert.equal(uploadResult.status,200,JSON.stringify(uploadResult));
   const upload=uploadResult.data.upload;
   const presetConfig=(await call('/api/photo/status')).data.preset_config;
-  assert.equal(presetConfig.presets.length,7);
+  assert.equal(presetConfig.presets.length,12);
   const body={filter:{config_version:presetConfig.version,preset_id:'soft_wedding',adjustments:{intensity:70,brightness:0,warmth:0},computed:{brightness:50}},upload_id:upload.id,upload_token:upload.token,request_key:randomUUID(),tracking_token:randomUUID(),guest_name:'API Test',orientation:'portrait',crop:{x:0,y:0,width:1,height:1}};
   const created=await call('/api/photo/requests','POST',body);assert.equal(created.status,200,JSON.stringify(created));
   const id=created.data.request.id;
   const snapshot=(await pg.query('select filter_snapshot,storage_path from photo_print_requests where id=$1',[id])).rows[0];
   assert.equal(snapshot.filter_snapshot.preset.id,'soft_wedding');
   assert.equal(snapshot.filter_snapshot.computed.profile,'astia_v2');
+  assert.ok(presetConfig.presets.some(p=>p.id==='bleach_bypass'&&p.profile==='bleach_v3'));
   assert.equal(snapshot.filter_snapshot.computed.brightness,1.4); // ignores forged client computed
   const originalPrint=objects.get('photo_print_private/'+snapshot.storage_path);
   const meta=await sharp(originalPrint).metadata();assert.equal(meta.width,1181);assert.equal(meta.height,1748);assert.equal(meta.density,300);
@@ -142,10 +146,10 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   saveBody.presets.find(p=>p.id==='soft_wedding').settings.brightness=20;
   assert.equal((await call('/api/admin/printing','PATCH',saveBody)).status,401);
   const updated=await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin});
-  assert.equal(updated.status,200,JSON.stringify(updated));assert.equal(updated.data.preset_config.version,3);
-  assert.equal((await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin})).data.preset_config.version,3);
+  assert.equal(updated.status,200,JSON.stringify(updated));assert.equal(updated.data.preset_config.version,4);
+  assert.equal((await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin})).data.preset_config.version,4);
   assert.equal((await call('/api/admin/printing','PATCH',{...saveBody,operation_key:randomUUID()},{'x-admin-password':admin})).data.code,'CONFIG_STALE');
-  assert.equal((await call('/api/photo/status')).data.preset_config.version,3);
+  assert.equal((await call('/api/photo/status')).data.preset_config.version,4);
   assert.equal((await call('/api/photo/requests','POST',{...body,filter:{...body.filter,adjustments:{...body.filter.adjustments,intensity:35}}})).data.code,'IDEMPOTENCY_CONFLICT');
   assert.equal((await call('/api/photo/requests','POST',{...body,request_key:randomUUID(),filter:{...body.filter,adjustments:{...body.filter.adjustments,brightness:Infinity}}})).status,400);
   assert.equal((await call('/api/photo/requests','POST',{...body,request_key:randomUUID(),filter:{...body.filter,preset_id:'invented'}})).status,400);
@@ -167,6 +171,14 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
     for(const action of ['claim','begin']) assert.equal((await call('/api/printing/station','POST',{action,station_id:randomUUID()},{Authorization:`Bearer ${stationToken}`})).data.code,'HARDWARE_NOT_VERIFIED');
     console.log('PASS: intake-only accepts uploads/requests, pause/resume work, printing/ready/reprint/claim/begin blocked until hardware verified.');
   }else{
+  const edited = await call('/api/admin/printing','PATCH',{action:'edit',id,expected_revision:0,operation_key:randomUUID(),guest_name:'Edited Guest Name',orientation:'landscape'},{'x-admin-password':admin});
+  assert.equal(edited.status,200,JSON.stringify(edited));
+  assert.equal(edited.data.request.guest_name,'Edited Guest Name');
+  assert.equal(edited.data.request.orientation,'landscape');
+  assert.ok(edited.data.preview_url);
+  const restoredEdit = await call('/api/admin/printing','PATCH',{action:'edit',id,expected_revision:1,operation_key:randomUUID(),guest_name:'API Test Guest',orientation:'portrait'},{'x-admin-password':admin});
+  assert.equal(restoredEdit.status,200);
+  assert.equal(restoredEdit.data.request.orientation,'portrait');
   assert.equal((await adminMutation('approve')).status,200);
   const station_id=randomUUID(),station=payload=>call('/api/printing/station','POST',{station_id,...payload},{Authorization:`Bearer ${stationToken}`});
   assert.equal((await station({action:'heartbeat',printer:'CP1500'})).status,200);
@@ -193,6 +205,20 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
     assert.equal((await pg.query('select filter_snapshot from photo_print_requests where id=$1',[oldResult.data.request.id])).rows[0].filter_snapshot,null);
     const legacyCreated=await call('/api/photo/requests','POST',{...oldBody,request_key:randomUUID(),tracking_token:randomUUID(),filter:restoredLegacy});assert.equal(legacyCreated.status,200);
     assert.equal((await pg.query('select filter_snapshot from photo_print_requests where id=$1',[legacyCreated.data.request.id])).rows[0].filter_snapshot.preset.id,'warm_film');
+    // New stock IDs survive trusted resolution, config publication and exact retry.
+    for(const stock of FILM_STOCK_PRESETS){
+      const stockBody={...body,request_key:randomUUID(),tracking_token:randomUUID(),filter:{
+        preset_id:stock.id,config_version:presetConfig.version,
+        adjustments:{intensity:100,brightness:0,warmth:0},computed:{profile:'original',saturation:50}}};
+      const result=await call('/api/photo/requests','POST',stockBody);assert.equal(result.status,200,JSON.stringify(result));
+      const row=(await pg.query('select filter_snapshot,storage_path from photo_print_requests where id=$1',[result.data.request.id])).rows[0];
+      assert.equal(row.filter_snapshot.preset.id,stock.id);
+      assert.deepEqual(row.filter_snapshot.computed,computeEffectiveFilter(stock));
+      const stored=objects.get('photo_print_private/'+row.storage_path);
+      assert.notDeepEqual(stored,originalPrint);
+      assert.equal((await call('/api/photo/requests','POST',stockBody)).data.request.id,result.data.request.id);
+      assert.deepEqual(objects.get('photo_print_private/'+row.storage_path),stored);
+    }
   }
   if(preview){
     filmQADraft={upload_id:upload.id,upload_token:upload.token,preview_url:upload.preview_url,width:upload.width,height:upload.height,guest_name:'Film QA Guest',orientation:'portrait',crop:body.crop,preset_id:'soft_wedding',config_version:presetConfig.version,preset_config:presetConfig,adjustments:body.filter.adjustments,step:2,request_key:randomUUID(),tracking_token:randomUUID(),submitted:false};

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import AdminRequestEditor from '@/components/photo/AdminRequestEditor';
 import PhotoHeader from '@/components/photo/PhotoHeader';
 import StatusBadge from '@/components/photo/StatusBadge';
 import PhotoboothCard from '@/components/photo/PhotoboothCard';
@@ -44,6 +45,8 @@ export default function AdminPrintingPage() {
   const [confirmReprintModal, setConfirmReprintModal] = useState(null); // request object
   const [reprintConfirmedCheckbox, setReprintConfirmedCheckbox] = useState(false);
   const [lightboxItem, setLightboxItem] = useState(null); // request object for large preview modal
+
+  const [editItem, setEditItem] = useState(null);
 
   // Admin Preset Configuration State
   const [adminPresets,setAdminPresets]=useState(DEFAULT_PRESETS);
@@ -1074,6 +1077,7 @@ export default function AdminPrintingPage() {
                               🔍 View
                             </button>
 
+                            {req.status === 'pending' && <button type="button" className={`${styles.btnAction} ${styles.btnEdit}`} disabled={activeMutationId !== null} onClick={() => setEditItem(req)}>Edit request</button>}
                             {/* For pending: Approve or Reject */}
                             {req.status === 'pending' && (
                               <>
@@ -1199,6 +1203,7 @@ export default function AdminPrintingPage() {
                         🔍 View Complete Print Preview
                       </button>
 
+                      {req.status === 'pending' && <button type="button" className={`${styles.btnAction} ${styles.btnEdit}`} disabled={activeMutationId !== null} onClick={() => setEditItem(req)}>Edit request</button>}
                       {req.status === 'pending' && (
                         <>
                           <button
@@ -1418,6 +1423,8 @@ export default function AdminPrintingPage() {
               </div>
             )}
 
+            {editItem && <AdminRequestEditor key={editItem.id} request={editItem} password={password} onClose={() => setEditItem(null)} onSaved={updated => { setEditItem(updated); fetchData(true); }} />}
+
             {/* LIGHTBOX MODAL WITH FULL PREVIEW & SPECS */}
             {lightboxItem && (
               <div
@@ -1490,6 +1497,7 @@ export default function AdminPrintingPage() {
                       <StatusBadge status={lightboxItem.status} />
                     </div>
 
+                    {lightboxItem.status === 'pending' && <button type="button" className={`${styles.btnAction} ${styles.btnEdit}`} disabled={activeMutationId !== null} onClick={() => { setEditItem(lightboxItem); setLightboxItem(null); }}>Edit request</button>}
                     {/* Quick action buttons in Lightbox */}
                     <div className={styles.actionGroup} style={{ marginTop: 8, justifyContent: 'center' }}>
                       {lightboxItem.status === 'pending' && (

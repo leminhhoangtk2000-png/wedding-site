@@ -1,0 +1,16 @@
+{
+  "scope": "100 simultaneous GET /api/photo/status, one bounded wave; no uploads or printing",
+  "total": 100,
+  "success": 100,
+  "statuses": {
+    "200": 100
+  },
+  "latencyMs": {
+    "min": 1630,
+    "p50": 3009,
+    "p95": 3597,
+    "p99": 3722,
+    "max": 5169
+  },
+  "at": "2026-10-02T17:02:26.213Z"
+}
