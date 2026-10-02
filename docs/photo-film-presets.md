@@ -40,3 +40,11 @@ Fujifilm character descriptions are source facts; suitability labels and all coe
 - ETERNA: https://www.fujifilm-x.com/en-us/products/film-simulation/eterna/
 - CLASSIC CHROME: https://www.fujifilm-x.com/en-us/products/film-simulation/classic-chrome/
 - ACROS: https://www.fujifilm-x.com/en-us/products/film-simulation/acros/
+
+## Stronger look revision (2026-10-02)
+
+The v2 profiles separate the looks at the existing 70% / 60% starting strengths: Soft Wedding lifts midtones into airy pastels, Golden Memory adds selective amber/olive split tones, Clean Portrait stays neutral with clearer contrast, Evening Cinema combines desaturation with cool matte shadows, Classic Story deepens midtones with muted cool colors, and Timeless B&W adds a stronger tonal curve. Neutral highlights remain untinted; the floral frame uses no film processing.
+
+Apply `20261002_photo_film_looks_v2.sql` after the initial film migration alongside the updated application. It publishes the new profile IDs in a new catalog version, retaining operator settings, enabled flags and default choice. Historical catalog rows and v1 transform coefficients remain unchanged, so pinned drafts keep their earlier appearance and accepted requests keep their existing JPEG. Saving presets from admin publishes the current v2 definitions. This migration has not been applied to production by Codex.
+
+The revised regression check requires a mean RGB separation of at least six levels across representative skin, blue, green, amber and gray swatches for every pair of color presets at default intensity. This is a regression guard, not a perceptual or printer calibration claim. The comparison sheet uses the same website photo plus simulated evening lighting.

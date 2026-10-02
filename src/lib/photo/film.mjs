@@ -1,6 +1,6 @@
 // Pure, deterministic sRGB transform shared by browser Canvas and server Sharp.
 // Inspired looks, not Fujifilm's proprietary film simulations.
-export const ENGINE_VERSION = 'wedding-film-v1';
+export const ENGINE_VERSION = 'wedding-film-v2';
 export const FRAME_VERSION = 'wedding-floral-v1';
 export const FRAMES = {
   portrait: { width:1181, height:1748, left:178, top:264, photoWidth:824, photoHeight:1220 },
@@ -9,7 +9,7 @@ export const FRAMES = {
 const settings = (brightness=0,warmth=0,contrast=0,saturation=0,fade=0,grain=0) => ({brightness,warmth,contrast,saturation,fade,grain});
 const preset = (id,name,subtitle,tags,profile,defaultIntensity,values,isDefault=false,monochrome=false) =>
   ({id,name,subtitle,tags,profile,defaultIntensity,settings:values,enabled:true,isDefault,monochrome,icon:monochrome?'◐':'✦'});
-export const DEFAULT_PRESETS = [
+export const V1_PRESETS = [
   preset('natural','Original','Keep original camera colors',[], 'original',100,settings()),
   preset('soft_wedding','Soft Wedding','Natural skin tones with gentle transitions',['Afternoon','Portrait'],'astia',70,settings(2,0,-3,1,1,2),true),
   preset('golden_memory','Golden Memory','Amber sunset glow with nostalgic warmth',['Afternoon'],'nostalgic',60,settings(1,0,-2,-3,2,3)),
@@ -18,6 +18,18 @@ export const DEFAULT_PRESETS = [
   preset('classic_story','Classic Story','Documentary tones with cool crisp contrast',['Afternoon','Evening'],'chrome',60,settings(0,0,2,-6,1,3)),
   preset('timeless_bw','Timeless B&W','Monochrome elegance with fine film grain',['Evening','Portrait'],'acros',100,settings(1,0,3,0,0,4),false,true),
 ];
+// Keep v1 profiles available for pinned drafts and stored render snapshots.
+const revisedSubtitles = {
+  soft_wedding:'Airy pastel colors with luminous skin tones',
+  golden_memory:'Warm amber highlights and nostalgic olive greens',
+  clean_portrait:'Neutral skin tones with clean, balanced contrast',
+  evening_cinema:'Muted cinema colors with cool, matte shadows',
+  classic_story:'Deep documentary contrast with muted blues and greens',
+  timeless_bw:'Rich monochrome contrast with fine film grain',
+};
+export const DEFAULT_PRESETS = V1_PRESETS.map(p => p.id === 'natural' ? {...p} : {
+  ...p, profile:p.profile+'_v2', subtitle:revisedSubtitles[p.id],
+});
 // Old IDs stay distinct. Never remap a restored draft to a different look.
 export const LEGACY_PRESETS = [
   preset('warm_film','Warm Film (Legacy)','Previous draft preset',[],'legacy',100,settings(5,26,8,-6,10,16)),
@@ -33,6 +45,9 @@ const curves = {
   astia:[0,.27,.52,.76,1],nostalgic:[.012,.27,.53,.78,1],
   pro_neg:[0,.27,.51,.74,1],eterna:[.018,.29,.51,.73,1],
   chrome:[0,.23,.50,.76,1],acros:[0,.23,.52,.78,1],
+  astia_v2:[0,.34,.60,.82,1],nostalgic_v2:[.025,.28,.55,.80,1],
+  pro_neg_v2:[0,.20,.49,.80,1],eterna_v2:[.07,.31,.48,.69,.97],
+  chrome_v2:[.005,.15,.40,.74,1],acros_v2:[0,.17,.50,.82,1],
 };
 function curve(v,points) {const n=clamp(v)*4,i=Math.min(3,Math.floor(n));return points[i]+(points[i+1]-points[i])*(n-i);}
 export function computeEffectiveFilter(p,adjustments=defaultAdjustments(p)) {
@@ -61,11 +76,31 @@ export function transformPixels(data,width,height,filter={},seed=0,referenceWidt
     r+=d;g+=d;b+=d;
     if(f.profile==='nostalgic') {r+=.025*highlights*colorful*t;g+=.008*highlights*colorful*t;b-=.022*highlights*colorful*t;}
     if(f.profile==='chrome') {r-=.012*shadows*t;b+=.018*shadows*t;g+=.003*shadows*t;}
+    // v2 split tones stay off neutral highlights and are gentler on warm skin hues.
+    // Profile IDs, rather than the current engine version, select the look revision.
+    const revised=f.profile.endsWith('_v2');
+    const skinProtection=1-.7*skin;
+    if(f.profile==='nostalgic_v2') {
+      const amber=(.055+.10*highlights)*colorful*t*(1-.45*skin);
+      r+=amber;g+=amber*.24;b-=amber*.85;
+      g+=.025*shadows*colorful*skinProtection*t;
+    }
+    if(f.profile==='eterna_v2') {
+      const cool=shadows*skinProtection*t;
+      r-=.055*cool;g+=.018*cool;b+=.05*cool;
+    }
+    if(f.profile==='chrome_v2') {
+      const cool=shadows*skinProtection*t;
+      r-=.035*cool;g+=.015*cool;b+=.04*cool;
+    }
     // Selective foliage and blue saturation; skin receives a gentler adjustment.
     const foliage=(g>r&&g>b)?1:0, blue=(b>r&&b>g)?1:0;
     const sat=clamp(1+f.saturation*.01,0,1.5);
     const group=f.profile==='astia'?1+.055*foliage*t:f.profile==='chrome'?1-.09*(foliage+blue)*t:f.profile==='eterna'?1-.04*blue*t:1;
-    const saturation=(1+(sat-1)*(1-.45*skin))*group;
+    const lookSat=f.profile==='astia_v2'?.78:f.profile==='nostalgic_v2'?.82:
+      f.profile==='pro_neg_v2'?.96:f.profile==='eterna_v2'?.48:f.profile==='chrome_v2'?.60:1;
+    const revisedGroup=revised?1+(lookSat-1)*t*(1-.6*skin):1;
+    const saturation=(1+(sat-1)*(1-.45*skin))*group*revisedGroup;
     let lum=.2126*r+.7152*g+.0722*b;
     r=lum+(r-lum)*saturation;g=lum+(g-lum)*saturation;b=lum+(b-lum)*saturation;
     // Temperature is an RGB balance adjustment, not hue rotation or sepia.

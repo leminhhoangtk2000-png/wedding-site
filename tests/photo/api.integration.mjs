@@ -18,6 +18,7 @@ let filmQADraft;
 await pg.exec("create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);");
 await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_printing.sql'),'utf8'));
 await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_presets.sql'),'utf8'));
+await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_looks_v2.sql'),'utf8'));
 const provider=createServer(async(req,res)=>{
   res.setHeader('Access-Control-Allow-Origin','*');
   const chunks=[];for await(const chunk of req)chunks.push(chunk);const bytes=Buffer.concat(chunks);
@@ -133,6 +134,7 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   const id=created.data.request.id;
   const snapshot=(await pg.query('select filter_snapshot,storage_path from photo_print_requests where id=$1',[id])).rows[0];
   assert.equal(snapshot.filter_snapshot.preset.id,'soft_wedding');
+  assert.equal(snapshot.filter_snapshot.computed.profile,'astia_v2');
   assert.equal(snapshot.filter_snapshot.computed.brightness,1.4); // ignores forged client computed
   const originalPrint=objects.get('photo_print_private/'+snapshot.storage_path);
   const meta=await sharp(originalPrint).metadata();assert.equal(meta.width,1181);assert.equal(meta.height,1748);assert.equal(meta.density,300);
@@ -140,10 +142,10 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   saveBody.presets.find(p=>p.id==='soft_wedding').settings.brightness=20;
   assert.equal((await call('/api/admin/printing','PATCH',saveBody)).status,401);
   const updated=await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin});
-  assert.equal(updated.status,200,JSON.stringify(updated));assert.equal(updated.data.preset_config.version,2);
-  assert.equal((await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin})).data.preset_config.version,2);
+  assert.equal(updated.status,200,JSON.stringify(updated));assert.equal(updated.data.preset_config.version,3);
+  assert.equal((await call('/api/admin/printing','PATCH',saveBody,{'x-admin-password':admin})).data.preset_config.version,3);
   assert.equal((await call('/api/admin/printing','PATCH',{...saveBody,operation_key:randomUUID()},{'x-admin-password':admin})).data.code,'CONFIG_STALE');
-  assert.equal((await call('/api/photo/status')).data.preset_config.version,2);
+  assert.equal((await call('/api/photo/status')).data.preset_config.version,3);
   assert.equal((await call('/api/photo/requests','POST',{...body,filter:{...body.filter,adjustments:{...body.filter.adjustments,intensity:35}}})).data.code,'IDEMPOTENCY_CONFLICT');
   assert.equal((await call('/api/photo/requests','POST',{...body,request_key:randomUUID(),filter:{...body.filter,adjustments:{...body.filter.adjustments,brightness:Infinity}}})).status,400);
   assert.equal((await call('/api/photo/requests','POST',{...body,request_key:randomUUID(),filter:{...body.filter,preset_id:'invented'}})).status,400);
@@ -193,7 +195,7 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
     assert.equal((await pg.query('select filter_snapshot from photo_print_requests where id=$1',[legacyCreated.data.request.id])).rows[0].filter_snapshot.preset.id,'warm_film');
   }
   if(preview){
-    filmQADraft={upload_id:upload.id,upload_token:upload.token,preview_url:upload.preview_url,width:upload.width,height:upload.height,guest_name:'Film QA Guest',orientation:'portrait',crop:body.crop,preset_id:'soft_wedding',config_version:1,preset_config:presetConfig,adjustments:body.filter.adjustments,step:2,request_key:randomUUID(),tracking_token:randomUUID(),submitted:false};
+    filmQADraft={upload_id:upload.id,upload_token:upload.token,preview_url:upload.preview_url,width:upload.width,height:upload.height,guest_name:'Film QA Guest',orientation:'portrait',crop:body.crop,preset_id:'soft_wedding',config_version:presetConfig.version,preset_config:presetConfig,adjustments:body.filter.adjustments,step:2,request_key:randomUUID(),tracking_token:randomUUID(),submitted:false};
     await writeFile('/tmp/wedding-photo-sample.jpg',bytes);
     await writeFile('/tmp/wedding-photo-preview.json',JSON.stringify({base,root,admin,tracking_url:created.data.tracking_url}));
     console.log(`PREVIEW fixture ready: ${base}/photo ; admin password: test-admin-password; metadata /tmp/wedding-photo-preview.json`);

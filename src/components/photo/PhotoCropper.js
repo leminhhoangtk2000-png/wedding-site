@@ -235,7 +235,9 @@ export default function PhotoCropper({
           aria-pressed={isPortrait}
           disabled={locked}
         >
-          <span className="icon-portrait" aria-hidden="true">▯</span>
+          <span className="icon-portrait" aria-hidden="true">
+            <HanddrawnOrientationPortrait size={20} />
+          </span>
           <div className="btn-text-col">
             <span className="btn-main-label">Portrait</span>
             <span className="btn-sub-label">10 × 14.8 cm</span>
@@ -248,7 +250,9 @@ export default function PhotoCropper({
           aria-pressed={!isPortrait}
           disabled={locked}
         >
-          <span className="icon-landscape" aria-hidden="true">▭</span>
+          <span className="icon-landscape" aria-hidden="true">
+            <HanddrawnOrientationLandscape size={20} />
+          </span>
           <div className="btn-text-col">
             <span className="btn-main-label">Landscape</span>
             <span className="btn-sub-label">14.8 × 10 cm</span>
@@ -356,7 +360,8 @@ export default function PhotoCropper({
               disabled={locked}
               title="Reset photo to center position"
             >
-              <span>↺ Center Photo</span>
+              <HanddrawnRefresh size={15} />
+              <span>Center Photo</span>
             </button>
 
             {onChangePhoto && !locked && (
@@ -366,7 +371,8 @@ export default function PhotoCropper({
                 onClick={onChangePhoto}
                 title="Choose another photo from device"
               >
-                <span>🖼️ Change Photo</span>
+                <HanddrawnImage size={15} />
+                <span>Change Photo</span>
               </button>
             )}
           </div>
@@ -423,13 +429,11 @@ export default function PhotoCropper({
           cursor: not-allowed;
         }
 
-        .icon-portrait {
-          font-size: 20px;
-          line-height: 1;
-        }
-
+        .icon-portrait,
         .icon-landscape {
-          font-size: 20px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           line-height: 1;
         }
 

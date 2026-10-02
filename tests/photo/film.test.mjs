@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
-import { DEFAULT_PRESETS, LEGACY_PRESETS, defaultAdjustments, computeEffectiveFilter, transformPixels, validatePresets, canonicalFilter, FRAMES } from '../../src/lib/photo/film.mjs';
+import { DEFAULT_PRESETS, V1_PRESETS, LEGACY_PRESETS, defaultAdjustments, computeEffectiveFilter, transformPixels, validatePresets, canonicalFilter, FRAMES } from '../../src/lib/photo/film.mjs';
 import { renderPrintPhoto } from '../../src/lib/photo/image.mjs';
 const pixels=()=>new Uint8ClampedArray([246,246,246,255,186,124,94,255,40,65,110,255,15,16,18,255]);
 
@@ -30,7 +30,7 @@ test('grain is reproducible, shadows suppress grain, white highlights resist amb
 });
 test('preset validation prevents profile injection, invalid ranges, disabled defaults and forged computed values',()=>{
   const cloned=structuredClone(DEFAULT_PRESETS);cloned[1].profile='invented';
-  assert.equal(validatePresets(cloned)[1].profile,'astia');
+  assert.equal(validatePresets(cloned)[1].profile,'astia_v2');
   for(const change of [p=>p[0].settings.grain=999,p=>p[1].enabled=false,p=>p[2].isDefault=true,p=>p[0].settings.brightness=1,p=>p[0].enabled=false]){
     const bad=structuredClone(DEFAULT_PRESETS);change(bad);assert.throws(()=>validatePresets(bad),/INVALID_FILTER/);
   }
@@ -61,17 +61,54 @@ test('versioned config keeps history, blocks anonymous use, and protects stale a
     await pg.exec('create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);');
     for(const file of ['20261002_photo_printing.sql','20261002_photo_film_presets.sql'])await pg.exec(await readFile(new URL('../../supabase/migrations/'+file,import.meta.url),'utf8'));
     const cmd=async(action,payload={})=>(await pg.query('select photo_print_film_command($1,$2::jsonb) result',[action,JSON.stringify(payload)])).rows[0].result;
-    const first=await cmd('preset_config');assert.deepEqual(first.presets,DEFAULT_PRESETS);
+    const historical=await cmd('preset_config');assert.deepEqual(historical.presets,V1_PRESETS);
+    await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_looks_v2.sql',import.meta.url),'utf8'));
+    const first=await cmd('preset_config');assert.deepEqual(first.presets,DEFAULT_PRESETS);assert.equal(first.version,2);
+    assert.deepEqual(await cmd('preset_config',{version:1}),historical);
     const next=structuredClone(first.presets);next[1].settings.brightness=10;
-    const payload={presets:next,expected_version:1,operation_key:randomUUID()};
-    assert.equal((await cmd('save_presets',payload)).version,2);
-    assert.equal((await cmd('save_presets',payload)).version,2);
-    assert.deepEqual(await cmd('preset_config',{version:1}),first);
+    const payload={presets:next,expected_version:2,operation_key:randomUUID()};
+    assert.equal((await cmd('save_presets',payload)).version,3);
+    assert.equal((await cmd('save_presets',payload)).version,3);
+    assert.deepEqual(await cmd('preset_config',{version:2}),first);
     await assert.rejects(cmd('save_presets',{...payload,operation_key:randomUUID()}),/CONFIG_STALE/);
     await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_remove_photo_quota_limit.sql',import.meta.url),'utf8'));
-    assert.equal((await cmd('preset_config')).version,2);
+    assert.equal((await cmd('preset_config')).version,3);
     await pg.exec('set role anon');
     await assert.rejects(cmd('preset_config'),/permission denied/);
     await assert.rejects(pg.query('select * from photo_print_preset_versions'),/permission denied/);
+  }finally{await pg.close();}
+});
+
+test('revised color presets have meaningful separation at default guest strengths',()=>{
+  // Skin, blue decor, foliage, amber lighting and neutral midtone: avoid mere uniqueness.
+  const source=new Uint8ClampedArray([186,124,94,255,40,65,110,255,60,125,70,255,160,120,65,255,100,100,100,255]);
+  const looks=DEFAULT_PRESETS.filter(p=>!p.monochrome&&p.id!=='natural').map(p=>{
+    const data=source.slice();transformPixels(data,5,1,{...computeEffectiveFilter(p),grain:0});return {p,data};
+  });
+  for(let i=0;i<looks.length;i++)for(let j=i+1;j<looks.length;j++){
+    let difference=0;for(let c=0;c<source.length;c++)if(c%4!==3)difference+=Math.abs(looks[i].data[c]-looks[j].data[c]);
+    assert.ok(difference/15>=6,`${looks[i].p.id} and ${looks[j].p.id} are too similar`);
+  }
+  for(const {p} of looks){
+    const whites=new Uint8ClampedArray([235,235,235,255,246,246,246,255,255,255,255,255]);
+    transformPixels(whites,3,1,{...computeEffectiveFilter(p),grain:0});
+    for(let i=0;i<12;i+=4)assert.ok(Math.max(...whites.slice(i,i+3))-Math.min(...whites.slice(i,i+3))<=1,`${p.id} tints whites`);
+    assert.ok(whites[0]<whites[4]&&whites[4]<whites[8],`${p.id} clips white detail`);
+  }
+});
+test('catalog upgrade preserves operator settings, default selection and historical rendering',async()=>{
+  const pg=new PGlite();
+  try{
+    await pg.exec('create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);');
+    for(const file of ['20261002_photo_printing.sql','20261002_photo_film_presets.sql'])await pg.exec(await readFile(new URL('../../supabase/migrations/'+file,import.meta.url),'utf8'));
+    const custom=structuredClone(V1_PRESETS);custom[1].settings.brightness=17;custom[1].isDefault=false;custom[2].isDefault=true;custom[4].enabled=false;
+    await pg.query('insert into photo_print_preset_versions(version,presets) values(2,$1)',[JSON.stringify(custom)]);
+    const oldPixels=pixels();transformPixels(oldPixels,4,1,computeEffectiveFilter(custom[1]),42);
+    await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_looks_v2.sql',import.meta.url),'utf8'));
+    const rows=(await pg.query('select version,presets from photo_print_preset_versions order by version')).rows;
+    assert.deepEqual(rows[1].presets,custom);assert.equal(rows[2].version,3);
+    for(let i=0;i<custom.length;i++)for(const key of ['settings','enabled','isDefault','defaultIntensity'])assert.deepEqual(rows[2].presets[i][key],custom[i][key]);
+    assert.equal(rows[2].presets[1].profile,'astia_v2');
+    const restored=pixels();transformPixels(restored,4,1,computeEffectiveFilter(rows[1].presets[1]),42);assert.deepEqual(restored,oldPixels);
   }finally{await pg.close();}
 });
