@@ -40,7 +40,7 @@ Phiên mặc định **tạm dừng**. Không mở cho khách trước khi cấu
 - `npm run test:photo:api`: chạy Next API thật trong workspace tạm, PGlite và HTTP adapter Storage/PostgREST phục vụ fixture; không liên hệ Supabase production hoặc máy in. Kiểm tra upload → lưu → token → duyệt → claim/report → ready/reprint.
 - `npm run lint` / `npm run build`; tách lỗi cũ khỏi lỗi của feature.
 - Nghiệm thu thiết bị bắt buộc: iPhone Safari và Android Chrome camera/picker/HEIC/crop; đúng Mac/CP1500 in >=10 ảnh. Test server/local desktop không thay thế nghiệm thu này.
-- Hiện dependency nền Next.js 16.2.9 có advisory trong npm audit; không tự nâng major/minor framework trong scope này. Sharp phục vụ upload mới được đưa vào dependency production và dùng 0.35.5; cần xử lý audit framework trước phát hành production.
+- Updated 2026-10-02: Next.js and eslint-config-next 16.3.8; full/production audit zero vulnerabilities. Build, lint and photo tests passed. Patch not deployed.
 
 ## Retention
 

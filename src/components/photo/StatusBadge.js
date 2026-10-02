@@ -3,7 +3,7 @@
 import { PHOTO_STATUS_LABELS } from '@/lib/photo/client';
 
 export default function StatusBadge({ status, className = '' }) {
-  const label = PHOTO_STATUS_LABELS[status] || status || 'Không rõ';
+  const label = PHOTO_STATUS_LABELS[status] || status || 'Unknown';
 
   const getStatusConfig = (st) => {
     switch (st) {

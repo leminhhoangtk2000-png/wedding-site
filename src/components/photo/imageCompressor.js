@@ -4,7 +4,7 @@
  */
 
 export async function processImageForUpload(file) {
-  if (!file) throw new Error('Không có tệp ảnh nào được chọn.');
+  if (!file) throw new Error('No image file selected.');
 
   const isHeic =
     /\.hei[cf]$/i.test(file.name) ||
@@ -19,7 +19,7 @@ export async function processImageForUpload(file) {
       return {
         ok: false,
         code: 'HEIC_OVERSIZE',
-        error: `Ảnh HEIC (${sizeMb.toFixed(1)}MB) vượt quá giới hạn 3MB của trạm in. Vui lòng xuất hoặc đổi sang định dạng JPEG trước khi tải lên.`,
+        error: `HEIC photo (${sizeMb.toFixed(1)}MB) exceeds the 3MB upload limit. Please export as JPEG or compress before uploading.`,
       };
     }
     // Small HEIC (<=3MB) is accepted directly and converted on backend
@@ -40,13 +40,13 @@ export async function processImageForUpload(file) {
     return {
       ok: false,
       code: 'IMAGE_OVERSIZE_CANNOT_COMPRESS',
-      error: `Ảnh có dung lượng ${sizeMb.toFixed(1)}MB vượt quá giới hạn 3MB và không thể tự động nén đủ nhỏ. Vui lòng chọn ảnh khác hoặc giảm dung lượng trước khi tải lên.`,
+      error: `Photo size (${sizeMb.toFixed(1)}MB) exceeds the 3MB limit and could not be compressed automatically. Please select another photo or resize it before uploading.`,
     };
   } catch (err) {
     return {
       ok: false,
       code: 'IMAGE_COMPRESSION_FAILED',
-      error: `Ảnh có dung lượng ${sizeMb.toFixed(1)}MB không thể nén xuống dưới 3MB (${err.message || 'lỗi xử lý'}). Vui lòng chọn ảnh khác.`,
+      error: `Photo (${sizeMb.toFixed(1)}MB) could not be compressed below 3MB (${err.message || 'processing error'}). Please select another photo.`,
     };
   }
 }
@@ -62,7 +62,7 @@ async function compressStandardImage(file, maxBytes) {
         const origWidth = img.naturalWidth || img.width;
         const origHeight = img.naturalHeight || img.height;
         if (!origWidth || !origHeight) {
-          reject(new Error('Kích thước ảnh không hợp lệ'));
+          reject(new Error('Invalid image dimensions'));
           return;
         }
 
@@ -120,7 +120,7 @@ async function compressStandardImage(file, maxBytes) {
           });
           resolve(newFile);
         } else {
-          reject(new Error('Dung lượng sau nén vẫn vượt 3MB'));
+          reject(new Error('Compressed size still exceeds 3MB'));
         }
       } catch (e) {
         reject(e);
@@ -129,7 +129,7 @@ async function compressStandardImage(file, maxBytes) {
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Không đọc được tệp ảnh'));
+      reject(new Error('Unable to read image file'));
     };
 
     img.src = url;

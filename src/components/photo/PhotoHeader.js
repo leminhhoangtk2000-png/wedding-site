@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-export default function PhotoHeader({ subtitle = 'Trạm In Ảnh Kỷ Niệm' }) {
+export default function PhotoHeader({ subtitle = 'Keepsake Photo Printing' }) {
   const pathname = usePathname();
 
   return (
     <header className="photo-header" role="banner">
       <div className="photo-header-inner">
         <div className="photo-header-brand">
-          <Link href="/" className="photo-brand-link" aria-label="Về trang chủ đám cưới Hoàng và Duyên">
+          <Link href="/" className="photo-brand-link" aria-label="Back to wedding home page">
             <span className="photo-brand-names">Hoàng &amp; Duyên</span>
             <span className="photo-brand-dot">•</span>
             <span className="photo-brand-project">69 Project</span>
@@ -18,24 +18,24 @@ export default function PhotoHeader({ subtitle = 'Trạm In Ảnh Kỷ Niệm' }
           <span className="photo-header-tagline">{subtitle}</span>
         </div>
 
-        <nav className="photo-header-nav" aria-label="Điều hướng tính năng in ảnh">
+        <nav className="photo-header-nav" aria-label="Photo booth navigation">
           <Link
             href="/"
             className={`photo-nav-item ${pathname === '/' ? 'active' : ''}`}
           >
-            Trang chủ
+            Home
           </Link>
           <Link
             href="/photo"
             className={`photo-nav-item ${pathname === '/photo' ? 'active' : ''}`}
           >
-            Chụp ảnh
+            Photo Booth
           </Link>
           <Link
             href="/admin/printing"
             className={`photo-nav-item ${pathname.startsWith('/admin/printing') ? 'active' : ''}`}
           >
-            Quản trị in
+            Print Admin
           </Link>
         </nav>
       </div>

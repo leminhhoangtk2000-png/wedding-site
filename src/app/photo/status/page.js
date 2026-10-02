@@ -85,7 +85,7 @@ export default function PhotoStatusPage() {
           if (err.status === 404 || err.code === 'NOT_FOUND') {
             setIsNotFound(true);
           } else {
-            setErrorMessage(err.message || 'Không thể cập nhật trạng thái in ảnh.');
+            setErrorMessage(err.message || 'Unable to update photo print status.');
           }
         })
         .finally(() => {
@@ -162,12 +162,12 @@ export default function PhotoStatusPage() {
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
                 <span className={styles.badgeSparkle}>✦</span>
-                <span>THÔNG TIN KHÔNG KHẢ DỤNG</span>
+                <span>INFORMATION UNAVAILABLE</span>
                 <span className={styles.badgeSparkle}>✦</span>
               </div>
-              <h1 className={styles.cardTitle}>Không Tìm Thấy Yêu Cầu</h1>
+              <h1 className={styles.cardTitle}>Photo Request Not Found</h1>
               <p className={styles.cardSubtitle}>
-                Liên kết theo dõi không chứa mã định danh hoặc mã bảo mật hợp lệ.
+                The tracking link is missing a valid identifier or security token.
               </p>
               <div className={styles.filigreeDivider} aria-hidden="true">
                 <div className={styles.filigreeLine} />
@@ -177,12 +177,12 @@ export default function PhotoStatusPage() {
             </div>
 
             <div className={styles.successInstructions} style={{ textAlign: 'center' }}>
-              Vui lòng kiểm tra lại liên kết bạn đã nhận được sau khi gửi ảnh, hoặc thực hiện chụp và gửi ảnh mới tại trạm in.
+              Please check the link you received after submitting your photo, or take and submit a new photo at the booth.
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
               <Link href="/photo" className={styles.btnPrimary}>
-                <span>← Đến trang chụp ảnh</span>
+                <span>← Back to Photo Booth</span>
               </Link>
             </div>
           </div>
@@ -193,17 +193,17 @@ export default function PhotoStatusPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
-                <span>✦ 404 KHÔNG TÌM THẤY ✦</span>
+                <span>✦ 404 NOT FOUND ✦</span>
               </div>
-              <h1 className={styles.cardTitle}>Yêu Cầu Không Tồn Tại</h1>
+              <h1 className={styles.cardTitle}>Request Does Not Exist</h1>
               <p className={styles.cardSubtitle}>
-                Yêu cầu in ảnh không tìm thấy trên hệ thống hoặc đã hết thời gian lưu trữ.
+                The photo print request was not found on the system or has expired.
               </p>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 20 }}>
               <Link href="/photo" className={styles.btnPrimary}>
-                <span>Gửi ảnh mới</span>
+                <span>Submit New Photo</span>
               </Link>
             </div>
           </div>
@@ -214,11 +214,11 @@ export default function PhotoStatusPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
-                <span>✦ TRẠM IN CHƯA SẴN SÀNG ✦</span>
+                <span>✦ PRINT STATION UNAVAILABLE ✦</span>
               </div>
-              <h1 className={styles.cardTitle}>Chưa Thể Tải Trạng Thái</h1>
+              <h1 className={styles.cardTitle}>Could Not Load Status</h1>
               <p className={styles.cardSubtitle}>
-                {errorMessage || 'Hệ thống trạm in hiện đang được chuẩn bị hoặc kết nối máy chủ tạm gián đoạn.'}
+                {errorMessage || 'The print station system is being prepared or the connection is temporarily interrupted.'}
               </p>
               <div className={styles.filigreeDivider} aria-hidden="true">
                 <div className={styles.filigreeLine} />
@@ -245,16 +245,16 @@ export default function PhotoStatusPage() {
                       if (err.status === 404 || err.code === 'NOT_FOUND') {
                         setIsNotFound(true);
                       } else {
-                        setErrorMessage(err.message || 'Không thể cập nhật trạng thái in ảnh.');
+                        setErrorMessage(err.message || 'Unable to update photo print status.');
                       }
                     })
                     .finally(() => setLoading(false));
                 }}
               >
-                <span>🔄 Thử tải lại</span>
+                <span>🔄 Retry</span>
               </button>
               <Link href="/photo" className={styles.btnSecondary}>
-                <span>Về trang chụp ảnh</span>
+                <span>Back to Photo Booth</span>
               </Link>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function PhotoStatusPage() {
           <div className={styles.card}>
             <div className={styles.uploadingNotice}>
               <div className={styles.spinner} aria-hidden="true" />
-              <div className={styles.uploadingText}>Đang kiểm tra tiến độ in ảnh...</div>
+              <div className={styles.uploadingText}>Checking photo printing progress...</div>
             </div>
           </div>
         )}
@@ -297,12 +297,12 @@ export default function PhotoStatusPage() {
             <div className={styles.cardHeader}>
               <div className={styles.badgePill}>
                 <span className={styles.badgeSparkle}>✦</span>
-                <span>TIẾN ĐỘ IN ẢNH</span>
+                <span>LIVE PRINTING PROGRESS</span>
                 <span className={styles.badgeSparkle}>✦</span>
               </div>
-              <h1 className={styles.cardTitle}>Trạng Thái Ảnh Của Bạn</h1>
+              <h1 className={styles.cardTitle}>Your Photo Print Status</h1>
               <p className={styles.cardSubtitle}>
-                Hệ thống tự động cập nhật tiến độ thực tế từ trạm in ảnh tại tiệc cưới.
+                Real-time status updates directly from the photo print station at the wedding.
               </p>
               <div className={styles.filigreeDivider} aria-hidden="true">
                 <div className={styles.filigreeLine} />
@@ -323,21 +323,21 @@ export default function PhotoStatusPage() {
 
             {/* Pickup Code Highlight */}
             <div className={styles.pickupHighlight}>
-              <span className={styles.pickupTitle}>MÃ NHẬN ẢNH CỦA BẠN</span>
+              <span className={styles.pickupTitle}>YOUR PICKUP CODE</span>
               <span className={styles.pickupCode}>{requestData.pickup_code}</span>
               <button
                 type="button"
                 className={styles.pickupCopyBtn}
                 onClick={() => handleCopyCode(requestData.pickup_code)}
-                aria-label="Sao chép mã nhận ảnh"
+                aria-label="Copy pickup code"
               >
                 {copiedCode ? (
                   <>
                     <HanddrawnCheck size={16} />
-                    <span>Đã sao chép</span>
+                    <span>Copied</span>
                   </>
                 ) : (
-                  <span>📋 Sao chép mã</span>
+                  <span>📋 Copy Code</span>
                 )}
               </button>
             </div>
@@ -346,16 +346,16 @@ export default function PhotoStatusPage() {
             <div className={styles.trackingStatusBox}>
               <div className={styles.trackingMetaRow}>
                 <div>
-                  <span style={{ fontSize: '0.85rem', color: '#6b5c47', fontWeight: 500 }}>Trạng thái hiện tại:</span>
+                  <span style={{ fontSize: '0.85rem', color: '#6b5c47', fontWeight: 500 }}>Current status:</span>
                   <div style={{ marginTop: 6 }}>
                     <StatusBadge status={requestData.status} />
                   </div>
                 </div>
                 {requestData.created_at && (
                   <div style={{ textAlign: 'right', fontSize: '0.85rem', color: '#6b5c47' }}>
-                    Thời gian gửi:
+                    Submitted at:
                     <div style={{ color: '#231d16', fontWeight: 600, marginTop: 2 }}>
-                      {new Date(requestData.created_at).toLocaleTimeString('vi-VN', {
+                      {new Date(requestData.created_at).toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -380,9 +380,9 @@ export default function PhotoStatusPage() {
                   <div className={styles.timelineStepDot} aria-hidden="true">
                     {getStepStatus(0, requestData.status) === 'completed' ? '✓' : '1'}
                   </div>
-                  <div className={styles.timelineStepTitle}>1. Đã tiếp nhận yêu cầu</div>
+                  <div className={styles.timelineStepTitle}>1. Request Received</div>
                   <div className={styles.timelineStepDesc}>
-                    Ảnh đã được gửi vào hàng đợi và đang chờ người trực duyệt in.
+                    Your photo is in queue and awaiting operator review.
                   </div>
                 </div>
 
@@ -400,9 +400,9 @@ export default function PhotoStatusPage() {
                   <div className={styles.timelineStepDot} aria-hidden="true">
                     {getStepStatus(1, requestData.status) === 'completed' ? '✓' : '2'}
                   </div>
-                  <div className={styles.timelineStepTitle}>2. Đã duyệt in</div>
+                  <div className={styles.timelineStepTitle}>2. Approved for Print</div>
                   <div className={styles.timelineStepDesc}>
-                    Yêu cầu đã được chấp thuận và đang xếp hàng đợi máy in xử lý.
+                    Your photo was approved and is queued for the printer.
                   </div>
                 </div>
 
@@ -420,11 +420,11 @@ export default function PhotoStatusPage() {
                   <div className={styles.timelineStepDot} aria-hidden="true">
                     {getStepStatus(2, requestData.status) === 'completed' ? '✓' : '3'}
                   </div>
-                  <div className={styles.timelineStepTitle}>3. Đang chuyển tới máy in</div>
+                  <div className={styles.timelineStepTitle}>3. Printing in Progress</div>
                   <div className={styles.timelineStepDesc}>
                     {requestData.status === 'review'
-                      ? '⚠️ Cần kiểm tra trạm in. Người trực đang hỗ trợ xử lý.'
-                      : 'Trạm in Mac đang tiếp nhận và in ảnh ra giấy postcard.'}
+                      ? '⚠️ Operator inspection required. Our booth attendant is handling it.'
+                      : 'The print station is spooling and printing your postcard photo.'}
                   </div>
                 </div>
 
@@ -442,9 +442,9 @@ export default function PhotoStatusPage() {
                   <div className={styles.timelineStepDot} aria-hidden="true">
                     {getStepStatus(3, requestData.status) === 'completed' ? '✨' : '4'}
                   </div>
-                  <div className={styles.timelineStepTitle}>4. Ảnh sẵn sàng nhận!</div>
+                  <div className={styles.timelineStepTitle}>4. Ready for Pickup!</div>
                   <div className={styles.timelineStepDesc}>
-                    Ảnh đã in hoàn tất! Mời bạn tới bàn trạm in đọc mã nhận ảnh để nhận bức ảnh kỷ niệm.
+                    Printing complete! Please head over to the photo booth table with your pickup code.
                   </div>
                 </div>
               </div>
@@ -464,8 +464,8 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  🎉 <strong>Ảnh của bạn đã in xong!</strong> Hãy đến bàn in ảnh và xuất trình mã{' '}
-                  <strong style={{ color: '#8c6720' }}>{requestData.pickup_code}</strong> để nhận ảnh nhé!
+                  🎉 <strong>Your photo is ready!</strong> Please head over to the photo booth table and present code{' '}
+                  <strong style={{ color: '#8c6720' }}>{requestData.pickup_code}</strong> to collect your print!
                 </div>
               )}
 
@@ -483,7 +483,7 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  Yêu cầu in này đã bị từ chối bởi người trực trạm. Bạn có thể chọn và gửi một ảnh khác phù hợp hơn.
+                  This photo submission was declined by the booth operator. Feel free to choose and submit another photo.
                 </div>
               )}
 
@@ -501,7 +501,7 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  ⚠️ Yêu cầu đang cần người trực trạm kiểm tra máy in. Bạn không cần gửi lại ảnh, người trực sẽ tiếp tục xử lý.
+                  ⚠️ This print request requires a quick check on the printer. No need to resubmit, our operator is working on it.
                 </div>
               )}
             </div>
@@ -510,8 +510,8 @@ export default function PhotoStatusPage() {
             <div className={styles.pollingNotice} aria-live="polite">
               <span className={styles.pollingDot} aria-hidden="true" />
               <span>
-                Cập nhật tự động mỗi 5 giây
-                {lastUpdated && ` • Lần cuối lúc ${lastUpdated.toLocaleTimeString('vi-VN')}`}
+                Auto-refreshing every 5 seconds
+                {lastUpdated && ` • Last updated ${lastUpdated.toLocaleTimeString('en-US')}`}
               </span>
             </div>
 
@@ -519,26 +519,26 @@ export default function PhotoStatusPage() {
             <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/photo" className={styles.btnPrimary}>
                 <HanddrawnCamera size={18} />
-                <span>Gửi thêm ảnh khác</span>
+                <span>Submit Another Photo</span>
               </Link>
               <Link href="/" className={styles.btnSecondary}>
-                <span>Về trang chủ</span>
+                <span>Back to Home</span>
               </Link>
             </div>
           </div>
         )}
 
         {/* BOTTOM EXPLORE NAVIGATION CARDS (Matching RSVP) */}
-        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Khám phá trang đám cưới">
+        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Explore our wedding">
           <div className={styles.badgePill}>
             <span className={styles.badgeSparkle}>✦</span>
-            <span>KHÁM PHÁ ĐÁM CƯỚI</span>
+            <span>EXPLORE OUR WEDDING</span>
             <span className={styles.badgeSparkle}>✦</span>
           </div>
 
-          <h2 className={styles.cardTitle}>Chuyện Tình Yêu &amp; Lời Chúc</h2>
+          <h2 className={styles.cardTitle}>Our Story &amp; Guestbook</h2>
           <p className={styles.cardSubtitle}>
-            Cùng đón xem hành trình 10 năm của Hoàng &amp; Duyên, xác nhận tham dự hoặc gửi lời chúc mừng.
+            Discover Hoàng &amp; Duyên&apos;s 10-year journey together, RSVP, or leave heartfelt blessings in our guestbook.
           </p>
 
           <div className={styles.filigreeDivider} aria-hidden="true">
@@ -548,7 +548,7 @@ export default function PhotoStatusPage() {
           </div>
 
           <div className={styles.navButtonGroup}>
-            <Link href="/" className={styles.navActionCard} aria-label="Xem câu chuyện tình yêu">
+            <Link href="/" className={styles.navActionCard} aria-label="Read our love story">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnBook size={24} />
@@ -558,7 +558,7 @@ export default function PhotoStatusPage() {
               <div className={styles.navCardArrow} aria-hidden="true">→</div>
             </Link>
 
-            <Link href="/rsvp" className={styles.navActionCard} aria-label="Xác nhận tham dự">
+            <Link href="/rsvp" className={styles.navActionCard} aria-label="Confirm attendance (RSVP)">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnEnvelope size={24} />
@@ -568,7 +568,7 @@ export default function PhotoStatusPage() {
               <div className={styles.navCardArrow} aria-hidden="true">→</div>
             </Link>
 
-            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Gửi lời chúc mừng">
+            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Send wedding blessings">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnHeart size={24} />
@@ -583,7 +583,7 @@ export default function PhotoStatusPage() {
         {/* Discreet admin link */}
         <div className={styles.adminFootnote}>
           <Link href="/admin/printing" className={styles.adminFootnoteLink}>
-            ⚙️ Quản trị trạm in ảnh
+            ⚙️ Print Station Admin
           </Link>
         </div>
       </main>

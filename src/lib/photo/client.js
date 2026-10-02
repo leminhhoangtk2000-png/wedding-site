@@ -1,15 +1,20 @@
 /** Shared UI contract. Secrets belong in headers/fragment, never URL query strings. */
 export const PHOTO_STATUS_LABELS = {
-  pending: 'Chờ duyệt', approved: 'Chờ in', claimed: 'Đang chuyển tới máy in',
-  submitting: 'Đang chuyển tới máy in', submitted: 'Đã gửi tới máy in',
-  review: 'Cần người trực kiểm tra', ready: 'Ảnh sẵn sàng', rejected: 'Yêu cầu đã bị từ chối',
+  pending: 'Pending Review',
+  approved: 'Queued for Print',
+  claimed: 'Spooling to Printer',
+  submitting: 'Spooling to Printer',
+  submitted: 'Printing in Progress',
+  review: 'Operator Review Needed',
+  ready: 'Ready for Pickup',
+  rejected: 'Request Declined',
 };
 export async function photoFetch(url, options = {}) {
   const response = await fetch(url, { cache: 'no-store', ...options });
   let data;
-  try { data = await response.json(); } catch { throw new Error('Máy chủ chưa trả về dữ liệu hợp lệ. Vui lòng thử lại.'); }
+  try { data = await response.json(); } catch { throw new Error('Server returned an invalid response. Please try again.'); }
   if (!response.ok || !data.success) {
-    const error = new Error(data.error || 'Không thể xử lý yêu cầu.');
+    const error = new Error(data.error || 'Unable to process request.');
     error.code = data.code; error.status = response.status; throw error;
   }
   return data;

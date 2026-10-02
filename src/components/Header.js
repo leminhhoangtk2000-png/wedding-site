@@ -52,7 +52,7 @@ export default function Header() {
     { href: '/', label: 'Our Story' },
     { href: '/rsvp', label: 'RSVP' },
     { href: '/wishes', label: 'Wishes Board' },
-    { href: '/photo', label: 'In Ảnh' },
+    { href: '/photo', label: 'Photo Booth' },
   ];
 
   const isStoryPage = pathname === '/';

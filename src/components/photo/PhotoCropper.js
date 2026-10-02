@@ -220,7 +220,7 @@ export default function PhotoCropper({
   return (
     <div className="cropper-container">
       {/* 1. Orientation Selector */}
-      <div className="orientation-selector" role="group" aria-label="Chọn khổ giấy in">
+      <div className="orientation-selector" role="group" aria-label="Select print orientation">
         <button
           type="button"
           className={`orientation-btn ${isPortrait ? 'active' : ''}`}
@@ -229,7 +229,7 @@ export default function PhotoCropper({
           disabled={locked}
         >
           <span className="icon-portrait" aria-hidden="true">▯</span>
-          <span>Khổ dọc (10 x 14.8 cm)</span>
+          <span>Portrait (10 × 14.8 cm)</span>
         </button>
         <button
           type="button"
@@ -239,7 +239,7 @@ export default function PhotoCropper({
           disabled={locked}
         >
           <span className="icon-landscape" aria-hidden="true">▭</span>
-          <span>Khổ ngang (14.8 x 10 cm)</span>
+          <span>Landscape (14.8 × 10 cm)</span>
         </button>
       </div>
 
@@ -247,8 +247,8 @@ export default function PhotoCropper({
       <div className="crop-workspace">
         <div className="crop-panel">
           <div className="crop-panel-title">
-            <span>Kéo di chuyển hoặc dùng phím mũi tên / thanh trượt để căn chỉnh</span>
-            <span className="crop-hint">Tỉ lệ {isPortrait ? '100:148' : '148:100'}</span>
+            <span>Drag photo or use sliders below to adjust framing</span>
+            <span className="crop-hint">Ratio {isPortrait ? '100:148' : '148:100'}</span>
           </div>
 
           <div
@@ -261,7 +261,7 @@ export default function PhotoCropper({
             onKeyDown={handleKeyDown}
             tabIndex={0}
             role="region"
-            aria-label="Khung căn chỉnh ảnh. Kéo bằng chuột, ngón tay hoặc dùng các phím mũi tên để di chuyển ảnh"
+            aria-label="Photo framing canvas. Drag with mouse/touch or use arrow keys to reposition"
           >
             {/* WYSIWYG Cropped Content */}
             <div className="crop-preview-box">
@@ -269,7 +269,7 @@ export default function PhotoCropper({
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={imageUrl}
-                  alt="Xem trước vùng ảnh cắt"
+                  alt="Photo crop preview"
                   className="crop-preview-img"
                   style={{
                     width: `${crop.width > 0 ? (100 / crop.width).toFixed(3) : 100}%`,
@@ -290,7 +290,7 @@ export default function PhotoCropper({
             </div>
 
             <div className="crop-drag-badge" aria-hidden="true">
-              <span>{locked ? '🔒 Khung ảnh đã chốt theo yêu cầu gửi' : '✦ Kéo để dịch chuyển'}</span>
+              <span>{locked ? '🔒 Framing locked for submitted request' : '✦ Drag to reposition'}</span>
             </div>
           </div>
         </div>
@@ -300,8 +300,8 @@ export default function PhotoCropper({
       <div className="crop-controls">
         <div className="control-row">
           <div className="control-label-row">
-            <label htmlFor="zoom-range">Thu phóng ({zoom.toFixed(1)}x)</label>
-            <span className="control-value">{Math.round((zoom - 1) * 50)}% phóng to</span>
+            <label htmlFor="zoom-range">Zoom ({zoom.toFixed(1)}x)</label>
+            <span className="control-value">{Math.round((zoom - 1) * 50)}% zoom</span>
           </div>
           <input
             id="zoom-range"
@@ -315,7 +315,7 @@ export default function PhotoCropper({
               setZoom(parseFloat(e.target.value));
             }}
             className="slider-input"
-            aria-label="Thu phóng ảnh"
+            aria-label="Photo zoom"
             disabled={locked}
           />
         </div>
@@ -323,7 +323,7 @@ export default function PhotoCropper({
         <div className="control-grid-sliders">
           <div className="control-row">
             <div className="control-label-row">
-              <label htmlFor="pan-x-range">Vị trí ngang (X)</label>
+              <label htmlFor="pan-x-range">Horizontal Position (X)</label>
               <span className="control-value">{Math.round(panX * 100)}%</span>
             </div>
             <input
@@ -338,14 +338,14 @@ export default function PhotoCropper({
                 setPanX(parseFloat(e.target.value));
               }}
               className="slider-input"
-              aria-label="Vị trí ngang"
+              aria-label="Horizontal position"
               disabled={locked}
             />
           </div>
 
           <div className="control-row">
             <div className="control-label-row">
-              <label htmlFor="pan-y-range">Vị trí dọc (Y)</label>
+              <label htmlFor="pan-y-range">Vertical Position (Y)</label>
               <span className="control-value">{Math.round(panY * 100)}%</span>
             </div>
             <input
@@ -360,7 +360,7 @@ export default function PhotoCropper({
                 setPanY(parseFloat(e.target.value));
               }}
               className="slider-input"
-              aria-label="Vị trí dọc"
+              aria-label="Vertical position"
               disabled={locked}
             />
           </div>
@@ -373,9 +373,9 @@ export default function PhotoCropper({
             className="crop-btn secondary"
             onClick={handleReset}
             disabled={locked}
-            title="Đưa về căn giữa chuẩn"
+            title="Reset framing to center"
           >
-            <span>↺ Đặt lại căn giữa</span>
+            <span>↺ Reset to Center</span>
           </button>
 
           {onChangePhoto && !locked && (
@@ -383,9 +383,9 @@ export default function PhotoCropper({
               type="button"
               className="crop-btn tertiary"
               onClick={onChangePhoto}
-              title="Chọn ảnh khác từ máy"
+              title="Choose a different photo from your device"
             >
-              <span>🖼️ Chọn ảnh khác</span>
+              <span>🖼️ Choose Different Photo</span>
             </button>
           )}
         </div>

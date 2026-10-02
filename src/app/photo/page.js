@@ -262,7 +262,7 @@ export default function PhotoPage() {
         }
       }
     } catch (uploadErr) {
-      setErrorMessage(uploadErr.message || 'Không thể tải ảnh lên máy chủ. Vui lòng thử lại.');
+      setErrorMessage(uploadErr.message || 'Unable to upload photo to server. Please try again.');
       // uploadData remains null so old photo cannot be submitted with new preview
     } finally {
       setIsUploading(false);
@@ -321,19 +321,19 @@ export default function PhotoPage() {
       // INITIAL SUBMISSION: Validate and establish immutable payload
       const trimmedName = guestName.trim();
       if (!trimmedName) {
-        setErrorMessage('Vui lòng nhập tên của bạn (tối đa 80 ký tự).');
+        setErrorMessage('Please enter your name (up to 80 characters).');
         return;
       }
       if (trimmedName.length > 80) {
-        setErrorMessage('Tên quá dài (tối đa 80 ký tự).');
+        setErrorMessage('Name is too long (up to 80 characters).');
         return;
       }
       if (!uploadData || !uploadData.id || !uploadData.token) {
-        setErrorMessage('Chưa có ảnh được tải lên hoàn tất.');
+        setErrorMessage('Photo upload is not complete yet.');
         return;
       }
       if (!crop) {
-        setErrorMessage('Vui lòng điều chỉnh khung ảnh trước khi gửi.');
+        setErrorMessage('Please adjust photo framing before submitting.');
         return;
       }
 
@@ -399,7 +399,7 @@ export default function PhotoPage() {
           tracking_token: payloadToSend.tracking_token,
         });
       } else {
-        throw new Error('Không nhận được phản hồi hợp lệ từ máy chủ.');
+        throw new Error('Invalid response received from server.');
       }
     } catch (err) {
       // Distinguish definitive server rejections from ambiguous network/server errors
@@ -427,14 +427,14 @@ export default function PhotoPage() {
         } catch {
           // ignore
         }
-        setErrorMessage(err.message || 'Yêu cầu in ảnh không được chấp nhận. Vui lòng kiểm tra lại.');
+        setErrorMessage(err.message || 'Photo print request was not accepted. Please try again.');
       } else {
         // Ambiguous result (network drop, timeout, 5xx server crash, lost response)
         // Keep submittedPayloadRef.current and hasSubmittedDraft = true!
         // Storage retains submitted: true so reloads continue in idempotent retry mode.
         setErrorMessage(
           err.message ||
-            'Chưa nhận được phản hồi từ máy chủ. Yêu cầu của bạn có thể đã được lưu. Vui lòng bấm "Gửi lại yêu cầu" để nhận mã mà không bị tính thêm lượt in.'
+            'Could not connect to server. Your request may already be saved. Please click "Resubmit Print Request" to retrieve your code without using an extra print credit.'
         );
       }
     } finally {
@@ -472,7 +472,7 @@ export default function PhotoPage() {
           capture="environment"
           style={{ display: 'none' }}
           onChange={handleFilePicked}
-          aria-label="Chụp ảnh mới bằng camera"
+          aria-label="Take new photo using camera"
         />
         <input
           ref={galleryInputRef}
@@ -480,7 +480,7 @@ export default function PhotoPage() {
           accept="image/*"
           style={{ display: 'none' }}
           onChange={handleFilePicked}
-          aria-label="Chọn ảnh có sẵn từ thư viện"
+          aria-label="Choose photo from photo library"
         />
 
         {/* Unavailable Banner */}
@@ -490,8 +490,8 @@ export default function PhotoPage() {
               <HanddrawnInfo size={22} />
             </span>
             <div>
-              <strong>Trạm in chưa sẵn sàng</strong>
-              <div>Hệ thống in ảnh hiện đang được chuẩn bị hoặc máy chủ tạm gián đoạn. Bạn vẫn có thể thử chọn ảnh trước.</div>
+              <strong>Print Station Not Ready</strong>
+              <div>The photo printing system is being prepared or temporarily interrupted. You can still select and crop your photo ahead of time.</div>
             </div>
           </div>
         )}
@@ -503,8 +503,8 @@ export default function PhotoPage() {
               <HanddrawnAlert size={22} />
             </span>
             <div>
-              <strong>Tạm dừng nhận ảnh</strong>
-              <div>Trạm in đang tạm thời ngưng nhận yêu cầu để xử lý các ảnh trước đó. Vui lòng chờ người trực mở lại.</div>
+              <strong>Submissions Temporarily Paused</strong>
+              <div>The photo station is temporarily paused to process existing prints. Please wait for our operator to reopen submissions.</div>
             </div>
           </div>
         )}
@@ -516,8 +516,8 @@ export default function PhotoPage() {
               <HanddrawnAlert size={22} />
             </span>
             <div>
-              <strong>Đã đủ số lượng ảnh in</strong>
-              <div>Hôm nay trạm in đã đạt tối đa {sessionData.capacity} ảnh. Cảm ơn bạn đã gửi những khoảnh khắc đẹp!</div>
+              <strong>Print Capacity Reached</strong>
+              <div>The photo station has reached its maximum quota of {sessionData.capacity} prints today. Thank you for sharing your wonderful memories!</div>
             </div>
           </div>
         )}
@@ -529,9 +529,9 @@ export default function PhotoPage() {
               <HanddrawnInfo size={22} />
             </span>
             <div>
-              <strong>Đang giữ yêu cầu in ảnh trước đó</strong>
+              <strong>Previous Print Request Held</strong>
               <div>
-                Hệ thống đang khóa và giữ nguyên ảnh cùng tên bạn đã gửi. Bấm &quot;Gửi lại yêu cầu in ảnh&quot; bên dưới để nhận mã nhận ảnh mà không bị tính thêm lượt in.
+                Your submitted photo and name have been preserved. Click &quot;Resubmit Print Request&quot; below to retrieve your pickup code without consuming an extra print.
               </div>
             </div>
           </div>
@@ -576,13 +576,13 @@ export default function PhotoPage() {
             <div className={styles.successCard}>
               <div className={styles.badgePill}>
                 <span className={styles.badgeSparkle}>✦</span>
-                <span>YÊU CẦU ĐÃ ĐƯỢC GỬI</span>
+                <span>PRINT REQUEST RECEIVED</span>
                 <span className={styles.badgeSparkle}>✦</span>
               </div>
 
-              <h1 className={styles.cardTitle}>In Ảnh Kỷ Niệm</h1>
+              <h1 className={styles.cardTitle}>Keepsake Photo Printing</h1>
               <p className={styles.cardSubtitle}>
-                Cảm ơn bạn, <strong>{guestName}</strong>! Ảnh của bạn đã được đưa vào danh sách chờ in tại tiệc cưới Hoàng &amp; Duyên.
+                Thank you, <strong>{guestName}</strong>! Your photo has been queued for printing at Hoàng &amp; Duyên&apos;s wedding celebration.
               </p>
 
               <div className={styles.filigreeDivider} aria-hidden="true">
@@ -593,27 +593,27 @@ export default function PhotoPage() {
 
               {/* Pickup Code Display */}
               <div className={styles.pickupHighlight}>
-                <span className={styles.pickupTitle}>MÃ NHẬN ẢNH CỦA BẠN</span>
+                <span className={styles.pickupTitle}>YOUR PICKUP CODE</span>
                 <span className={styles.pickupCode}>{submissionSuccess.request.pickup_code}</span>
                 <button
                   type="button"
                   className={styles.pickupCopyBtn}
                   onClick={() => handleCopyCode(submissionSuccess.request.pickup_code)}
-                  aria-label="Sao chép mã nhận ảnh"
+                  aria-label="Copy pickup code"
                 >
                   {copiedCode ? (
                     <>
                       <HanddrawnCheck size={16} />
-                      <span>Đã sao chép</span>
+                      <span>Copied</span>
                     </>
                   ) : (
-                    <span>📋 Sao chép mã</span>
+                    <span>📋 Copy Code</span>
                   )}
                 </button>
               </div>
 
               <p className={styles.successInstructions}>
-                Hãy chụp màn hình hoặc lưu lại mã trên. Khi ảnh in hoàn tất, bạn có thể đọc mã này tại bàn trực in ảnh để nhận bức ảnh xinh xắn của mình!
+                Please take a screenshot or save your code. Once printing is complete, present this code at our photo booth table to collect your printed keepsake!
               </p>
 
               <div className={styles.successActions}>
@@ -622,7 +622,7 @@ export default function PhotoPage() {
                   className={styles.btnPrimary}
                   rel="noreferrer"
                 >
-                  <span>Xem tiến độ in ảnh trực tiếp →</span>
+                  <span>Track Live Print Status →</span>
                 </a>
 
                 <button
@@ -647,7 +647,7 @@ export default function PhotoPage() {
                     }
                   }}
                 >
-                  <span>Gửi thêm ảnh khác</span>
+                  <span>Print Another Photo</span>
                 </button>
               </div>
             </div>
@@ -657,12 +657,12 @@ export default function PhotoPage() {
               <div className={styles.cardHeader}>
                 <div className={styles.badgePill}>
                   <span className={styles.badgeSparkle}>✦</span>
-                  <span>CHỤP &amp; IN ẢNH LẤY LIỀN</span>
+                  <span>INSTANT PHOTO PRINTING</span>
                   <span className={styles.badgeSparkle}>✦</span>
                 </div>
-                <h1 className={styles.cardTitle}>In Ảnh Kỷ Niệm</h1>
+                <h1 className={styles.cardTitle}>Keepsake Photo Printing</h1>
                 <p className={styles.cardSubtitle}>
-                  Lưu giữ khoảnh khắc đáng nhớ cùng cô dâu chú rể. Ảnh sẽ được in trực tiếp tại tiệc cưới.
+                  Capture and print your memorable moments with Hoàng &amp; Duyên right at our wedding celebration.
                 </p>
                 <div className={styles.filigreeDivider} aria-hidden="true">
                   <div className={styles.filigreeLine} />
@@ -674,9 +674,9 @@ export default function PhotoPage() {
               {/* Quota indicator */}
               {sessionData && (
                 <div className={styles.quotaBox}>
-                  <span className={styles.quotaLabel}>Hạn mức trạm in:</span>
+                  <span className={styles.quotaLabel}>Station quota:</span>
                   <span className={styles.quotaValue}>
-                    <span>Còn {sessionData.remaining} / {sessionData.capacity} lượt in</span>
+                    <span>{sessionData.remaining} of {sessionData.capacity} prints remaining</span>
                   </span>
                 </div>
               )}
@@ -688,10 +688,10 @@ export default function PhotoPage() {
                     <HanddrawnCamera size={38} />
                   </div>
                   <div className={styles.pickerPrompt}>
-                    Chụp ảnh mới hoặc chọn ảnh từ máy của bạn
+                    Take a new photo or select from your device
                   </div>
                   <div className={styles.pickerHint}>
-                    Hỗ trợ ảnh JPEG, PNG, WebP (tự động nén tối ưu) hoặc ảnh HEIC (tối đa 3MB).
+                    Supports JPEG, PNG, WebP (auto-optimized) or HEIC photos (up to 3MB).
                   </div>
 
                   <div className={styles.pickerButtons}>
@@ -702,7 +702,7 @@ export default function PhotoPage() {
                       disabled={isBlocked}
                     >
                       <HanddrawnCamera size={18} />
-                      <span>Chụp ảnh ngay</span>
+                      <span>Take Photo</span>
                     </button>
                     <button
                       type="button"
@@ -711,7 +711,7 @@ export default function PhotoPage() {
                       disabled={isBlocked}
                     >
                       <HanddrawnSparkles size={18} />
-                      <span>Chọn ảnh có sẵn</span>
+                      <span>Choose from Library</span>
                     </button>
                   </div>
                 </div>
@@ -721,9 +721,9 @@ export default function PhotoPage() {
               {isUploading && (
                 <div className={styles.uploadingNotice}>
                   <div className={styles.spinner} aria-hidden="true" />
-                  <div className={styles.uploadingText}>Đang tải ảnh lên máy chủ...</div>
+                  <div className={styles.uploadingText}>Uploading photo to server...</div>
                   <div className={styles.uploadingSubtext}>
-                    Đang chuẩn hoá kích thước và chuẩn bị khung căn chỉnh
+                    Optimizing resolution and preparing framing canvas
                   </div>
                 </div>
               )}
@@ -749,7 +749,7 @@ export default function PhotoPage() {
                     <div className={styles.fieldGroup}>
                       <div className={styles.fieldLabelRow}>
                         <label htmlFor="guest-name">
-                          Tên của bạn hoặc lời nhắn ngắn <span style={{ color: '#d4af37' }}>*</span>
+                          Your name or short message <span style={{ color: '#d4af37' }}>*</span>
                         </label>
                         <span className={styles.charCounter}>{guestName.length}/80</span>
                       </div>
@@ -758,7 +758,7 @@ export default function PhotoPage() {
                         type="text"
                         value={guestName}
                         onChange={(e) => setGuestName(e.target.value)}
-                        placeholder="VD: Bạn Minh, Bàn 5, Team Bạn Thân..."
+                        placeholder="e.g. Sarah, Table 5, Best Friends..."
                         maxLength={80}
                         required
                         className={styles.textInput}
@@ -781,12 +781,12 @@ export default function PhotoPage() {
                             style={{ width: 20, height: 20, borderWidth: 2 }}
                             aria-hidden="true"
                           />
-                          <span>{hasSubmittedDraft ? 'Đang gửi lại yêu cầu in...' : 'Đang gửi yêu cầu in...'}</span>
+                          <span>{hasSubmittedDraft ? 'Resubmitting print request...' : 'Sending print request...'}</span>
                         </>
                       ) : (
                         <>
                           <HanddrawnSparkles size={18} />
-                          <span>{hasSubmittedDraft ? 'Thử gửi lại yêu cầu in ảnh' : 'Gửi yêu cầu in ảnh'}</span>
+                          <span>{hasSubmittedDraft ? 'Resubmit Print Request' : 'Send Print Request'}</span>
                         </>
                       )}
                     </button>
@@ -798,16 +798,16 @@ export default function PhotoPage() {
         </div>
 
         {/* BOTTOM EXPLORE NAVIGATION CARDS (Matching RSVP) */}
-        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Khám phá trang đám cưới">
+        <section className={`${styles.card} ${styles.navSectionCard}`} aria-label="Explore our wedding">
           <div className={styles.badgePill}>
             <span className={styles.badgeSparkle}>✦</span>
-            <span>KHÁM PHÁ ĐÁM CƯỚI</span>
+            <span>EXPLORE OUR WEDDING</span>
             <span className={styles.badgeSparkle}>✦</span>
           </div>
 
-          <h2 className={styles.cardTitle}>Chuyện Tình Yêu &amp; Lời Chúc</h2>
+          <h2 className={styles.cardTitle}>Our Story &amp; Guestbook</h2>
           <p className={styles.cardSubtitle}>
-            Cùng đón xem hành trình 10 năm của Hoàng &amp; Duyên, xác nhận tham dự hoặc gửi lời chúc mừng.
+            Discover Hoàng &amp; Duyên&apos;s 10-year journey together, RSVP, or leave heartfelt blessings in our guestbook.
           </p>
 
           <div className={styles.filigreeDivider} aria-hidden="true">
@@ -817,7 +817,7 @@ export default function PhotoPage() {
           </div>
 
           <div className={styles.navButtonGroup}>
-            <Link href="/" className={styles.navActionCard} aria-label="Xem câu chuyện tình yêu">
+            <Link href="/" className={styles.navActionCard} aria-label="Read our love story">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnBook size={24} />
@@ -827,7 +827,7 @@ export default function PhotoPage() {
               <div className={styles.navCardArrow} aria-hidden="true">→</div>
             </Link>
 
-            <Link href="/rsvp" className={styles.navActionCard} aria-label="Xác nhận tham dự">
+            <Link href="/rsvp" className={styles.navActionCard} aria-label="Confirm attendance (RSVP)">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnEnvelope size={24} />
@@ -837,7 +837,7 @@ export default function PhotoPage() {
               <div className={styles.navCardArrow} aria-hidden="true">→</div>
             </Link>
 
-            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Gửi lời chúc mừng">
+            <Link href="/wishes" className={`${styles.navActionCard} ${styles.navActionCardPrimary}`} aria-label="Send wedding blessings">
               <div className={styles.navCardMain}>
                 <div className={styles.navCardIcon} aria-hidden="true">
                   <HanddrawnHeart size={24} />
@@ -852,7 +852,7 @@ export default function PhotoPage() {
         {/* Discreet admin link */}
         <div className={styles.adminFootnote}>
           <Link href="/admin/printing" className={styles.adminFootnoteLink}>
-            ⚙️ Quản trị trạm in ảnh
+            ⚙️ Print Station Admin
           </Link>
         </div>
       </main>

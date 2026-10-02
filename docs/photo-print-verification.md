@@ -18,9 +18,16 @@ UI được thực thi bằng Antigravity bản thường, chat `Wedding Photo P
 
 ## Chưa thể kiểm chứng/đưa vào hoạt động
 
-- Môi trường hiện tại chưa có `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` và token trạm. Chưa chạy migration production hoặc triển khai website.
-- CUPS trên Mac chưa có máy in đã thêm. Chưa cài/chạy LaunchAgent, chưa in 10 ảnh giấy hoặc thử lỗi hết giấy/mực.
+- Updated 2026-10-02: production migration applied. Vercel production has service-role, station token and PHOTO_PRINT_HARDWARE_VERIFIED=false. Existing ADMIN_PASSWORD preserved. New environment settings and security patch are not deployed.
+- Mac CUPS has no printers. Private station config created with UUID/token and hardware_verified=false; printer/media remain placeholders. LaunchAgent not installed or started; no physical prints yet.
 - Upload qua Chrome automation bị chặn bởi quyền file URL của extension. Không thay đổi quyền extension. Upload qua API fixture đã kiểm chứng.
 - Còn phải kiểm tra iPhone Safari/Android Chrome: camera, hủy chụp, chọn thư viện, HEIC, crop và mạng yếu; sau đó chạy trên đúng Mac và CP1500.
 
 Giữ phiên mặc định tạm dừng, `PHOTO_PRINT_HARDWARE_VERIFIED=false` và config Mac `hardware_verified:false` cho đến khi nghiệm thu. Quy trình setup ở `photo-printing.md`.
+
+## Setup verification 2026-10-02
+
+- Next.js / eslint-config-next 16.3.8; full and production npm audit: zero vulnerabilities. Build: 17 routes; lint: zero errors, 21 existing warnings; 11 tests and HTTP API integration passed.
+- Live Supabase SDK: service-role session RPC passed (paused, capacity 100, reserved 0), private bucket passed, anonymous RPC denied. No guest data or print jobs created.
+- All photo_print tables have RLS; anon/authenticated cannot execute RPC. Screenshot: ../../photo-print-qa/supabase-production-security.png.
+- Secrets stay in ignored private server/config files. Mac worker has only station token. No commit, push or deployment performed in this setup run.
