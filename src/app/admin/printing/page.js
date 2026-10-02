@@ -4,12 +4,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import PhotoHeader from '@/components/photo/PhotoHeader';
 import StatusBadge from '@/components/photo/StatusBadge';
+import PhotoboothCard from '@/components/photo/PhotoboothCard';
+import {
+  DEFAULT_PRESETS,
+  computeEffectiveFilter,
+  defaultAdjustments,
+} from '@/lib/photo/presets';
 import { getPrintingAdmin, mutatePrintingAdmin, PHOTO_STATUS_LABELS } from '@/lib/photo/client';
 import styles from './printing.module.css';
 
 export default function AdminPrintingPage() {
-  // Authentication: In component memory only (never localStorage/sessionStorage)
-  const [password, setPassword] = useState('');
+  // Authentication: Initialize from shared admin session (same account as /admin)
+  const [password, setPassword] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const storedAuth = sessionStorage.getItem('admin_auth');
+      const storedPass = sessionStorage.getItem('admin_pass');
+      return storedAuth === 'true' && storedPass ? storedPass : '';
+    } catch {
+      return '';
+    }
+  });
   const [inputPassword, setInputPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -28,7 +43,22 @@ export default function AdminPrintingPage() {
   const [confirmRejectModal, setConfirmRejectModal] = useState(null); // request object
   const [confirmReprintModal, setConfirmReprintModal] = useState(null); // request object
   const [reprintConfirmedCheckbox, setReprintConfirmedCheckbox] = useState(false);
-  const [lightboxUrl, setLightboxUrl] = useState(null);
+  const [lightboxItem, setLightboxItem] = useState(null); // request object for large preview modal
+
+  // Admin Preset Configuration State
+  const [adminPresets,setAdminPresets]=useState(DEFAULT_PRESETS);
+  const [selectedPresetId,setSelectedPresetId]=useState('soft_wedding');
+  const [configVersion,setConfigVersion]=useState(null);
+  const [savingPresets,setSavingPresets]=useState(false);
+  const configDirtyRef=useRef(false), savePresetOpRef=useRef(null);
+  const applyConfig = config => {
+    if(!config)return;
+    setAdminPresets(config.presets);setConfigVersion(config.version);
+    configDirtyRef.current=false;
+  };
+  const [adminPreviewOrientation, setAdminPreviewOrientation] = useState('portrait');
+  const [presetSavedNotice, setPresetSavedNotice] = useState('');
+  const [isConfigCollapsed, setIsConfigCollapsed] = useState(false);
 
   // Filters & Search
   const [statusFilter, setStatusFilter] = useState('all');
@@ -47,6 +77,7 @@ export default function AdminPrintingPage() {
         const res = await getPrintingAdmin(password);
         if (res && res.session) {
           setData(res);
+          if(!configDirtyRef.current)applyConfig(res.preset_config);
           setIsAuthenticated(true);
           setAuthError('');
           const isOnline = Boolean(
@@ -57,10 +88,10 @@ export default function AdminPrintingPage() {
         }
       } catch (err) {
         if (err.status === 401 || err.code === 'UNAUTHORIZED') {
-          setAuthError('Mật khẩu quản trị không chính xác.');
+          setAuthError('Incorrect admin password.');
           setIsAuthenticated(false);
         } else {
-          setMutationError(err.message || 'Lỗi kết nối máy chủ quản trị in.');
+          setMutationError(err.message || 'Error connecting to print admin server.');
         }
       } finally {
         setLoading(false);
@@ -69,6 +100,15 @@ export default function AdminPrintingPage() {
     },
     [password]
   );
+
+  // Auto-authenticate if password was loaded from shared sessionStorage
+  useEffect(() => {
+    let active=true;
+    if (password && !isAuthenticated) {
+      Promise.resolve().then(()=>{if(active)fetchData(false);});
+    }
+    return ()=>{active=false;};
+  }, [password, isAuthenticated, fetchData]);
 
   // 5-second polling when authenticated
   useEffect(() => {
@@ -88,7 +128,7 @@ export default function AdminPrintingPage() {
     setMutationError('');
     const entered = inputPassword.trim();
     if (!entered) {
-      setAuthError('Vui lòng nhập mật khẩu quản trị.');
+      setAuthError('Please enter admin password.');
       return;
     }
 
@@ -98,13 +138,18 @@ export default function AdminPrintingPage() {
       if (res && res.session) {
         setPassword(entered);
         setData(res);
+        applyConfig(res.preset_config);
         setIsAuthenticated(true);
+        try {
+          sessionStorage.setItem('admin_auth', 'true');
+          sessionStorage.setItem('admin_pass', entered);
+        } catch {}
       }
     } catch (err) {
       if (err.status === 401 || err.code === 'UNAUTHORIZED') {
-        setAuthError('Mật khẩu quản trị không đúng.');
+        setAuthError('Incorrect admin password.');
       } else {
-        setAuthError(err.message || 'Không thể đăng nhập vào hệ thống in.');
+        setAuthError(err.message || 'Unable to sign in to print station system.');
       }
     } finally {
       setLoading(false);
@@ -119,13 +164,17 @@ export default function AdminPrintingPage() {
     setAuthError('');
     setMutationError('');
     activeOpKeyRef.current = {};
+    try {
+      sessionStorage.removeItem('admin_auth');
+      sessionStorage.removeItem('admin_pass');
+    } catch {}
   };
 
   // Close modals on Escape key
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (lightboxUrl) setLightboxUrl(null);
+        if (lightboxItem) setLightboxItem(null);
         else if (confirmReprintModal) {
           setConfirmReprintModal(null);
           setReprintConfirmedCheckbox(false);
@@ -136,7 +185,71 @@ export default function AdminPrintingPage() {
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [lightboxUrl, confirmReprintModal, confirmRejectModal]);
+  }, [lightboxItem, confirmReprintModal, confirmRejectModal]);
+
+  // Preset configuration handlers
+  const activePreset = adminPresets.find((p) => p.id === selectedPresetId) || adminPresets[0];
+
+  const handleUpdateSlider = (key, value) => {
+    configDirtyRef.current=true;setPresetSavedNotice('');
+    setAdminPresets((prev) =>
+      prev.map((p) =>
+        p.id === selectedPresetId
+          ? {
+              ...p,
+              settings: {
+                ...p.settings,
+                [key]: Number(value),
+              },
+            }
+          : p
+      )
+    );
+  };
+
+  const handleToggleEnable = (id, e) => {
+    e.stopPropagation();
+    configDirtyRef.current=true;setPresetSavedNotice('');
+    setAdminPresets((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, enabled: !p.enabled } : p))
+    );
+  };
+
+  const handleSetDefault = (id, e) => {
+    e.stopPropagation();
+    configDirtyRef.current=true;setPresetSavedNotice('');
+    setAdminPresets((prev) =>
+      prev.map((p) => ({
+        ...p,
+        isDefault: p.id === id,
+        enabled: p.id === id ? true : p.enabled,
+      }))
+    );
+  };
+
+  const handleSavePresets = async () => {
+    if(savingPresets||configVersion==null)return;
+    setSavingPresets(true);setPresetSavedNotice('');
+    const signature=JSON.stringify({presets:adminPresets,expected_version:configVersion});
+    if(savePresetOpRef.current?.signature!==signature)savePresetOpRef.current={signature,operation_key:crypto.randomUUID()};
+    try {
+      const res=await mutatePrintingAdmin(password,{action:'save_presets',presets:adminPresets,expected_version:configVersion,operation_key:savePresetOpRef.current.operation_key});
+      applyConfig(res.preset_config);savePresetOpRef.current=null;
+      setPresetSavedNotice(`✓ Presets saved on server (v${res.preset_config.version}).`);
+    }catch(error){setPresetSavedNotice(error.message||'Unable to save configuration. Your changes are preserved.');}
+    finally{setSavingPresets(false);}
+  };
+  const handleResetPresets = () => {
+    if(window.confirm('Reset presets to standard defaults? Click Save to apply to guests.')) {
+      setAdminPresets(DEFAULT_PRESETS);configDirtyRef.current=true;
+      setPresetSavedNotice('Reset to defaults; not yet saved to server.');
+    }
+  };
+  const handleReloadPresets = async () => {
+    if(configDirtyRef.current&&!window.confirm('Discard unsaved changes and reload config from server?'))return;
+    try {const res=await getPrintingAdmin(password);applyConfig(res.preset_config);savePresetOpRef.current=null;setPresetSavedNotice('Reloaded latest config from server.');}
+    catch(error){setPresetSavedNotice(error.message);}
+  };
 
   // Perform mutation with persisted operation_key
   const performMutation = async (action, requestId = null, extraPayload = {}) => {
@@ -180,7 +293,7 @@ export default function AdminPrintingPage() {
         err.code === 'HARDWARE_NOT_VERIFIED' ||
         err.message?.includes('PHOTO_PRINT_HARDWARE_VERIFIED');
       const prefix = isHwError ? '[409 PHOTO_PRINT_HARDWARE_VERIFIED] ' : '';
-      setMutationError(`${prefix}${err.message || `Lỗi khi thực hiện thao tác ${action}.`}`);
+      setMutationError(`${prefix}${err.message || `Error executing action ${action}.`}`);
     } finally {
       setActiveMutationId(null);
     }
@@ -212,7 +325,7 @@ export default function AdminPrintingPage() {
 
   return (
     <div className={styles.adminContainer}>
-      <PhotoHeader subtitle="Bàn Điều Khiển Trạm In Ảnh" />
+      <PhotoHeader subtitle="Print Station Control Panel" />
 
       <main className={styles.mainWrapper}>
         {/* LOGIN SCREEN */}
@@ -221,9 +334,9 @@ export default function AdminPrintingPage() {
             <div className={styles.loginIcon} aria-hidden="true">
               🔒
             </div>
-            <h1 className={styles.loginTitle}>Đăng Nhập Quản Trị In</h1>
+            <h1 className={styles.loginTitle}>Print Station Sign In</h1>
             <p className={styles.loginSubtitle}>
-              Nhập mật khẩu quản trị để điều khiển hàng đợi in ảnh tiệc cưới. Mật khẩu được lưu trong phiên bộ nhớ.
+              Enter admin password to manage the wedding photo print queue. Password is kept in session memory.
             </p>
 
             {authError && (
@@ -235,14 +348,14 @@ export default function AdminPrintingPage() {
             <form onSubmit={handleLoginSubmit} className={styles.loginForm}>
               <div>
                 <label htmlFor="admin-pass-input" style={{ fontSize: '0.85rem', color: 'rgba(253,250,245,0.8)' }}>
-                  Mật khẩu trạm in
+                  Print station password
                 </label>
                 <input
                   id="admin-pass-input"
                   type="password"
                   value={inputPassword}
                   onChange={(e) => setInputPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu quản trị..."
+                  placeholder="Enter admin password..."
                   className={styles.loginInput}
                   autoComplete="current-password"
                   required
@@ -264,13 +377,13 @@ export default function AdminPrintingPage() {
                   marginTop: 8,
                 }}
               >
-                {loading ? 'Đang kiểm tra...' : 'Vào quản trị trạm in →'}
+                {loading ? 'Checking...' : 'Sign In to Dashboard →'}
               </button>
             </form>
 
             <div style={{ marginTop: 24, fontSize: '0.82rem', color: 'rgba(253,250,245,0.5)' }}>
               <Link href="/admin" style={{ color: '#d4af37', textDecoration: 'underline' }}>
-                Quay lại trang quản trị tiệc cưới
+                Back to wedding admin
               </Link>
             </div>
           </div>
@@ -280,10 +393,10 @@ export default function AdminPrintingPage() {
             {/* Top Header */}
             <div className={styles.dashHeader}>
               <div className={styles.dashTitleBlock}>
-                <h1>Hàng Đợi In Ảnh (FIFO)</h1>
+                <h1>Photo Print Queue (FIFO)</h1>
                 <p>
-                  Theo dõi yêu cầu in, phê duyệt và giám sát kết nối máy in Mac
-                  {refreshing && ' • Đang đồng bộ...'}
+                  Track print requests, review photos, and monitor Mac printer connection
+                  {refreshing && ' • Syncing...'}
                 </p>
               </div>
 
@@ -308,12 +421,32 @@ export default function AdminPrintingPage() {
                     onClick={() => performMutation(data.session.accepting ? 'pause' : 'resume')}
                   >
                     {activeMutationId === 'session_toggle'
-                      ? 'Đang đổi trạng thái...'
+                      ? 'Updating status...'
                       : data.session.accepting
-                      ? '⏸ Tạm dừng nhận ảnh'
-                      : '▶ Mở nhận ảnh mới'}
+                      ? '⏸ Pause Submissions'
+                      : '▶ Resume Submissions'}
                   </button>
                 )}
+
+                <Link
+                  href="/admin"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    minHeight: 44,
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    background: 'rgba(212, 175, 55, 0.15)',
+                    border: '1px solid rgba(212, 175, 55, 0.4)',
+                    color: '#d4af37',
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                    fontSize: '0.88rem',
+                  }}
+                >
+                  ← Back to Admin
+                </Link>
 
                 <button
                   type="button"
@@ -328,9 +461,9 @@ export default function AdminPrintingPage() {
                     color: '#fdfaf5',
                     cursor: 'pointer',
                   }}
-                  title="Tải lại dữ liệu"
+                  title="Reload data"
                 >
-                  🔄 Làm mới
+                  🔄 Refresh
                 </button>
 
                 <button
@@ -346,7 +479,7 @@ export default function AdminPrintingPage() {
                     cursor: 'pointer',
                   }}
                 >
-                  Đăng xuất
+                  Sign Out
                 </button>
               </div>
             </div>
@@ -374,7 +507,7 @@ export default function AdminPrintingPage() {
                     mutationError.includes('HARDWARE_NOT_VERIFIED') ? (
                       <>
                         <strong style={{ display: 'block', color: '#fecaca', marginBottom: 2 }}>
-                          Chặn mở nhận ảnh từ Server (PHOTO_PRINT_HARDWARE_VERIFIED):
+                          Submissions blocked by server (PHOTO_PRINT_HARDWARE_VERIFIED):
                         </strong>
                         <span>{mutationError}</span>
                       </>
@@ -387,7 +520,7 @@ export default function AdminPrintingPage() {
                   type="button"
                   className={styles.errorCloseBtn}
                   onClick={() => setMutationError('')}
-                  aria-label="Đóng thông báo lỗi"
+                  aria-label="Close error notice"
                 >
                   ✕
                 </button>
@@ -399,10 +532,10 @@ export default function AdminPrintingPage() {
               <div className={styles.stationBanner} role="alert">
                 <span style={{ fontSize: '1.3rem' }} aria-hidden="true">⚠️</span>
                 <div>
-                  <strong>Trạm in Mac hiện chưa kết nối hoặc mất tín hiệu heartbeat (&gt;15s)</strong>
+                  <strong>Mac print station is offline or lost heartbeat signal (&gt;15s)</strong>
                   <div>
-                    Bạn vẫn có thể duyệt các ảnh chờ in bình thường. Các yêu cầu đã duyệt sẽ được lưu trữ an toàn trong hàng đợi và tự động in khi trạm Mac kết nối lại.
-                    {data?.station?.error && ` (Chi tiết lỗi: ${data.station.error})`}
+                    You can still review and approve print requests normally. Approved requests will be securely queued and automatically printed once the Mac station reconnects.
+                    {data?.station?.error && ` (Error details: ${data.station.error})`}
                   </div>
                 </div>
               </div>
@@ -410,111 +543,430 @@ export default function AdminPrintingPage() {
 
             {/* STATS OVERVIEW GRID */}
             <div className={styles.statsGrid}>
-              {/* Stat 1: Hạn mức in */}
+              {/* Stat 1: Total prints / quota */}
               <div className={styles.statCard}>
-                <span className={styles.statCardLabel}>Hạn mức tiệc cưới</span>
-                <div className={styles.statCardValue}>
-                  <span style={{ color: '#d4af37' }}>{data?.session?.remaining ?? 0}</span>
-                  <span style={{ fontSize: '1rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>
-                    / {data?.session?.capacity ?? 100} ảnh
-                  </span>
-                </div>
-                <span className={styles.statCardDesc}>
-                  Đã nhận: {data?.session?.reserved ?? 0} • Trạng thái:{' '}
-                  {data?.session?.accepting ? 'Đang mở nhận' : 'Đang tạm dừng'}
+                <span className={styles.statCardLabel}>
+                  {data?.session?.capacity != null ? 'Wedding Print Quota' : 'Total Prints Received'}
                 </span>
-              </div>
-
-              {/* Stat 2: Chờ duyệt */}
-              <div className={styles.statCard}>
-                <span className={styles.statCardLabel}>Yêu cầu chờ duyệt</span>
                 <div className={styles.statCardValue}>
-                  <span style={{ color: pendingCount > 0 ? '#eab308' : '#fdfaf5' }}>{pendingCount}</span>
-                  <span style={{ fontSize: '0.85rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>ảnh</span>
-                </div>
-                <span className={styles.statCardDesc}>Cần kiểm duyệt nội dung trước khi đưa vào hàng in</span>
-              </div>
-
-              {/* Stat 3: Cần kiểm tra (Review) */}
-              <div className={styles.statCard}>
-                <span className={styles.statCardLabel}>Cần kiểm tra lại</span>
-                <div className={styles.statCardValue}>
-                  <span style={{ color: reviewCount > 0 ? '#f97316' : '#fdfaf5' }}>{reviewCount}</span>
-                  <span style={{ fontSize: '0.85rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>ảnh</span>
-                </div>
-                <span className={styles.statCardDesc}>Lỗi gửi máy in hoặc trạm ngắt kết nối giữa chừng</span>
-              </div>
-
-              {/* Stat 4: Trạm in Mac */}
-              <div className={styles.statCard}>
-                <span className={styles.statCardLabel}>Trạng thái trạm in Mac</span>
-                <div className={styles.statCardValue}>
-                  {stationOnline ? (
-                    <span className={styles.stationOnline}>● Trực tuyến</span>
+                  {data?.session?.capacity != null ? (
+                    <>
+                      <span style={{ color: '#d4af37' }}>{data?.session?.remaining ?? 0}</span>
+                      <span style={{ fontSize: '1rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>
+                        / {data.session.capacity} prints
+                      </span>
+                    </>
                   ) : (
-                    <span className={styles.stationOffline}>○ Ngoại tuyến</span>
+                    <>
+                      <span style={{ color: '#d4af37' }}>{data?.session?.reserved ?? 0}</span>
+                      <span style={{ fontSize: '1rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>
+                        prints (Unlimited)
+                      </span>
+                    </>
                   )}
                 </div>
                 <span className={styles.statCardDesc}>
-                  {data?.station?.printer ? `Máy in: ${data.station.printer}` : 'Chưa nhận diện máy in CUPS'}
+                  Received: {data?.session?.reserved ?? 0} • Status:{' '}
+                  {data?.session?.accepting ? 'Open' : 'Paused'}
+                </span>
+              </div>
+
+              {/* Stat 2: Pending review */}
+              <div className={styles.statCard}>
+                <span className={styles.statCardLabel}>Pending Approval</span>
+                <div className={styles.statCardValue}>
+                  <span style={{ color: pendingCount > 0 ? '#eab308' : '#fdfaf5' }}>{pendingCount}</span>
+                  <span style={{ fontSize: '0.85rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>photos</span>
+                </div>
+                <span className={styles.statCardDesc}>Review content before sending to printer queue</span>
+              </div>
+
+              {/* Stat 3: Needs review */}
+              <div className={styles.statCard}>
+                <span className={styles.statCardLabel}>Needs Review</span>
+                <div className={styles.statCardValue}>
+                  <span style={{ color: reviewCount > 0 ? '#f97316' : '#fdfaf5' }}>{reviewCount}</span>
+                  <span style={{ fontSize: '0.85rem', color: 'rgba(253,250,245,0.5)', fontWeight: 400 }}>photos</span>
+                </div>
+                <span className={styles.statCardDesc}>Printer dispatch error or station disconnected</span>
+              </div>
+
+              {/* Stat 4: Mac print station */}
+              <div className={styles.statCard}>
+                <span className={styles.statCardLabel}>Mac Print Station Status</span>
+                <div className={styles.statCardValue}>
+                  {stationOnline ? (
+                    <span className={styles.stationOnline}>● Online</span>
+                  ) : (
+                    <span className={styles.stationOffline}>○ Offline</span>
+                  )}
+                </div>
+                <span className={styles.statCardDesc}>
+                  {data?.station?.printer ? `Printer: ${data.station.printer}` : 'CUPS printer not detected'}
                 </span>
               </div>
             </div>
 
+            {/* =========================================================
+               PRESET CONFIGURATION SECTION (Before Event)
+               ========================================================= */}
+            <section className={styles.presetConfigSection} aria-labelledby="preset-config-heading">
+              <div className={styles.configSectionHeader}>
+                <div>
+                  <h2 id="preset-config-heading" className={styles.configHeaderTitle}>
+                    <span>🎨</span> Photobooth Film Tone Configuration (Pre-Event)
+                  </h2>
+                  <p className={styles.configHeaderSubtitle}>
+                    Preview with real wedding floral frames, fine-tune 6 film parameters, enable/disable presets, and choose the default tone for guests.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  {presetSavedNotice && (
+                    <span style={{ fontSize: '0.85rem', color: presetSavedNotice.startsWith('✓')?'#86efac':'#fbbf24', fontWeight: 600 }}>
+                      {presetSavedNotice}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsConfigCollapsed(!isConfigCollapsed)}
+                    className="btnSecondary"
+                    style={{
+                      minHeight: 38,
+                      padding: '6px 14px',
+                      borderRadius: 8,
+                      background: 'rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#fdfaf5',
+                      fontSize: '0.85rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isConfigCollapsed ? '▼ Expand Settings' : '▲ Collapse'}
+                  </button>
+                </div>
+              </div>
+
+              {!isConfigCollapsed && (
+                <div className={styles.configGrid}>
+                  {/* Column 1: Sample preview with vintage floral frame */}
+                  <div className={styles.configPreviewCol}>
+                    <div className={styles.previewToggleRow}>
+                      <button
+                        type="button"
+                        className={`${styles.previewToggleBtn} ${adminPreviewOrientation === 'portrait' ? styles.active : ''}`}
+                        onClick={() => setAdminPreviewOrientation('portrait')}
+                      >
+                        📱 Portrait (10×14.8)
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.previewToggleBtn} ${adminPreviewOrientation === 'landscape' ? styles.active : ''}`}
+                        onClick={() => setAdminPreviewOrientation('landscape')}
+                      >
+                        🖼️ Landscape (14.8×10)
+                      </button>
+                    </div>
+
+                    <div style={{ width: '100%', maxWidth: adminPreviewOrientation === 'portrait' ? 280 : 380, margin: '8px auto' }}>
+                      <PhotoboothCard
+                        imageUrl="/images/000045.webp"
+                        orientation={adminPreviewOrientation}
+                        filter={computeEffectiveFilter(activePreset,defaultAdjustments(activePreset))}
+                      />
+                    </div>
+
+                    <div style={{ textAlign: 'center', fontSize: '0.82rem', color: 'rgba(253,250,245,0.65)' }}>
+                      Sample preview: <strong style={{ color: '#d4af37' }}>{activePreset.name}</strong> • Floral frame &amp; typography remain unchanged
+                    </div>
+                  </div>
+
+                  {/* Column 2: Presets list and 6 deep fine-tuning sliders */}
+                  <div className={styles.configSettingsCol}>
+                    <button type="button" onClick={handleReloadPresets} disabled={savingPresets} style={{minHeight:44,marginBottom:12}}>Reload config from server</button>
+                    <div className={styles.adminPresetList}>
+                      {adminPresets.map((p) => {
+                        const isSelected = p.id === selectedPresetId;
+                        return (
+                          <div
+                            key={p.id}
+                            className={`${styles.adminPresetItem} ${isSelected ? styles.active : ''}`}
+                            onClick={() => setSelectedPresetId(p.id)}
+                            onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelectedPresetId(p.id);}}}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <div className={styles.presetItemTop}>
+                              <span className={styles.presetItemName}>
+                                <span>{p.icon}</span> {p.name}
+                                {p.isDefault && <span className={styles.presetBadgeDefault}>Default</span>}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: p.enabled ? '#86efac' : '#fca5a5' }}>
+                                {p.enabled ? '● Enabled' : '○ Hidden'}
+                              </span>
+                            </div>
+
+                            <div style={{ fontSize: '0.75rem', color: 'rgba(253,250,245,0.6)' }}>
+                              {p.subtitle}
+                            </div>
+
+                            <div className={styles.presetItemActions}>
+                              <label
+                                className={styles.presetToggleLabel}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  type="radio"
+                                  name="defaultPresetRadio"
+                                  checked={p.isDefault}
+                                  disabled={savingPresets}
+                                  onChange={(e) => handleSetDefault(p.id, e)}
+                                  style={{ accentColor: '#d4af37' }}
+                                />
+                                <span>Set default</span>
+                              </label>
+
+                              <label
+                                className={styles.presetToggleLabel}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={p.enabled}
+                                  disabled={savingPresets || p.id==='natural'}
+                                  onChange={(e) => handleToggleEnable(p.id, e)}
+                                  style={{ accentColor: '#22c55e' }}
+                                />
+                                <span>Visible</span>
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Fine-Tuning Panel: 6 deep parameters */}
+                    <div className={styles.adminSlidersCard}>
+                      <div className={styles.adminSlidersHeader}>
+                        <span className={styles.adminSlidersTitle}>
+                          ⚙️ Deep Adjustments for: <strong>{activePreset.name}</strong>
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'rgba(253,250,245,0.5)' }}>
+                          Saved on server and applied across all guest devices
+                        </span>
+                      </div>
+
+                      <div className={styles.adminSlidersGrid}>
+                        {/* 1. Brightness (-50 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Brightness</span>
+                            <span className={styles.adminSliderVal}>
+                              {activePreset.settings.brightness > 0 ? `+${activePreset.settings.brightness}` : activePreset.settings.brightness}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-50"
+                            max="50"
+                            value={activePreset.settings.brightness}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('brightness', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+
+                        {/* 2. Warmth (-50 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Warmth / Temp</span>
+                            <span className={styles.adminSliderVal}>
+                              {activePreset.settings.warmth > 0 ? `+${activePreset.settings.warmth}` : activePreset.settings.warmth}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-50"
+                            max="50"
+                            value={activePreset.settings.warmth}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('warmth', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+
+                        {/* 3. Contrast (-50 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Contrast</span>
+                            <span className={styles.adminSliderVal}>
+                              {activePreset.settings.contrast > 0 ? `+${activePreset.settings.contrast}` : activePreset.settings.contrast}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-50"
+                            max="50"
+                            value={activePreset.settings.contrast}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('contrast', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+
+                        {/* 4. Saturation (-100 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Saturation</span>
+                            <span className={styles.adminSliderVal}>
+                              {activePreset.settings.saturation > 0 ? `+${activePreset.settings.saturation}` : activePreset.settings.saturation}%
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-100"
+                            max="50"
+                            value={activePreset.settings.saturation}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('saturation', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+
+                        {/* 5. Fade (0 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Matte Fade</span>
+                            <span className={styles.adminSliderVal}>{activePreset.settings.fade}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="50"
+                            value={activePreset.settings.fade}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('fade', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+
+                        {/* 6. Grain (0 .. 50) */}
+                        <div className={styles.adminSliderRow}>
+                          <div className={styles.adminSliderLabelRow}>
+                            <span>Classic Grain</span>
+                            <span className={styles.adminSliderVal}>{activePreset.settings.grain}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="50"
+                            value={activePreset.settings.grain}
+                            disabled={savingPresets || activePreset.id==='natural'}
+                            onChange={(e) => handleUpdateSlider('grain', e.target.value)}
+                            style={{ accentColor: '#d4af37', width: '100%' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action buttons: Save & Reset */}
+                    <div className={styles.configActionRow}>
+                      <button
+                        type="button"
+                        onClick={handleResetPresets}
+                        disabled={savingPresets}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: 8,
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          color: 'rgba(253,250,245,0.8)',
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ↺ Reset to Defaults
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSavePresets}
+                        disabled={savingPresets || configVersion==null}
+                        className="btnPrimary"
+                        style={{
+                          minHeight: 42,
+                          padding: '8px 20px',
+                          borderRadius: 8,
+                          background: 'linear-gradient(135deg, #d4af37, #b08d4f)',
+                          color: '#0E1217',
+                          fontWeight: 600,
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        💾 Save Film Presets
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+
             {/* TOOLBAR: Filter tabs & search */}
             <div className={styles.toolbar}>
-              <div className={styles.filterTabs} role="tablist" aria-label="Bộ lọc trạng thái">
+              <div className={styles.filterTabs} role="tablist" aria-label="Status filters">
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'all' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('all')}
                 >
-                  Tất cả ({data?.requests?.length || 0})
+                  All ({data?.requests?.length || 0})
                 </button>
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'pending' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('pending')}
                 >
-                  Chờ duyệt ({pendingCount})
+                  Pending Review ({pendingCount})
                 </button>
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'processing' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('processing')}
                 >
-                  Chờ in / Đang in
+                  Queued / Printing
                 </button>
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'review' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('review')}
                 >
-                  Cần kiểm tra ({reviewCount})
+                  Needs Review ({reviewCount})
                 </button>
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'ready' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('ready')}
                 >
-                  Ảnh sẵn sàng
+                  Ready for Pickup
                 </button>
                 <button
                   type="button"
                   className={`${styles.filterTab} ${statusFilter === 'rejected' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('rejected')}
                 >
-                  Đã từ chối
+                  Declined
                 </button>
               </div>
 
               <input
                 type="search"
-                placeholder="Tìm tên khách hoặc mã nhận ảnh..."
+                placeholder="Search guest name or pickup code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.searchInput}
-                aria-label="Tìm kiếm yêu cầu in"
+                aria-label="Search print requests"
               />
             </div>
 
@@ -522,19 +974,20 @@ export default function AdminPrintingPage() {
             <div className={styles.tableContainer}>
               {filteredRequests.length === 0 ? (
                 <div className={styles.emptyState}>
-                  Không có yêu cầu in nào phù hợp với bộ lọc hiện tại.
+                  No print requests match the current filter.
                 </div>
               ) : (
                 <table className={styles.requestsTable}>
                   <thead>
                     <tr>
-                      <th style={{ width: 80 }}>Ảnh</th>
-                      <th>Khách gửi</th>
-                      <th>Mã nhận</th>
-                      <th>Khổ ảnh</th>
-                      <th>Thời gian</th>
-                      <th>Trạng thái</th>
-                      <th style={{ textAlign: 'right' }}>Thao tác</th>
+                      <th style={{ width: 80 }}>Photo</th>
+                      <th>Guest</th>
+                      <th>Pickup Code</th>
+                      <th>Orientation</th>
+                      <th>Film Tone</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -546,14 +999,14 @@ export default function AdminPrintingPage() {
                             className={`${styles.thumbnailWrapper} ${
                               req.orientation === 'landscape' ? styles.landscape : ''
                             }`}
-                            onClick={() => req.preview_url && setLightboxUrl(req.preview_url)}
-                            title="Bấm để xem ảnh kích thước lớn"
+                            onClick={() => req.preview_url && setLightboxItem(req)}
+                            title="Click to view full framed preview"
                             role="button"
                             tabIndex={0}
                           >
                             {req.preview_url ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={req.preview_url} alt={`Ảnh của ${req.guest_name}`} className={styles.thumbnailImg} />
+                              <img src={req.preview_url} alt={`Photo from ${req.guest_name}`} className={styles.thumbnailImg} />
                             ) : (
                               <div style={{ color: '#666', fontSize: '0.7rem', textAlign: 'center', paddingTop: 20 }}>
                                 N/A
@@ -572,7 +1025,7 @@ export default function AdminPrintingPage() {
                           )}
                           {req.attempts && req.attempts.length > 0 && req.attempts[0].error && (
                             <div style={{ fontSize: '0.75rem', color: '#fca5a5', marginTop: 2 }}>
-                              Lỗi: {req.attempts[0].error}
+                              Error: {req.attempts[0].error}
                             </div>
                           )}
                         </td>
@@ -583,13 +1036,20 @@ export default function AdminPrintingPage() {
                         {/* Orientation */}
                         <td>
                           <span style={{ fontSize: '0.82rem', color: 'rgba(253,250,245,0.7)' }}>
-                            {req.orientation === 'portrait' ? 'Khổ dọc (10x14.8)' : 'Khổ ngang (14.8x10)'}
+                            {req.orientation === 'portrait' ? '📱 Portrait (10×14.8)' : '🖼️ Landscape (14.8×10)'}
+                          </span>
+                        </td>
+
+                        {/* Tone Film Preset */}
+                        <td>
+                          <span className={styles.presetTag}>
+                            🎞️ {req.preset_name || 'Saved (no preset)'}
                           </span>
                         </td>
 
                         {/* Timestamps */}
                         <td style={{ fontSize: '0.82rem', color: 'rgba(253,250,245,0.6)' }}>
-                          {new Date(req.created_at).toLocaleTimeString('vi-VN', {
+                          {new Date(req.created_at).toLocaleTimeString('en-US', {
                             hour: '2-digit',
                             minute: '2-digit',
                             second: '2-digit',
@@ -604,6 +1064,16 @@ export default function AdminPrintingPage() {
                         {/* Action buttons */}
                         <td>
                           <div className={styles.actionGroup} style={{ justifyContent: 'flex-end' }}>
+                            {/* Open Lightbox Preview Button */}
+                            <button
+                              type="button"
+                              className={styles.btnPreviewSmall}
+                              onClick={() => setLightboxItem(req)}
+                              title="View complete framed photo before printing"
+                            >
+                              🔍 View
+                            </button>
+
                             {/* For pending: Approve or Reject */}
                             {req.status === 'pending' && (
                               <>
@@ -613,7 +1083,7 @@ export default function AdminPrintingPage() {
                                   disabled={activeMutationId === req.id}
                                   onClick={() => performMutation('approve', req.id)}
                                 >
-                                  {activeMutationId === req.id ? 'Đang duyệt...' : '✓ Duyệt in'}
+                                  {activeMutationId === req.id ? 'Approving...' : '✓ Approve'}
                                 </button>
                                 <button
                                   type="button"
@@ -621,7 +1091,7 @@ export default function AdminPrintingPage() {
                                   disabled={activeMutationId === req.id}
                                   onClick={() => setConfirmRejectModal(req)}
                                 >
-                                  ✕ Từ chối
+                                  ✕ Reject
                                 </button>
                               </>
                             )}
@@ -634,7 +1104,7 @@ export default function AdminPrintingPage() {
                                 disabled={activeMutationId === req.id}
                                 onClick={() => setConfirmRejectModal(req)}
                               >
-                                ✕ Từ chối
+                                ✕ Reject
                               </button>
                             )}
 
@@ -646,7 +1116,7 @@ export default function AdminPrintingPage() {
                                 disabled={activeMutationId === req.id}
                                 onClick={() => performMutation('ready', req.id)}
                               >
-                                {activeMutationId === req.id ? 'Đang lưu...' : '✨ Đã có ảnh'}
+                                {activeMutationId === req.id ? 'Updating...' : '✨ Mark Ready'}
                               </button>
                             )}
 
@@ -661,7 +1131,7 @@ export default function AdminPrintingPage() {
                                   setReprintConfirmedCheckbox(false);
                                 }}
                               >
-                                🔄 In lại
+                                🔄 Reprint
                               </button>
                             )}
                           </div>
@@ -677,7 +1147,7 @@ export default function AdminPrintingPage() {
             <div className={styles.mobileCardsList}>
               {filteredRequests.length === 0 ? (
                 <div className={styles.emptyState}>
-                  Không có yêu cầu in nào phù hợp với bộ lọc hiện tại.
+                  No print requests match the current filter.
                 </div>
               ) : (
                 filteredRequests.map((req) => (
@@ -687,7 +1157,7 @@ export default function AdminPrintingPage() {
                         className={`${styles.thumbnailWrapper} ${
                           req.orientation === 'landscape' ? styles.landscape : ''
                         }`}
-                        onClick={() => req.preview_url && setLightboxUrl(req.preview_url)}
+                        onClick={() => req.preview_url && setLightboxItem(req)}
                       >
                         {req.preview_url && (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -700,10 +1170,16 @@ export default function AdminPrintingPage() {
                           <strong style={{ color: '#fdfaf5', fontSize: '1rem' }}>{req.guest_name}</strong>
                           <span className={styles.pickupCodeCell}>{req.pickup_code}</span>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 4, flexWrap: 'wrap' }}>
                           <StatusBadge status={req.status} />
+                          <span className={styles.presetTag}>
+                            🎞️ {req.preset_name || 'Saved (no preset)'}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: 'rgba(253,250,245,0.6)' }}>
+                            {req.orientation === 'portrait' ? 'Portrait' : 'Landscape'}
+                          </span>
                           <span style={{ fontSize: '0.75rem', color: 'rgba(253,250,245,0.5)' }}>
-                            {new Date(req.created_at).toLocaleTimeString('vi-VN', {
+                            {new Date(req.created_at).toLocaleTimeString('en-US', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
@@ -714,6 +1190,15 @@ export default function AdminPrintingPage() {
 
                     {/* Actions on mobile */}
                     <div className={styles.actionGroup}>
+                      <button
+                        type="button"
+                        className={styles.btnPreviewSmall}
+                        onClick={() => setLightboxItem(req)}
+                        style={{ width: '100%', justifyContent: 'center' }}
+                      >
+                        🔍 View Complete Print Preview
+                      </button>
+
                       {req.status === 'pending' && (
                         <>
                           <button
@@ -723,7 +1208,7 @@ export default function AdminPrintingPage() {
                             disabled={activeMutationId === req.id}
                             onClick={() => performMutation('approve', req.id)}
                           >
-                            ✓ Duyệt in
+                            ✓ Approve
                           </button>
                           <button
                             type="button"
@@ -744,7 +1229,7 @@ export default function AdminPrintingPage() {
                           disabled={activeMutationId === req.id}
                           onClick={() => setConfirmRejectModal(req)}
                         >
-                          ✕ Từ chối in
+                          ✕ Reject
                         </button>
                       )}
 
@@ -756,7 +1241,7 @@ export default function AdminPrintingPage() {
                           disabled={activeMutationId === req.id}
                           onClick={() => performMutation('ready', req.id)}
                         >
-                          ✨ Xác nhận ảnh sẵn sàng
+                          ✨ Mark Ready for Pickup
                         </button>
                       )}
 
@@ -771,7 +1256,7 @@ export default function AdminPrintingPage() {
                             setReprintConfirmedCheckbox(false);
                           }}
                         >
-                          🔄 Yêu cầu in lại
+                          🔄 Request Reprint
                         </button>
                       )}
                     </div>
@@ -784,15 +1269,15 @@ export default function AdminPrintingPage() {
             {confirmRejectModal && (
               <div className={styles.modalOverlay} role="dialog" aria-modal="true">
                 <div className={styles.modalContent}>
-                  <h3 className={styles.modalTitle}>Xác nhận từ chối in</h3>
+                  <h3 className={styles.modalTitle}>Confirm Rejection</h3>
                   <div className={styles.modalBody}>
                     <p>
-                      Bạn có chắc chắn muốn từ chối yêu cầu in ảnh của khách{' '}
-                      <strong>{confirmRejectModal.guest_name}</strong> (Mã:{' '}
+                      Are you sure you want to decline the print request for{' '}
+                      <strong>{confirmRejectModal.guest_name}</strong> (Code:{' '}
                       <code>{confirmRejectModal.pickup_code}</code>)?
                     </p>
                     <p style={{ color: 'rgba(253,250,245,0.6)', fontSize: '0.85rem' }}>
-                      Lượt in này sẽ được hoàn trả lại vào hạn mức tiệc cưới. Khách có thể gửi ảnh khác.
+                      This print credit will be refunded to the wedding quota. The guest can submit another photo.
                     </p>
                   </div>
                   <div className={styles.modalActions}>
@@ -811,7 +1296,7 @@ export default function AdminPrintingPage() {
                       onClick={() => setConfirmRejectModal(null)}
                       disabled={activeMutationId === confirmRejectModal.id}
                     >
-                      Hủy bỏ
+                      Cancel
                     </button>
                     <button
                       type="button"
@@ -829,7 +1314,7 @@ export default function AdminPrintingPage() {
                       onClick={() => performMutation('reject', confirmRejectModal.id)}
                       disabled={activeMutationId === confirmRejectModal.id}
                     >
-                      {activeMutationId === confirmRejectModal.id ? 'Đang từ chối...' : 'Xác nhận từ chối'}
+                      {activeMutationId === confirmRejectModal.id ? 'Declining...' : 'Confirm Decline'}
                     </button>
                   </div>
                 </div>
@@ -840,10 +1325,10 @@ export default function AdminPrintingPage() {
             {confirmReprintModal && (
               <div className={styles.modalOverlay} role="dialog" aria-modal="true">
                 <div className={styles.modalContent}>
-                  <h3 className={styles.modalTitle}>Xác nhận In Lại Ảnh</h3>
+                  <h3 className={styles.modalTitle}>Confirm Photo Reprint</h3>
                   <div className={styles.modalBody}>
                     <p>
-                      Yêu cầu in lại cho khách <strong>{confirmReprintModal.guest_name}</strong> (Mã:{' '}
+                      Reprint request for <strong>{confirmReprintModal.guest_name}</strong> (Code:{' '}
                       <code>{confirmReprintModal.pickup_code}</code>).
                     </p>
                     <div
@@ -859,12 +1344,14 @@ export default function AdminPrintingPage() {
                         gap: 8,
                       }}
                     >
-                      <div>
-                        ⚠️ <strong>Lưu ý về hạn mức (quota):</strong> In lại sẽ tiêu hao thêm 1 lượt in vào số lượng còn lại của tiệc cưới.
-                      </div>
+                      {data?.session?.capacity != null && (
+                        <div>
+                          ⚠️ <strong>Quota Notice:</strong> Reprinting will consume 1 additional print from the wedding quota.
+                        </div>
+                      )}
                       {confirmReprintModal.status === 'review' && (
                         <div>
-                          🛠️ <strong>Trạng thái cần kiểm tra:</strong> Hãy xác nhận lệnh in cũ trên máy in Mac đã được dừng hoặc huỷ trước khi gửi lệnh in lại.
+                          🛠️ <strong>Inspection Required:</strong> Please ensure the previous print job on the Mac printer has stopped or been canceled before resending.
                         </div>
                       )}
                     </div>
@@ -886,7 +1373,7 @@ export default function AdminPrintingPage() {
                         style={{ marginTop: 3, width: 18, height: 18, accentColor: '#d4af37' }}
                       />
                       <span>
-                        Tôi đã kiểm tra thực tế máy in và xác nhận tiêu hao thêm 1 lượt in vào hạn mức.
+                        I have verified the physical printer and confirm consuming 1 additional print from the quota.
                       </span>
                     </label>
                   </div>
@@ -906,7 +1393,7 @@ export default function AdminPrintingPage() {
                       onClick={() => setConfirmReprintModal(null)}
                       disabled={activeMutationId === confirmReprintModal.id}
                     >
-                      Hủy bỏ
+                      Cancel
                     </button>
                     <button
                       type="button"
@@ -924,32 +1411,158 @@ export default function AdminPrintingPage() {
                       disabled={!reprintConfirmedCheckbox || activeMutationId === confirmReprintModal.id}
                       onClick={() => performMutation('reprint', confirmReprintModal.id)}
                     >
-                      {activeMutationId === confirmReprintModal.id ? 'Đang gửi lệnh in...' : 'Xác nhận In Lại'}
+                      {activeMutationId === confirmReprintModal.id ? 'Sending print command...' : 'Confirm Reprint'}
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* LIGHTBOX MODAL */}
-            {lightboxUrl && (
+            {/* LIGHTBOX MODAL WITH FULL PREVIEW & SPECS */}
+            {lightboxItem && (
               <div
                 className={styles.modalOverlay}
-                onClick={() => setLightboxUrl(null)}
+                onClick={() => setLightboxItem(null)}
                 role="dialog"
                 aria-modal="true"
               >
-                <div className={styles.lightboxModal} onClick={(e) => e.stopPropagation()}>
+                <div
+                  className={styles.lightboxModal}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '24px 20px',
+                    maxWidth: '92vw',
+                    maxHeight: '92vh',
+                    overflowY: 'auto',
+                  }}
+                >
                   <button
                     type="button"
                     className={styles.lightboxCloseBtn}
-                    onClick={() => setLightboxUrl(null)}
-                    aria-label="Đóng ảnh"
+                    onClick={() => setLightboxItem(null)}
+                    aria-label="Close preview"
                   >
                     ✕
                   </button>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={lightboxUrl} alt="Ảnh in khổ lớn" className={styles.lightboxImg} />
+
+                  {/* Render the full framed preview from backend */}
+                  <div
+                    style={{
+                      maxWidth: lightboxItem.orientation === 'portrait' ? 360 : 540,
+                      width: '100%',
+                      marginBottom: 16,
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+                    }}
+                  >
+                    {lightboxItem.preview_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={lightboxItem.preview_url}
+                        alt={`Framed preview of ${lightboxItem.guest_name}`}
+                        className={styles.lightboxImg}
+                        style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '65vh', objectFit: 'contain' }}
+                      />
+                    ) : (
+                      <div style={{ padding: 40, textAlign: 'center', color: '#888' }}>
+                        Complete preview file not yet available from backend
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Lightbox Details & Specs */}
+                  <div className={styles.lightboxDetails}>
+                    <div className={styles.lightboxMetaRow}>
+                      <span>Guest: <strong style={{ color: '#fdfaf5' }}>{lightboxItem.guest_name}</strong></span>
+                      <span>Pickup Code: <strong className={styles.pickupCodeCell}>{lightboxItem.pickup_code}</strong></span>
+                      <span>
+                        Size: <strong style={{ color: '#d4af37' }}>
+                          {lightboxItem.orientation === 'portrait' ? 'Portrait (10×14.8 cm)' : 'Landscape (14.8×10 cm)'}
+                        </strong>
+                      </span>
+                      <span className={styles.presetTag}>
+                        Tone: {lightboxItem.preset_name || 'Saved (no preset)'}
+                      </span>
+                      <StatusBadge status={lightboxItem.status} />
+                    </div>
+
+                    {/* Quick action buttons in Lightbox */}
+                    <div className={styles.actionGroup} style={{ marginTop: 8, justifyContent: 'center' }}>
+                      {lightboxItem.status === 'pending' && (
+                        <>
+                          <button
+                            type="button"
+                            className={`${styles.btnAction} ${styles.btnApprove}`}
+                            disabled={activeMutationId === lightboxItem.id}
+                            onClick={async () => {
+                              await performMutation('approve', lightboxItem.id);
+                              setLightboxItem(null);
+                            }}
+                          >
+                            {activeMutationId === lightboxItem.id ? 'Approving...' : '✓ Approve Now'}
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.btnAction} ${styles.btnReject}`}
+                            disabled={activeMutationId === lightboxItem.id}
+                            onClick={() => {
+                              setConfirmRejectModal(lightboxItem);
+                              setLightboxItem(null);
+                            }}
+                          >
+                            ✕ Reject
+                          </button>
+                        </>
+                      )}
+
+                      {lightboxItem.status === 'approved' && (
+                        <button
+                          type="button"
+                          className={`${styles.btnAction} ${styles.btnReject}`}
+                          disabled={activeMutationId === lightboxItem.id}
+                          onClick={() => {
+                            setConfirmRejectModal(lightboxItem);
+                            setLightboxItem(null);
+                          }}
+                        >
+                          ✕ Reject
+                        </button>
+                      )}
+
+                      {(lightboxItem.status === 'submitted' || lightboxItem.status === 'review') && (
+                        <button
+                          type="button"
+                          className={`${styles.btnAction} ${styles.btnReady}`}
+                          disabled={activeMutationId === lightboxItem.id}
+                          onClick={async () => {
+                            await performMutation('ready', lightboxItem.id);
+                            setLightboxItem(null);
+                          }}
+                        >
+                          {activeMutationId === lightboxItem.id ? 'Updating...' : '✨ Mark Ready for Pickup'}
+                        </button>
+                      )}
+
+                      {(lightboxItem.status === 'ready' || lightboxItem.status === 'review') && (
+                        <button
+                          type="button"
+                          className={`${styles.btnAction} ${styles.btnReprint}`}
+                          disabled={activeMutationId === lightboxItem.id}
+                          onClick={() => {
+                            setConfirmReprintModal(lightboxItem);
+                            setReprintConfirmedCheckbox(false);
+                            setLightboxItem(null);
+                          }}
+                        >
+                          🔄 Request Reprint
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

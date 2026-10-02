@@ -1,5 +1,7 @@
 import sharp from 'sharp';
 import convert from 'heic-convert';
+import { fileURLToPath } from 'node:url';
+import { FRAMES, transformPixels } from './film.mjs';
 
 export const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
 export function validateCrop(crop, orientation, width, height) {
@@ -35,9 +37,20 @@ export async function normalizePhoto(bytes) {
     return { bytes: data, width: info.width, height: info.height };
   } catch { throw new Error('INVALID_IMAGE'); }
 }
-export async function renderPrintPhoto(bytes, crop, orientation, width, height) {
+export async function renderPrintPhoto(bytes, crop, orientation, width, height, snapshot = null) {
   const region = validateCrop(crop, orientation, width, height);
   const output = orientation === 'portrait' ? [1181, 1748] : [1748, 1181];
+  if (snapshot) {
+    const f = FRAMES[orientation];
+    const { data, info } = await sharp(bytes).extract(region).resize(f.photoWidth,f.photoHeight,{fit:'fill'})
+      .toColourspace('srgb').ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    transformPixels(data,info.width,info.height,snapshot.computed,snapshot.seed);
+    const photo = await sharp(data,{raw:info}).png().toBuffer();
+    const frame = fileURLToPath(new URL(`./assets/photobooth-frame-${orientation}.png`,import.meta.url));
+    return sharp({create:{width:f.width,height:f.height,channels:4,background:'#fdfaf5'}})
+      .composite([{input:photo,left:f.left,top:f.top},{input:frame,left:0,top:0}])
+      .toColourspace('srgb').withMetadata({density:300}).jpeg({quality:96}).toBuffer();
+  }
   return sharp(bytes).extract(region).resize(output[0], output[1], { fit: 'fill' })
     .withMetadata({ density: 300 }).jpeg({ quality: 96 }).toBuffer();
 }

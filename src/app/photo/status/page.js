@@ -382,7 +382,7 @@ export default function PhotoStatusPage() {
                   </div>
                   <div className={styles.timelineStepTitle}>1. Request Received</div>
                   <div className={styles.timelineStepDesc}>
-                    Your photo is in queue and awaiting operator review.
+                    Your photo request was received and is awaiting operator review and printer setup.
                   </div>
                 </div>
 
@@ -450,6 +450,24 @@ export default function PhotoStatusPage() {
               </div>
 
               {/* Status Explanations for Special States */}
+              {requestData.status === 'pending' && (
+                <div
+                  style={{
+                    marginTop: 20,
+                    padding: '16px 20px',
+                    borderRadius: 14,
+                    background: '#FEF9E7',
+                    border: '1.5px solid #F39C12',
+                    color: '#7D5A00',
+                    fontSize: '0.95rem',
+                    textAlign: 'center',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  ⏳ <strong>Request received:</strong> Your photo has been safely recorded and is awaiting operator and print station setup. Printing will start after the print station is configured; your request will remain pending.
+                </div>
+              )}
+
               {requestData.status === 'ready' && (
                 <div
                   style={{

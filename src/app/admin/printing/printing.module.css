@@ -541,3 +541,290 @@
     width: 100%;
   }
 }
+
+/* =========================================================
+   ADMIN PRESET CONFIGURATION SECTION
+   ========================================================= */
+.presetConfigSection {
+  background: rgba(22, 28, 36, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+}
+
+.configSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 16px;
+}
+
+.configHeaderTitle {
+  font-family: var(--font-heading), 'Fraunces', serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #fdfaf5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.configHeaderSubtitle {
+  font-size: 0.85rem;
+  color: rgba(253, 250, 245, 0.65);
+  margin-top: 4px;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .configGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.configPreviewCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.previewToggleRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.previewToggleBtn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fdfaf5;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.previewToggleBtn.active {
+  background: #d4af37;
+  color: #0e1217;
+  border-color: #d4af37;
+  font-weight: 600;
+}
+
+.configSettingsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adminPresetList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 500px) {
+  .adminPresetList {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adminPresetItem {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adminPresetItem:hover {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.adminPresetItem.active {
+  border-color: #d4af37;
+  background: rgba(212, 175, 55, 0.12);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.15);
+}
+
+.presetItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.presetItemName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fdfaf5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.presetBadgeDefault {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-weight: 600;
+}
+
+.presetItemActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: rgba(253, 250, 245, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 6px;
+}
+
+.presetToggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.adminSlidersCard {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.adminSlidersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.adminSlidersTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.adminSlidersGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .adminSlidersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adminSliderRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adminSliderLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(253, 250, 245, 0.8);
+}
+
+.adminSliderVal {
+  color: #d4af37;
+  font-weight: 600;
+}
+
+.configActionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.presetTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #fde047;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.btnPreviewSmall {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fdfaf5;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.btnPreviewSmall:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #d4af37;
+}
+
+/* Lightbox Details */
+.lightboxDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+}
+
+.lightboxMetaRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: rgba(253, 250, 245, 0.85);
+  flex-wrap: wrap;
+  justify-content: center;
+}

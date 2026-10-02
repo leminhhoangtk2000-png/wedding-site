@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { getAdminRsvps, updateAdminRsvp, deleteAdminRsvp } from '@/lib/rsvpApi';
 import { ATTENDANCE_VALUES, WEDDING_EVENT } from '@/lib/rsvpConstants';
@@ -15,6 +16,7 @@ import {
   HanddrawnDove,
   HanddrawnLeaf,
   HanddrawnStar,
+  HanddrawnCamera,
 } from '@/components/icons/HanddrawnIcons';
 
 export default function AdminPage() {
@@ -466,6 +468,14 @@ export default function AdminPage() {
           <span className="admin-tab-icon"><HanddrawnSettings size={18} /></span>
           <span>Cài đặt hệ thống</span>
         </button>
+        <Link
+          href="/admin/printing"
+          className="admin-tab-btn"
+          style={{ textDecoration: 'none' }}
+        >
+          <span className="admin-tab-icon"><HanddrawnCamera size={18} /></span>
+          <span>Trạm in ảnh</span>
+        </Link>
       </nav>
 
       {/* ==================== TAB 1: RSVP ==================== */}

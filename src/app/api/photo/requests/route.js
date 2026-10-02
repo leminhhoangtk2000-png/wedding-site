@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { db, command, respond, errorResponse, fail, hash, requireUUID, jsonBody, publicRequest, BUCKET } from '@/lib/photo/server';
 import { renderPrintPhoto, validateCrop } from '@/lib/photo/image.mjs';
+import { resolveFilter } from '@/lib/photo/config-server';
+import { canonicalFilter } from '@/lib/photo/film.mjs';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 export async function GET(request) {
@@ -26,6 +28,9 @@ export async function POST(request) {
     const crop = body.crop;
     if (!crop || !['x','y','width','height'].every(k => typeof crop[k] === 'number' && Number.isFinite(crop[k]))) fail('INVALID_CROP');
     const canonical = { upload_id:body.upload_id, guest_name:body.guest_name.trim(), orientation:body.orientation, crop:{ x:crop.x,y:crop.y,width:crop.width,height:crop.height } };
+    if (body.filter != null) {
+      try { canonical.filter = canonicalFilter({...body.filter,config_version:body.filter.config_version??0}); } catch { fail('INVALID_FILTER'); }
+    }
     const fingerprint = hash(JSON.stringify(canonical)), trackingHash = hash(body.tracking_token);
     client = db();
     // Wait for any concurrent reservation transaction before looking up a
@@ -34,18 +39,19 @@ export async function POST(request) {
     const { data: existing, error: existingError } = await client.from('photo_print_requests').select('*').eq('request_key',body.request_key).maybeSingle();
     if (existingError) fail('DATABASE_UNAVAILABLE', 503);
     if (existing) {
-      if (existing.tracking_hash !== trackingHash || existing.fingerprint !== fingerprint) fail('IDEMPOTENCY_CONFLICT',409);
+      if (existing.tracking_hash !== trackingHash || (existing.fingerprint !== fingerprint && !(existing.filter_snapshot == null && existing.fingerprint === hash(JSON.stringify({upload_id:canonical.upload_id,guest_name:canonical.guest_name,orientation:canonical.orientation,crop:canonical.crop}))))) fail('IDEMPOTENCY_CONFLICT',409);
       return respond({ request:publicRequest(existing), tracking_url:`/photo/status#id=${existing.id}&token=${body.tracking_token}` });
     }
     if (!session.accepting) fail('PAUSED',409);
-    if (!session.remaining) fail('FULL',409);
+    if (session.capacity != null && session.remaining <= 0) fail('FULL', 409);
     const { data: upload, error: uploadError } = await client.from('photo_print_uploads').select('*').eq('id',body.upload_id).eq('token_hash',hash(body.upload_token)).gt('expires_at',new Date().toISOString()).maybeSingle();
     if (uploadError) fail('DATABASE_UNAVAILABLE',503);
     if (!upload) fail('UPLOAD_NOT_FOUND',404);
     validateCrop(crop,body.orientation,upload.width,upload.height);
     const { data: original, error: downloadError } = await client.storage.from(BUCKET).download(upload.storage_path);
     if (downloadError) fail('DATABASE_UNAVAILABLE',503);
-    const rendered = await renderPrintPhoto(Buffer.from(await original.arrayBuffer()),crop,body.orientation,upload.width,upload.height);
+    const snapshot = await resolveFilter(client,canonical.filter,body.upload_id);
+    const rendered = await renderPrintPhoto(Buffer.from(await original.arrayBuffer()),crop,body.orientation,upload.width,upload.height,snapshot);
     outputPath = `prints/${randomUUID()}.jpg`;
     const { error: storageError } = await client.storage.from(BUCKET).upload(outputPath,rendered,{ contentType:'image/jpeg',upsert:false });
     if (storageError) fail('DATABASE_UNAVAILABLE',503);
@@ -53,6 +59,7 @@ export async function POST(request) {
     const saved = await command(client,'create',{
       ...canonical, request_key:body.request_key,tracking_hash:trackingHash,fingerprint,
       upload_hash:hash(body.upload_token),storage_path:outputPath,
+      ...(snapshot ? {filter_snapshot:snapshot} : {}),
     });
     retained = saved.storage_path === outputPath;
     if (!retained) await client.storage.from(BUCKET).remove([outputPath]);

@@ -9,7 +9,7 @@ export async function POST(request) {
     client = db();
     const session = await command(client, 'session');
     if (!session.accepting) fail('PAUSED', 409);
-    if (!session.remaining) fail('FULL', 409);
+    if (session.capacity != null && session.remaining <= 0) fail('FULL', 409);
     if (Number(request.headers.get('content-length')) > MAX_UPLOAD_BYTES + 65536) fail('INVALID_IMAGE_SIZE', 413);
     const form = await request.formData(), file = form.get('file');
     if (!file || typeof file.arrayBuffer !== 'function') fail('INVALID_INPUT');

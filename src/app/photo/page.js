@@ -13,6 +13,15 @@ import {
   HanddrawnInfo,
 } from '@/components/icons/HanddrawnIcons';
 import PhotoCropper, { computeNormalizedCrop } from '@/components/photo/PhotoCropper';
+import PhotoboothCard from '@/components/photo/PhotoboothCard';
+import {
+  DEFAULT_PRESETS,
+  DEFAULT_GUEST_ADJUSTMENTS,
+  LEGACY_PRESETS,
+  defaultAdjustments,
+  computeEffectiveFilter,
+} from '@/lib/photo/presets';
+import FilmPhoto from '@/components/photo/FilmPhoto';
 import { processImageForUpload } from '@/components/photo/imageCompressor';
 import { getPhotoSession, uploadPhoto, createPhotoRequest } from '@/lib/photo/client';
 import styles from './photo.module.css';
@@ -86,6 +95,30 @@ export default function PhotoPage() {
     return draft?.crop || null;
   });
 
+  // Presets & Filter state
+  const [presets,setPresets]=useState(DEFAULT_PRESETS);
+  const [configVersion,setConfigVersion]=useState(()=>readStoredDraft()?.config_version??null);
+  const [colorPreviewState,setColorPreviewState]=useState('loading');
+  const [selectedPresetId,setSelectedPresetId]=useState(()=>readStoredDraft()?.preset_id||'soft_wedding');
+  const [guestAdjustments, setGuestAdjustments] = useState(() => {
+    const draft = readStoredDraft();
+    return draft?.adjustments || DEFAULT_GUEST_ADJUSTMENTS;
+  });
+
+  // Current Step in 3-step photobooth flow:
+  // 1: Framing (Orientation & Crop)
+  // 2: Film Tone (Presets & Sliders)
+  // 3: Review & Submit (Review & Print)
+  const [currentStep, setCurrentStep] = useState(() => {
+    const draft = readStoredDraft();
+    return draft?.step || 1;
+  });
+
+  // Compute active effective filter
+  const activePreset =
+    presets.find((p) => p.id === selectedPresetId) || LEGACY_PRESETS.find(p=>p.id===selectedPresetId) || DEFAULT_PRESETS.find(p=>p.id===selectedPresetId) || DEFAULT_PRESETS[1];
+  const effectiveFilter = computeEffectiveFilter(activePreset, guestAdjustments);
+
   // Submission & Retry state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -123,6 +156,17 @@ export default function PhotoPage() {
         if (!active) return;
         if (res && res.session) {
           setSessionData(res.session);
+          const draft=readStoredDraft();
+          const config=draft?.preset_config?.version!=null?draft.preset_config:res.preset_config;
+          if(config) {
+            const restoredLegacy=LEGACY_PRESETS.find(p=>p.id===draft?.preset_id);
+            setPresets([...config.presets.filter(p=>p.enabled),...(restoredLegacy&&!config.presets.some(p=>p.id===restoredLegacy.id)?[restoredLegacy]:[])]);
+            setConfigVersion(draft?.config_version??config.version);
+            if(!draft?.preset_id) {
+              const def=config.presets.find(p=>p.enabled&&p.isDefault);
+              setSelectedPresetId(def.id);setGuestAdjustments(defaultAdjustments(def));
+            }
+          }
           setSessionUnavailable(false);
         } else {
           setSessionUnavailable(true);
@@ -158,6 +202,11 @@ export default function PhotoPage() {
           guest_name: guestName.trim(),
           orientation,
           crop,
+          preset_id: selectedPresetId,
+          config_version: configVersion,
+          preset_config: {version:configVersion,presets},
+          adjustments: guestAdjustments,
+          step: currentStep,
           request_key,
           tracking_token,
           submitted: false,
@@ -166,7 +215,7 @@ export default function PhotoPage() {
     } catch {
       // ignore
     }
-  }, [uploadData, guestName, orientation, crop, hasSubmittedDraft]);
+  }, [uploadData, guestName, orientation, crop, selectedPresetId, guestAdjustments, currentStep, hasSubmittedDraft, configVersion, presets]);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -310,6 +359,7 @@ export default function PhotoPage() {
         tracking_token: submittedPayloadRef.current.tracking_token,
         guest_name: submittedPayloadRef.current.guest_name,
         orientation: submittedPayloadRef.current.orientation,
+        ...(submittedPayloadRef.current.filter ? {filter:submittedPayloadRef.current.filter} : {}),
         crop: {
           x: submittedPayloadRef.current.crop.x,
           y: submittedPayloadRef.current.crop.y,
@@ -337,6 +387,8 @@ export default function PhotoPage() {
         return;
       }
 
+      if(configVersion==null||colorPreviewState!=='ready'){setErrorMessage('Please wait for color settings and preview to load before submitting.');return;}
+
       // Ensure persistent retry keys
       let { request_key, tracking_token, upload_id } = draftKeysRef.current;
       if (!request_key || !tracking_token || upload_id !== uploadData.id) {
@@ -359,6 +411,11 @@ export default function PhotoPage() {
           width: crop.width,
           height: crop.height,
         },
+        filter: {
+          preset_id: selectedPresetId,
+          config_version: LEGACY_PRESETS.some(p=>p.id===selectedPresetId)?0:configVersion,
+          adjustments: guestAdjustments,
+        },
       };
 
       // Set immutable body ref BEFORE POST
@@ -367,6 +424,11 @@ export default function PhotoPage() {
         preview_url: uploadData.preview_url,
         width: uploadData.width,
         height: uploadData.height,
+        preset_id: selectedPresetId,
+        config_version: configVersion,
+        preset_config: {version:configVersion,presets},
+        adjustments: guestAdjustments,
+        step: 3,
         submitted: true,
       };
       submittedPayloadRef.current = immutableSnapshot;
@@ -455,7 +517,7 @@ export default function PhotoPage() {
   };
 
   const isSessionAccepting = sessionData ? sessionData.accepting : true;
-  const isSessionFull = sessionData ? sessionData.remaining <= 0 : false;
+  const isSessionFull = sessionData && sessionData.capacity != null ? sessionData.remaining <= 0 : false;
   // If retrying an already submitted payload, do NOT block! Request may have already committed on server.
   const isBlocked = !hasSubmittedDraft && (isSessionFull || !isSessionAccepting);
 
@@ -510,7 +572,7 @@ export default function PhotoPage() {
         )}
 
         {/* Full Banner */}
-        {sessionData && sessionData.remaining <= 0 && (
+        {sessionData && sessionData.capacity != null && sessionData.remaining <= 0 && (
           <div className={`${styles.alertBanner} ${styles.alertFull}`} role="alert">
             <span className={styles.alertIcon} aria-hidden="true">
               <HanddrawnAlert size={22} />
@@ -518,6 +580,21 @@ export default function PhotoPage() {
             <div>
               <strong>Print Capacity Reached</strong>
               <div>The photo station has reached its maximum quota of {sessionData.capacity} prints today. Thank you for sharing your wonderful memories!</div>
+            </div>
+          </div>
+        )}
+
+        {/* Trial Submissions / Intake Only Banner */}
+        {sessionData && sessionData.intake_only && sessionData.accepting && (sessionData.capacity == null || sessionData.remaining > 0) && (
+          <div className={`${styles.alertBanner} ${styles.alertInfo}`} role="status" aria-live="polite">
+            <span className={styles.alertIcon} aria-hidden="true">
+              <HanddrawnInfo size={22} />
+            </span>
+            <div>
+              <strong>Trial submissions are open</strong>
+              <div>
+                You can submit a photo now. Printing will start after the print station is configured; your request will remain pending.
+              </div>
             </div>
           </div>
         )}
@@ -580,9 +657,9 @@ export default function PhotoPage() {
                 <span className={styles.badgeSparkle}>✦</span>
               </div>
 
-              <h1 className={styles.cardTitle}>Keepsake Photo Printing</h1>
+              <h1 className={styles.cardTitle}>Wedding Keepsake Photo</h1>
               <p className={styles.cardSubtitle}>
-                Thank you, <strong>{guestName}</strong>! Your photo has been queued for printing at Hoàng &amp; Duyên&apos;s wedding celebration.
+                Thank you, <strong>{guestName}</strong>! Your photo has been added to the printing queue at Hoàng &amp; Duyên&apos;s wedding.
               </p>
 
               <div className={styles.filigreeDivider} aria-hidden="true">
@@ -613,7 +690,7 @@ export default function PhotoPage() {
               </div>
 
               <p className={styles.successInstructions}>
-                Please take a screenshot or save your code. Once printing is complete, present this code at our photo booth table to collect your printed keepsake!
+                Please take a screenshot or save this code. When the system indicates it is ready, present your code at the Photo Booth station to collect your keepsake photo!
               </p>
 
               <div className={styles.successActions}>
@@ -622,7 +699,7 @@ export default function PhotoPage() {
                   className={styles.btnPrimary}
                   rel="noreferrer"
                 >
-                  <span>Track Live Print Status →</span>
+                  <span>Track Live Printing Status →</span>
                 </a>
 
                 <button
@@ -639,6 +716,10 @@ export default function PhotoPage() {
                       setLocalPreviewUrl(null);
                     }
                     setCrop(null);
+                    setCurrentStep(1);
+                    const defaultPreset=presets.find(p=>p.isDefault&&p.enabled)||presets[0];
+                    setSelectedPresetId(defaultPreset.id);
+                    setGuestAdjustments(defaultAdjustments(defaultPreset));
                     setErrorMessage('');
                     try {
                       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
@@ -652,17 +733,17 @@ export default function PhotoPage() {
               </div>
             </div>
           ) : (
-            /* UPLOAD & CROP FLOW */
+            /* UPLOAD & MULTI-STEP FLOW */
             <div>
               <div className={styles.cardHeader}>
                 <div className={styles.badgePill}>
                   <span className={styles.badgeSparkle}>✦</span>
-                  <span>INSTANT PHOTO PRINTING</span>
+                  <span>WEDDING KEEPSAKE • PHOTO BOOTH</span>
                   <span className={styles.badgeSparkle}>✦</span>
                 </div>
-                <h1 className={styles.cardTitle}>Keepsake Photo Printing</h1>
+                <h1 className={styles.cardTitle}>Print Your Keepsake Photo</h1>
                 <p className={styles.cardSubtitle}>
-                  Capture and print your memorable moments with Hoàng &amp; Duyên right at our wedding celebration.
+                  Capture and print your memorable moments with Hoàng &amp; Duyên on high-quality keepsake postcards.
                 </p>
                 <div className={styles.filigreeDivider} aria-hidden="true">
                   <div className={styles.filigreeLine} />
@@ -671,12 +752,12 @@ export default function PhotoPage() {
                 </div>
               </div>
 
-              {/* Quota indicator */}
-              {sessionData && (
+              {/* Quota indicator - only shown if a capacity quota is explicitly configured */}
+              {sessionData && sessionData.capacity != null && (
                 <div className={styles.quotaBox}>
-                  <span className={styles.quotaLabel}>Station quota:</span>
+                  <span className={styles.quotaLabel}>Print station quota:</span>
                   <span className={styles.quotaValue}>
-                    <span>{sessionData.remaining} of {sessionData.capacity} prints remaining</span>
+                    <span>{sessionData.remaining} of {sessionData.capacity} prints available today</span>
                   </span>
                 </div>
               )}
@@ -688,10 +769,10 @@ export default function PhotoPage() {
                     <HanddrawnCamera size={38} />
                   </div>
                   <div className={styles.pickerPrompt}>
-                    Take a new photo or select from your device
+                    Take a new photo or choose from your device
                   </div>
                   <div className={styles.pickerHint}>
-                    Supports JPEG, PNG, WebP (auto-optimized) or HEIC photos (up to 3MB).
+                    Supports phone photos (JPEG, PNG, WebP, or HEIC, automatically optimized).
                   </div>
 
                   <div className={styles.pickerButtons}>
@@ -702,7 +783,7 @@ export default function PhotoPage() {
                       disabled={isBlocked}
                     >
                       <HanddrawnCamera size={18} />
-                      <span>Take Photo</span>
+                      <span>Take New Photo</span>
                     </button>
                     <button
                       type="button"
@@ -721,77 +802,392 @@ export default function PhotoPage() {
               {isUploading && (
                 <div className={styles.uploadingNotice}>
                   <div className={styles.spinner} aria-hidden="true" />
-                  <div className={styles.uploadingText}>Uploading photo to server...</div>
+                  <div className={styles.uploadingText}>Uploading and processing photo...</div>
                   <div className={styles.uploadingSubtext}>
-                    Optimizing resolution and preparing framing canvas
+                    Optimizing resolution and fitting into wedding postcard frame
                   </div>
                 </div>
               )}
 
-              {/* State 3: Uploaded -> Crop & Submit */}
+              {/* State 3: Uploaded -> Multi-Step Photobooth Flow */}
               {uploadData && !isUploading && (
-                <form onSubmit={handleSubmit} className={styles.cropperWrapper}>
-                  {/* Photo Cropper Component */}
-                  <PhotoCropper
-                    imageUrl={uploadData.preview_url}
-                    imageWidth={uploadData.width}
-                    imageHeight={uploadData.height}
-                    orientation={orientation}
-                    onOrientationChange={handleOrientationChange}
-                    crop={crop}
-                    onCropChange={setCrop}
-                    onChangePhoto={handleChangePhoto}
-                    locked={hasSubmittedDraft}
-                  />
-
-                  {/* Guest Name input & details */}
-                  <div className={styles.formFields}>
-                    <div className={styles.fieldGroup}>
-                      <div className={styles.fieldLabelRow}>
-                        <label htmlFor="guest-name">
-                          Your name or short message <span style={{ color: '#d4af37' }}>*</span>
-                        </label>
-                        <span className={styles.charCounter}>{guestName.length}/80</span>
-                      </div>
-                      <input
-                        id="guest-name"
-                        type="text"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        placeholder="e.g. Sarah, Table 5, Best Friends..."
-                        maxLength={80}
-                        required
-                        className={styles.textInput}
-                        disabled={isSubmitting || hasSubmittedDraft}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Submission Action */}
-                  <div className={styles.submitBar}>
+                <div className={styles.cropperWrapper}>
+                  {/* Stepper Progress Bar */}
+                  <div className={styles.stepperBar} role="navigation" aria-label="Photo booth steps">
                     <button
-                      type="submit"
-                      className={styles.btnPrimary}
-                      disabled={isSubmitting || isBlocked || (!hasSubmittedDraft && !guestName.trim())}
+                      type="button"
+                      className={`${styles.stepItem} ${currentStep === 1 ? styles.active : ''} ${currentStep > 1 ? styles.completed : ''}`}
+                      onClick={() => !hasSubmittedDraft && setCurrentStep(1)}
+                      disabled={hasSubmittedDraft}
                     >
-                      {isSubmitting ? (
-                        <>
-                          <div
-                            className={styles.spinner}
-                            style={{ width: 20, height: 20, borderWidth: 2 }}
-                            aria-hidden="true"
-                          />
-                          <span>{hasSubmittedDraft ? 'Resubmitting print request...' : 'Sending print request...'}</span>
-                        </>
-                      ) : (
-                        <>
-                          <HanddrawnSparkles size={18} />
-                          <span>{hasSubmittedDraft ? 'Resubmit Print Request' : 'Send Print Request'}</span>
-                        </>
-                      )}
+                      <span className={styles.stepDot}>{currentStep > 1 ? '✓' : '1'}</span>
+                      <span>Framing</span>
+                    </button>
+                    <div className={styles.stepSeparator} />
+                    <button
+                      type="button"
+                      className={`${styles.stepItem} ${currentStep === 2 ? styles.active : ''} ${currentStep > 2 ? styles.completed : ''}`}
+                      onClick={() => !hasSubmittedDraft && setCurrentStep(2)}
+                      disabled={hasSubmittedDraft}
+                    >
+                      <span className={styles.stepDot}>{currentStep > 2 ? '✓' : '2'}</span>
+                      <span>Film Tone</span>
+                    </button>
+                    <div className={styles.stepSeparator} />
+                    <button
+                      type="button"
+                      className={`${styles.stepItem} ${currentStep === 3 ? styles.active : ''}`}
+                      onClick={() => !hasSubmittedDraft && setCurrentStep(3)}
+                      disabled={hasSubmittedDraft}
+                    >
+                      <span className={styles.stepDot}>3</span>
+                      <span>Review &amp; Print</span>
                     </button>
                   </div>
-                </form>
+
+                  {/* STEP 1: FRAMING (Orientation & Cropping) */}
+                  {currentStep === 1 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      <div style={{ textAlign: 'center', marginBottom: 4 }}>
+                        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: '#231d16', margin: 0 }}>
+                          Adjust Framing
+                        </h2>
+                        <p style={{ fontSize: '0.88rem', color: '#635b52', marginTop: 4 }}>
+                          Select portrait or landscape, then drag to reposition and zoom within the floral frame.
+                        </p>
+                      </div>
+
+                      <PhotoCropper
+                        imageUrl={uploadData.preview_url}
+                        imageWidth={uploadData.width}
+                        imageHeight={uploadData.height}
+                        orientation={orientation}
+                        onOrientationChange={handleOrientationChange}
+                        crop={crop}
+                        onCropChange={setCrop}
+                        onChangePhoto={handleChangePhoto}
+                        locked={hasSubmittedDraft}
+                        filter={effectiveFilter}
+                        showControls={true}
+                      />
+
+                      <div className={styles.stepNavRow}>
+                        <button
+                          type="button"
+                          className={styles.btnBack}
+                          onClick={handleChangePhoto}
+                          disabled={hasSubmittedDraft}
+                        >
+                          <span>🖼️ Change Photo</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.btnForward}
+                          onClick={() => setCurrentStep(2)}
+                        >
+                          <span>Continue: Choose Film Tone →</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 2: FILM TONE (Presets & Sliders) */}
+                  {currentStep === 2 && (
+                    <div className={styles.presetSection}>
+                      <div style={{ textAlign: 'center', marginBottom: 2 }}>
+                        <h2 className={styles.presetSectionTitle}>Choose Film Tone Style</h2>
+                        <p style={{ fontSize: '0.88rem', color: '#635b52', marginTop: 4 }}>
+                          Filters apply only to your photo; the vintage floral border and typography remain pristine.
+                        </p>
+                      </div>
+
+                      {/* Real-time framed preview */}
+                      <PhotoboothCard
+                        imageUrl={uploadData.preview_url}
+                        crop={crop}
+                        orientation={orientation}
+                        filter={effectiveFilter}
+                        seed={uploadData.id}
+                        onStateChange={setColorPreviewState}
+                        locked={hasSubmittedDraft}
+                      />
+
+                      {/* Presets Grid */}
+                      <div className={styles.presetGrid} role="radiogroup" aria-label="Film tone filters">
+                        {presets.map((preset) => {
+                          const isSelected = preset.id === selectedPresetId;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              className={`${styles.presetCard} ${isSelected ? styles.activePreset : ''}`}
+                              onClick={() => {
+                                if (!hasSubmittedDraft) {
+                                  setSelectedPresetId(preset.id);
+                                  setGuestAdjustments(defaultAdjustments(preset));
+                                }
+                              }}
+                              role="radio"
+                              aria-checked={isSelected}
+                              disabled={hasSubmittedDraft}
+                            >
+                              <span style={{position:'relative',display:'block',width:'100%',aspectRatio:'4/3',overflow:'hidden',borderRadius:8}}>
+                                <FilmPhoto imageUrl={uploadData.preview_url} crop={crop} orientation={orientation} filter={computeEffectiveFilter(preset,defaultAdjustments(preset))} seed={uploadData.id} thumbnail />
+                              </span>
+                              <span className={styles.presetName}>{preset.name}</span>
+                              <span className={styles.presetSub}>{preset.subtitle}</span>
+                              <span className={styles.presetSub}>{preset.tags?.join(" · ")}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Fine-Tuning Panel */}
+                      <div className={styles.fineTunePanel}>
+                        <div className={styles.fineTuneHeader}>
+                          <span className={styles.fineTuneTitle}>Fine-Tune Tone</span>
+                          <button
+                            type="button"
+                            className={styles.resetFilterBtn}
+                            onClick={() => {
+                              if (!hasSubmittedDraft) {
+                                setGuestAdjustments(defaultAdjustments(activePreset));
+                              }
+                            }}
+                            disabled={hasSubmittedDraft}
+                            title="Reset adjustments to preset defaults"
+                          >
+                            ↺ Reset Preset
+                          </button>
+                        </div>
+
+                        <div className={styles.sliderGroup}>
+                          {/* Slider 1: Intensity */}
+                          <div className={styles.sliderItem}>
+                            <div className={styles.sliderLabelRow}>
+                              <label htmlFor="intensity-range">Film Intensity ({guestAdjustments.intensity}%)</label>
+                              <span className={styles.sliderValue}>{guestAdjustments.intensity}%</span>
+                            </div>
+                            <input
+                              id="intensity-range"
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="5"
+                              value={guestAdjustments.intensity}
+                              onChange={(e) =>
+                                !hasSubmittedDraft &&
+                                setGuestAdjustments((prev) => ({
+                                  ...prev,
+                                  intensity: parseInt(e.target.value, 10),
+                                }))
+                              }
+                              className={styles.rangeInput}
+                              disabled={hasSubmittedDraft}
+                              aria-label="Film tone intensity"
+                            />
+                          </div>
+
+                          {/* Slider 2: Brightness */}
+                          <div className={styles.sliderItem}>
+                            <div className={styles.sliderLabelRow}>
+                              <label htmlFor="brightness-range">
+                                Brightness ({guestAdjustments.brightness > 0 ? `+${guestAdjustments.brightness}` : guestAdjustments.brightness})
+                              </label>
+                              <span className={styles.sliderValue}>
+                                {guestAdjustments.brightness > 0 ? `+${guestAdjustments.brightness}` : guestAdjustments.brightness}
+                              </span>
+                            </div>
+                            <input
+                              id="brightness-range"
+                              type="range"
+                              min="-40"
+                              max="40"
+                              step="2"
+                              value={guestAdjustments.brightness}
+                              onChange={(e) =>
+                                !hasSubmittedDraft &&
+                                setGuestAdjustments((prev) => ({
+                                  ...prev,
+                                  brightness: parseInt(e.target.value, 10),
+                                }))
+                              }
+                              className={styles.rangeInput}
+                              disabled={hasSubmittedDraft}
+                              aria-label="Photo brightness"
+                            />
+                          </div>
+
+                          {/* Slider 3: Warmth */}
+                          {!activePreset.monochrome && <div className={styles.sliderItem}>
+                            <div className={styles.sliderLabelRow}>
+                              <label htmlFor="warmth-range">
+                                Warmth ({guestAdjustments.warmth > 0 ? `+${guestAdjustments.warmth}` : guestAdjustments.warmth})
+                              </label>
+                              <span className={styles.sliderValue}>
+                                {guestAdjustments.warmth > 0 ? `+${guestAdjustments.warmth}` : guestAdjustments.warmth}
+                              </span>
+                            </div>
+                            <input
+                              id="warmth-range"
+                              type="range"
+                              min="-40"
+                              max="40"
+                              step="2"
+                              value={guestAdjustments.warmth}
+                              onChange={(e) =>
+                                !hasSubmittedDraft &&
+                                setGuestAdjustments((prev) => ({
+                                  ...prev,
+                                  warmth: parseInt(e.target.value, 10),
+                                }))
+                              }
+                              className={styles.rangeInput}
+                              disabled={hasSubmittedDraft}
+                              aria-label="Photo warmth"
+                            />
+                          </div>}
+                        </div>
+                      </div>
+
+                      {/* Step 2 Navigation */}
+                      <div className={styles.stepNavRow}>
+                        <button
+                          type="button"
+                          className={styles.btnBack}
+                          onClick={() => setCurrentStep(1)}
+                        >
+                          <span>← Back to Framing</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.btnForward}
+                          onClick={() => setCurrentStep(3)}
+                        >
+                          <span>Continue: Review &amp; Print →</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 3: REVIEW & SUBMIT */}
+                  {currentStep === 3 && (
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                      <div style={{ textAlign: 'center', marginBottom: 2 }}>
+                        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: '#231d16', margin: 0 }}>
+                          Review Your Print Preview
+                        </h2>
+                        <p style={{ fontSize: '0.88rem', color: '#635b52', marginTop: 4 }}>
+                          Check your composition and tone. Printed colors may vary slightly from screen display.
+                        </p>
+                      </div>
+
+                      {/* Final Complete Keepsake Card Preview */}
+                      <PhotoboothCard
+                        imageUrl={uploadData.preview_url}
+                        crop={crop}
+                        orientation={orientation}
+                        filter={effectiveFilter}
+                        seed={uploadData.id}
+                        onStateChange={setColorPreviewState}
+                        locked={hasSubmittedDraft}
+                      />
+
+                      {/* Print Specifications Badges */}
+                      <div className={styles.reviewSpecsGrid}>
+                        <div className={styles.reviewSpecBadge}>
+                          <span className={styles.reviewSpecIcon}>📐</span>
+                          <div className={styles.reviewSpecInfo}>
+                            <span className={styles.reviewSpecLabel}>Print Size</span>
+                            <span className={styles.reviewSpecVal}>
+                              {orientation === 'portrait' ? 'Portrait (10×14.8 cm)' : 'Landscape (14.8×10 cm)'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles.reviewSpecBadge}>
+                          <span className={styles.reviewSpecIcon}>{activePreset.icon}</span>
+                          <div className={styles.reviewSpecInfo}>
+                            <span className={styles.reviewSpecLabel}>Film Tone</span>
+                            <span className={styles.reviewSpecVal}>
+                              {activePreset.name} ({guestAdjustments.intensity}%)
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className={styles.reviewSpecBadge}>
+                          <span className={styles.reviewSpecIcon}>🖨️</span>
+                          <div className={styles.reviewSpecInfo}>
+                            <span className={styles.reviewSpecLabel}>Specification</span>
+                            <span className={styles.reviewSpecVal}>Single-sided Postcard</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Guest Name input & details */}
+                      <div className={styles.formFields}>
+                        <div className={styles.fieldGroup}>
+                          <div className={styles.fieldLabelRow}>
+                            <label htmlFor="guest-name">
+                              Your name or short message <span style={{ color: '#d4af37' }}>*</span>
+                            </label>
+                            <span className={styles.charCounter}>{guestName.length}/80</span>
+                          </div>
+                          <input
+                            id="guest-name"
+                            type="text"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            placeholder="e.g. Sarah, Bride's friend, Table 6..."
+                            maxLength={80}
+                            required
+                            className={styles.textInput}
+                            disabled={isSubmitting || hasSubmittedDraft}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className={styles.stepNavRow}>
+                        {!hasSubmittedDraft && (
+                          <button
+                            type="button"
+                            className={styles.btnBack}
+                            onClick={() => setCurrentStep(2)}
+                            disabled={isSubmitting}
+                          >
+                            <span>← Back to Tone</span>
+                          </button>
+                        )}
+
+                        <button
+                          type="submit"
+                          className={styles.btnForward}
+                          style={{ minHeight: 52 }}
+                          disabled={isSubmitting || isBlocked || (!hasSubmittedDraft && (!guestName.trim() || configVersion==null || colorPreviewState!=='ready'))}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div
+                                className={styles.spinner}
+                                style={{ width: 20, height: 20, borderWidth: 2 }}
+                                aria-hidden="true"
+                              />
+                              <span>
+                                {hasSubmittedDraft ? 'Resubmitting print request...' : 'Submitting print request...'}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <HanddrawnSparkles size={18} />
+                              <span>{hasSubmittedDraft ? 'Resubmit Print Request' : 'Submit Print Request'}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               )}
             </div>
           )}

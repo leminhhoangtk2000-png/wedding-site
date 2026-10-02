@@ -5,3 +5,6 @@ PHOTO_PRINT_STATION_TOKEN=replace_with_random_secret_at_least_32_characters
 # Keep false until physical tests pass; initial database session is paused too.
 PHOTO_PRINT_HARDWARE_VERIFIED=false
 # Existing NEXT_PUBLIC_SUPABASE_URL must point to the same Supabase project.
+
+# Explicit opt-in for guest intake before printer setup; printing remains blocked.
+PHOTO_PRINT_ACCEPT_WITHOUT_PRINTER=false

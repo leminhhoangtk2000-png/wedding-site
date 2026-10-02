@@ -516,3 +516,165 @@ export function HanddrawnTeaCup({ size = 22, className = '', ...props }) {
     </svg>
   );
 }
+
+// 26. Handdrawn Printer (for Photo Booth / Keepsake Printing)
+export function HanddrawnPrinter({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Paper tray top */}
+      <path d="M6.5 9V3.5c0-.6.5-1 1-1h9c.6 0 1 .5 1 1V9" />
+      {/* Printer main body */}
+      <path d="M4.5 9.5h15c1 0 1.8.8 1.8 1.8v5.2c0 1-.8 1.8-1.8 1.8h-2.5" />
+      <path d="M7 18.3H4.5c-1 0-1.8-.8-1.8-1.8v-5.2c0-1 .8-1.8 1.8-1.8" />
+      {/* Power / status sparkle dot */}
+      <circle cx="17.5" cy="12.5" r="0.9" fill="currentColor" />
+      {/* Postcard ejecting from front tray */}
+      <path d="M7 14.5h10c.6 0 1 .5 1 1v5c0 .6-.5 1-1 1H7c-.6 0-1-.5-1-1v-5c0-.6.5-1 1-1z" />
+      {/* Postcard photo line */}
+      <path d="M9 18.2h6" strokeWidth={1.3} />
+    </svg>
+  );
+}
+
+// 27. Handdrawn Dimensions / Aspect Ratio / Frame Size (for Print Size)
+export function HanddrawnAspectRatio({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Outer frame */}
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      {/* Delicate dimension corner ticks */}
+      <path d="M7 4.5v2.5M10.5 4.5v1.5M14 4.5v2.5M17.5 4.5v1.5" strokeWidth={1.2} />
+      <path d="M3.5 8h2.5M3.5 11.5h1.5M3.5 15h2.5" strokeWidth={1.2} />
+      {/* Center diagonal composition guideline */}
+      <path d="M9 15.5l6-6" strokeDasharray="1.5 2" strokeWidth={1.2} />
+    </svg>
+  );
+}
+
+// 28. Handdrawn Portrait Orientation
+export function HanddrawnOrientationPortrait({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Portrait card frame */}
+      <rect x="5.5" y="2.8" width="13" height="18.4" rx="2.2" />
+      {/* Inner photo aperture */}
+      <rect x="8" y="5.5" width="8" height="11" rx="1" strokeWidth={1.3} />
+      {/* Little botanical leaf in corner */}
+      <path d="M12 18.2c.8-.4 1.4-1 1.6-1.6" strokeWidth={1.2} />
+    </svg>
+  );
+}
+
+// 29. Handdrawn Landscape Orientation
+export function HanddrawnOrientationLandscape({ size = 20, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Landscape card frame */}
+      <rect x="2.8" y="5.5" width="18.4" height="13" rx="2.2" />
+      {/* Inner photo aperture */}
+      <rect x="5.5" y="8" width="11" height="8" rx="1" strokeWidth={1.3} />
+      {/* Little botanical leaf in corner */}
+      <path d="M18.2 12c-.4.8-1 1.4-1.6 1.6" strokeWidth={1.2} />
+    </svg>
+  );
+}
+
+// 30. Handdrawn Refresh / Retry / Reset (replaces ↺, 🔄)
+export function HanddrawnRefresh({ size = 18, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Upper arc with arrow */}
+      <path d="M4.5 12a7.5 7.5 0 0 1 13-4.8l2.2-2.2" />
+      <path d="M19.7 5v4.5H15.2" />
+      {/* Lower arc with arrow */}
+      <path d="M19.5 12a7.5 7.5 0 0 1-13 4.8l-2.2 2.2" />
+      <path d="M4.3 19v-4.5h4.5" />
+    </svg>
+  );
+}
+
+// 31. Handdrawn Photo Image (replaces 🖼️)
+export function HanddrawnImage({ size = 18, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Photo frame */}
+      <rect x="3.5" y="3.5" width="17" height="17" rx="2" />
+      {/* Sun / moon */}
+      <circle cx="8.5" cy="8.5" r="1.8" />
+      {/* Rolling hills */}
+      <path d="M4.5 17.5l5.5-5.5 3.5 3.5 3-3 3 4" />
+    </svg>
+  );
+}
+
+// 32. Handdrawn Copy / Clipboard (replaces 📋)
+export function HanddrawnCopy({ size = 18, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      {/* Back card */}
+      <path d="M8.5 4.5h9c1 0 1.8.8 1.8 1.8v10" />
+      {/* Front card */}
+      <rect x="4.5" y="7.5" width="11.5" height="12.5" rx="1.8" />
+      {/* Content lines */}
+      <path d="M7.5 11.5h5.5M7.5 14.5h3.5" strokeWidth={1.3} />
+    </svg>
+  );
+}
+
+// 33. Handdrawn Cross / Decline (replaces ✕)
+export function HanddrawnCross({ size = 16, className = '', ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      className={`handdrawn-icon ${className}`}
+      {...baseSvgProps}
+      {...props}
+    >
+      <path d="M6 6l12 12M18 6L6 18" strokeWidth={2} />
+    </svg>
+  );
+}
+

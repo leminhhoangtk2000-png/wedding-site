@@ -9,6 +9,7 @@ async function database() {
   await pg.exec(`create role anon;create role authenticated;create role service_role bypassrls;
     create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);`);
   await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_printing.sql',import.meta.url),'utf8'));
+  await pg.exec(await readFile(new URL('../../supabase/migrations/20261002_photo_film_presets.sql',import.meta.url),'utf8'));
   return pg;
 }
 const cmd=async(pg,action,payload={})=>(await pg.query('select public.photo_print_command($1,$2::jsonb) result',[action,JSON.stringify(payload)])).rows[0].result;

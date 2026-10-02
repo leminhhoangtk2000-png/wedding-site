@@ -4,6 +4,7 @@ export async function POST(request) {
   try {
     requireAuth(request,true); const body=await jsonBody(request);requireUUID(body.station_id);
     if (!['heartbeat','claim','begin','submitted','review'].includes(body.action)) fail('INVALID_INPUT');
+    if (['claim','begin'].includes(body.action) && process.env.PHOTO_PRINT_HARDWARE_VERIFIED!=='true') fail('HARDWARE_NOT_VERIFIED',409);
     if (body.action==='heartbeat' && (typeof body.printer!=='string' || !body.printer.trim() || (body.error!=null && typeof body.error!=='string'))) fail('INVALID_INPUT');
     if (['begin','submitted','review'].includes(body.action)) { requireUUID(body.attempt_id);requireUUID(body.claim_token); }
     const client=db(), result=await command(client,body.action,body);

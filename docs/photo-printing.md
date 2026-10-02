@@ -1,3 +1,11 @@
+# Production trial intake - 2026-10-02
+
+User authorized guest intake before printer setup. Live URL: https://www.project69hd.xyz/photo. PHOTO_PRINT_ACCEPT_WITHOUT_PRINTER=true; PHOTO_PRINT_HARDWARE_VERIFIED=false. Guest requests remain pending. Admin approve/reprint/ready and station claim/begin return HARDWARE_NOT_VERIFIED until hardware is verified. Pause/reject remain available.
+
+Correct Vercel project is hoangle/wedding-site (custom domain project69hd.xyz), not hoang-le2/wedding-site. Local .vercel link was corrected; do not deploy to the previous project. Production deployment: dpl_2fyDNNFmn6sU29KnT6i5jNia2Rwk, Next.js 16.3.8. Existing public Supabase settings preserved and matched live client project. ADMIN_PASSWORD is configured privately; local operator access file is .vercel/admin-access.txt (ignored, mode 0600). Never commit credentials.
+
+Live checks passed: upload/create/idempotent retry/tracking; invalid tracking denied; authenticated admin resume/reject; printing blocked. Synthetic test request rejected and quota restored to 100. Camera on physical phones and physical printing are not yet verified. When configuring CP1500, run the original physical acceptance procedure below.
+
 # Chụp và in ảnh — vận hành
 
 ## Trạng thái triển khai

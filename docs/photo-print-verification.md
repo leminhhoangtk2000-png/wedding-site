@@ -31,3 +31,12 @@ Giữ phiên mặc định tạm dừng, `PHOTO_PRINT_HARDWARE_VERIFIED=false` v
 - Live Supabase SDK: service-role session RPC passed (paused, capacity 100, reserved 0), private bucket passed, anonymous RPC denied. No guest data or print jobs created.
 - All photo_print tables have RLS; anon/authenticated cannot execute RPC. Screenshot: ../../photo-print-qa/supabase-production-security.png.
 - Secrets stay in ignored private server/config files. Mac worker has only station token. No commit, push or deployment performed in this setup run.
+
+## Authorized production trial - 2026-10-02
+
+- Corrected local Vercel link from hoang-le2 to hoangle; deployment dpl_2fyDNNFmn6sU29KnT6i5jNia2Rwk serves www.project69hd.xyz. Next.js 16.3.8.
+- Guest intake enabled explicitly before printer setup. Hardware remains false; print approval, reprint, ready confirmation, station claim/begin are blocked.
+- Antigravity regular app implemented trial banner and pending explanation; Codex reviewed diff. Banner only displays when accepting and quota remains.
+- API fixtures passed for both normal printing and intake-only modes; build/lint passed (21 existing warnings); 11 tests passed.
+- Live HTTP to production/Supabase: upload, create, duplicate retry, correct/incorrect tracking, admin auth/resume/reject, station claim/approval blocked. Test request rejected, remaining quota 100.
+- Screenshot: ../../photo-print-qa/guest-intake-production.png. No physical phone camera or printer test claimed. No git commit or push in this run.

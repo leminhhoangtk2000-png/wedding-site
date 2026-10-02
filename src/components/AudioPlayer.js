@@ -1,7 +1,11 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function AudioPlayer() {
+  const pathname = usePathname();
+  const isAdmin = pathname ? (pathname === '/admin' || pathname.startsWith('/admin/')) : false;
+
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
   const playPromiseRef = useRef(null);
@@ -31,6 +35,13 @@ export default function AudioPlayer() {
   };
 
   useEffect(() => {
+    if (isAdmin) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      return;
+    }
+
     if (audioRef.current) {
       audioRef.current.volume = 0.5; // Set volume to 50%
       safePlay();
@@ -76,7 +87,7 @@ export default function AudioPlayer() {
       window.removeEventListener('pause-bg-music', handlePauseMusic);
       window.removeEventListener('play-bg-music', handlePlayMusic);
     };
-  }, []);
+  }, [isAdmin]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -88,6 +99,10 @@ export default function AudioPlayer() {
       }
     }
   };
+
+  if (isAdmin) {
+    return null;
+  }
 
   return (
     <>
