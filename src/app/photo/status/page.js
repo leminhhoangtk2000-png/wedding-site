@@ -387,7 +387,11 @@ export default function PhotoStatusPage() {
                   role="listitem"
                 >
                   <div className={styles.timelineStepDot} aria-hidden="true">
-                    {getStepStatus(0, requestData.status) === 'completed' ? '✓' : '1'}
+                    {getStepStatus(0, requestData.status) === 'completed' ? (
+                      <HanddrawnCheck size={12} strokeWidth={2.4} />
+                    ) : (
+                      '1'
+                    )}
                   </div>
                   <div className={styles.timelineStepTitle}>1. Request Received</div>
                   <div className={styles.timelineStepDesc}>
@@ -407,7 +411,11 @@ export default function PhotoStatusPage() {
                   role="listitem"
                 >
                   <div className={styles.timelineStepDot} aria-hidden="true">
-                    {getStepStatus(1, requestData.status) === 'completed' ? '✓' : '2'}
+                    {getStepStatus(1, requestData.status) === 'completed' ? (
+                      <HanddrawnCheck size={12} strokeWidth={2.4} />
+                    ) : (
+                      '2'
+                    )}
                   </div>
                   <div className={styles.timelineStepTitle}>2. Approved for Print</div>
                   <div className={styles.timelineStepDesc}>
@@ -427,13 +435,22 @@ export default function PhotoStatusPage() {
                   role="listitem"
                 >
                   <div className={styles.timelineStepDot} aria-hidden="true">
-                    {getStepStatus(2, requestData.status) === 'completed' ? '✓' : '3'}
+                    {getStepStatus(2, requestData.status) === 'completed' ? (
+                      <HanddrawnCheck size={12} strokeWidth={2.4} />
+                    ) : (
+                      '3'
+                    )}
                   </div>
                   <div className={styles.timelineStepTitle}>3. Printing in Progress</div>
                   <div className={styles.timelineStepDesc}>
-                    {requestData.status === 'review'
-                      ? '⚠️ Operator inspection required. Our booth attendant is handling it.'
-                      : 'The print station is spooling and printing your postcard photo.'}
+                    {requestData.status === 'review' ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <HanddrawnAlert size={14} strokeWidth={2} />
+                        <span>Operator inspection required. Our booth attendant is handling it.</span>
+                      </span>
+                    ) : (
+                      'The print station is spooling and printing your postcard photo.'
+                    )}
                   </div>
                 </div>
 
@@ -449,7 +466,11 @@ export default function PhotoStatusPage() {
                   role="listitem"
                 >
                   <div className={styles.timelineStepDot} aria-hidden="true">
-                    {getStepStatus(3, requestData.status) === 'completed' ? '✨' : '4'}
+                    {getStepStatus(3, requestData.status) === 'completed' ? (
+                      <HanddrawnSparkles size={13} strokeWidth={1.8} />
+                    ) : (
+                      '4'
+                    )}
                   </div>
                   <div className={styles.timelineStepTitle}>4. Ready for Pickup!</div>
                   <div className={styles.timelineStepDesc}>
@@ -473,7 +494,10 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  ⏳ <strong>Request received:</strong> Your photo has been safely recorded and is awaiting operator and print station setup. Printing will start after the print station is configured; your request will remain pending.
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, verticalAlign: 'middle', marginRight: 4 }}>
+                    <HanddrawnClock size={16} strokeWidth={2} />
+                  </span>
+                  <strong>Request received:</strong> Your photo has been safely recorded and is awaiting operator and print station setup. Printing will start after the print station is configured; your request will remain pending.
                 </div>
               )}
 
@@ -491,7 +515,10 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  🎉 <strong>Your photo is ready!</strong> Please head over to the photo booth table and present code{' '}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, verticalAlign: 'middle', marginRight: 4 }}>
+                    <HanddrawnCelebration size={18} strokeWidth={1.8} />
+                  </span>
+                  <strong>Your photo is ready!</strong> Please head over to the photo booth table and present code{' '}
                   <strong style={{ color: '#8c6720' }}>{requestData.pickup_code}</strong> to collect your print!
                 </div>
               )}
@@ -528,7 +555,10 @@ export default function PhotoStatusPage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  ⚠️ This print request requires a quick check on the printer. No need to resubmit, our operator is working on it.
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, verticalAlign: 'middle', marginRight: 4 }}>
+                    <HanddrawnAlert size={16} strokeWidth={2} />
+                  </span>
+                  This print request requires a quick check on the printer. No need to resubmit, our operator is working on it.
                 </div>
               )}
             </div>
@@ -610,7 +640,8 @@ export default function PhotoStatusPage() {
         {/* Discreet admin link */}
         <div className={styles.adminFootnote}>
           <Link href="/admin/printing" className={styles.adminFootnoteLink}>
-            ⚙️ Print Station Admin
+            <HanddrawnSettings size={14} />
+            <span>Print Station Admin</span>
           </Link>
         </div>
       </main>

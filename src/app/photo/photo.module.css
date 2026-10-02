@@ -854,6 +854,10 @@
   font-size: 12px;
   text-decoration: none;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .adminFootnoteLink:hover {
@@ -1112,6 +1116,9 @@
   padding: 4px 8px;
   border-radius: 6px;
   transition: background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .resetFilterBtn:hover {
@@ -1272,7 +1279,11 @@
 .reviewSpecIcon {
   font-size: 18px;
   line-height: 1;
-  color: #d4af37;
+  color: #b08d4f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .reviewSpecInfo {
