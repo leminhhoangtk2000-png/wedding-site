@@ -3,6 +3,7 @@
 import React from 'react';
 import FilmPhoto from './FilmPhoto';
 import { FRAMES } from '@/lib/photo/film.mjs';
+import { HanddrawnLock, HanddrawnSparkles } from '@/components/icons/HanddrawnIcons';
 
 /**
  * PhotoboothCard
@@ -91,7 +92,17 @@ export default function PhotoboothCard({
         {/* 4. Touch drag hint badge (only when interactive) */}
         {interactive && (
           <div className="interactive-drag-badge" aria-hidden="true">
-            <span>{locked ? '🔒 Frame locked' : '✦ Drag to adjust framing'}</span>
+            {locked ? (
+              <>
+                <HanddrawnLock size={12} strokeWidth={2} />
+                <span>Frame locked</span>
+              </>
+            ) : (
+              <>
+                <HanddrawnSparkles size={12} strokeWidth={1.8} />
+                <span>Drag to adjust framing</span>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -230,6 +241,9 @@ export default function PhotoboothCard({
           pointer-events: none;
           letter-spacing: 0.02em;
           white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
         }
 
         @media (max-width: 480px) {
