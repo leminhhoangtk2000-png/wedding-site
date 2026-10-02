@@ -11,6 +11,12 @@ import {
   HanddrawnHeart,
   HanddrawnAlert,
   HanddrawnInfo,
+  HanddrawnPrinter,
+  HanddrawnAspectRatio,
+  HanddrawnRefresh,
+  HanddrawnImage,
+  HanddrawnCopy,
+  HanddrawnSettings,
 } from '@/components/icons/HanddrawnIcons';
 import PhotoCropper, { computeNormalizedCrop } from '@/components/photo/PhotoCropper';
 import PhotoboothCard from '@/components/photo/PhotoboothCard';
@@ -684,7 +690,10 @@ export default function PhotoPage() {
                       <span>Copied</span>
                     </>
                   ) : (
-                    <span>📋 Copy Code</span>
+                    <>
+                      <HanddrawnCopy size={16} />
+                      <span>Copy Code</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -820,7 +829,9 @@ export default function PhotoPage() {
                       onClick={() => !hasSubmittedDraft && setCurrentStep(1)}
                       disabled={hasSubmittedDraft}
                     >
-                      <span className={styles.stepDot}>{currentStep > 1 ? '✓' : '1'}</span>
+                      <span className={styles.stepDot}>
+                        {currentStep > 1 ? <HanddrawnCheck size={11} strokeWidth={2.4} /> : '1'}
+                      </span>
                       <span>Framing</span>
                     </button>
                     <div className={styles.stepSeparator} />
@@ -830,7 +841,9 @@ export default function PhotoPage() {
                       onClick={() => !hasSubmittedDraft && setCurrentStep(2)}
                       disabled={hasSubmittedDraft}
                     >
-                      <span className={styles.stepDot}>{currentStep > 2 ? '✓' : '2'}</span>
+                      <span className={styles.stepDot}>
+                        {currentStep > 2 ? <HanddrawnCheck size={11} strokeWidth={2.4} /> : '2'}
+                      </span>
                       <span>Film Tone</span>
                     </button>
                     <div className={styles.stepSeparator} />
@@ -878,7 +891,8 @@ export default function PhotoPage() {
                           onClick={handleChangePhoto}
                           disabled={hasSubmittedDraft}
                         >
-                          <span>🖼️ Change Photo</span>
+                          <HanddrawnImage size={15} />
+                          <span>Change Photo</span>
                         </button>
                         <button
                           type="button"
@@ -957,7 +971,8 @@ export default function PhotoPage() {
                             disabled={hasSubmittedDraft}
                             title="Reset adjustments to preset defaults"
                           >
-                            ↺ Reset Preset
+                            <HanddrawnRefresh size={13} strokeWidth={2} />
+                            <span>Reset Preset</span>
                           </button>
                         </div>
 
@@ -1096,7 +1111,9 @@ export default function PhotoPage() {
                       {/* Print Specifications Badges */}
                       <div className={styles.reviewSpecsGrid}>
                         <div className={styles.reviewSpecBadge}>
-                          <span className={styles.reviewSpecIcon}>📐</span>
+                          <span className={styles.reviewSpecIcon}>
+                            <HanddrawnAspectRatio size={18} />
+                          </span>
                           <div className={styles.reviewSpecInfo}>
                             <span className={styles.reviewSpecLabel}>Print Size</span>
                             <span className={styles.reviewSpecVal}>
@@ -1106,7 +1123,9 @@ export default function PhotoPage() {
                         </div>
 
                         <div className={styles.reviewSpecBadge}>
-                          <span className={styles.reviewSpecIcon}>{activePreset.icon}</span>
+                          <span className={styles.reviewSpecIcon}>
+                            <HanddrawnSparkles size={18} />
+                          </span>
                           <div className={styles.reviewSpecInfo}>
                             <span className={styles.reviewSpecLabel}>Film Tone</span>
                             <span className={styles.reviewSpecVal}>
@@ -1116,7 +1135,9 @@ export default function PhotoPage() {
                         </div>
 
                         <div className={styles.reviewSpecBadge}>
-                          <span className={styles.reviewSpecIcon}>🖨️</span>
+                          <span className={styles.reviewSpecIcon}>
+                            <HanddrawnPrinter size={18} />
+                          </span>
                           <div className={styles.reviewSpecInfo}>
                             <span className={styles.reviewSpecLabel}>Specification</span>
                             <span className={styles.reviewSpecVal}>Single-sided Postcard</span>
@@ -1248,7 +1269,8 @@ export default function PhotoPage() {
         {/* Discreet admin link */}
         <div className={styles.adminFootnote}>
           <Link href="/admin/printing" className={styles.adminFootnoteLink}>
-            ⚙️ Print Station Admin
+            <HanddrawnSettings size={14} />
+            <span>Print Station Admin</span>
           </Link>
         </div>
       </main>

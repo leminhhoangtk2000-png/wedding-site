@@ -11,6 +11,11 @@ import {
   HanddrawnHeart,
   HanddrawnAlert,
   HanddrawnInfo,
+  HanddrawnRefresh,
+  HanddrawnCopy,
+  HanddrawnClock,
+  HanddrawnCelebration,
+  HanddrawnSettings,
 } from '@/components/icons/HanddrawnIcons';
 import StatusBadge from '@/components/photo/StatusBadge';
 import { getPhotoRequest, PHOTO_STATUS_LABELS } from '@/lib/photo/client';
@@ -251,7 +256,8 @@ export default function PhotoStatusPage() {
                     .finally(() => setLoading(false));
                 }}
               >
-                <span>🔄 Retry</span>
+                <HanddrawnRefresh size={16} />
+                <span>Retry</span>
               </button>
               <Link href="/photo" className={styles.btnSecondary}>
                 <span>Back to Photo Booth</span>
@@ -337,7 +343,10 @@ export default function PhotoStatusPage() {
                     <span>Copied</span>
                   </>
                 ) : (
-                  <span>📋 Copy Code</span>
+                  <>
+                    <HanddrawnCopy size={16} />
+                    <span>Copy Code</span>
+                  </>
                 )}
               </button>
             </div>
