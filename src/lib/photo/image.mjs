@@ -3,6 +3,12 @@ import decodeHeic from 'heic-decode';
 import { fileURLToPath } from 'node:url';
 import { FRAMES, transformPixels } from './film.mjs';
 
+// Static URLs keep Turbopack from resolving both orientations to one asset.
+const FRAME_PATHS = {
+  portrait: fileURLToPath(new URL('./assets/photobooth-frame-portrait.png', import.meta.url)),
+  landscape: fileURLToPath(new URL('./assets/photobooth-frame-landscape.png', import.meta.url)),
+};
+
 export const MAX_CLIENT_UPLOAD_BYTES = 3 * 1024 * 1024;
 export const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
 export function validateCrop(crop, orientation, width, height) {
@@ -57,7 +63,7 @@ export async function renderPrintPhoto(bytes, crop, orientation, width, height, 
       .toColourspace('srgb').ensureAlpha().raw().toBuffer({resolveWithObject:true});
     transformPixels(data,info.width,info.height,snapshot.computed,snapshot.seed);
     const photo = await sharp(data,{raw:info}).png().toBuffer();
-    const frame = fileURLToPath(new URL(`./assets/photobooth-frame-${orientation}.png`,import.meta.url));
+    const frame = FRAME_PATHS[orientation];
     return sharp({create:{width:f.width,height:f.height,channels:4,background:'#fdfaf5'}})
       .composite([{input:photo,left:f.left,top:f.top},{input:frame,left:0,top:0}])
       .toColourspace('srgb').withMetadata({density:300}).jpeg({quality:96}).toBuffer();
@@ -115,7 +121,7 @@ export async function editPrintPhoto({ existingPrintBytes, existingOrientation, 
   }
 
   const photo = await photoSharp.toColourspace('srgb').png().toBuffer();
-  const frame = fileURLToPath(new URL(`./assets/photobooth-frame-${targetOrientation}.png`, import.meta.url));
+  const frame = FRAME_PATHS[targetOrientation];
 
   return sharp({
     create: { width: targetF.width, height: targetF.height, channels: 4, background: '#fdfaf5' },

@@ -40,3 +40,9 @@ Fixture PostgreSQL PGlite tuần tự hóa queries; số đo này kiểm chứng
 5. Verify production save → reload → guest config → request snapshot, preview renewal, pagination và một đợt mixed traffic trên staging cùng cấu hình cloud. Giữ hardware flag như hiện tại cho đến khi nghiệm thu máy in theo phạm vi riêng.
 
 Production SQL đã apply qua SQL Editor trong một transaction, trả Success. REST kiểm chứng runtime read_session/dashboard và film RPC hoạt động: capacity null, reserved 4, accepting true, preset version 3. Vercel dùng Git integration; CLI management credential cũ trả 403 nhưng dashboard đã xác minh đúng project/repository và main production branch. Không tự xóa ảnh cũ hoặc thay chính sách retention; file chưa xác định commit vẫn được giữ để tránh xóa ảnh của request đã lưu.
+
+## Production deployment 03/10/2026
+
+- SQL migration đã apply thành công, reserved 4 và preset version 3 giữ nguyên.
+- Deployment đầu b9e7488 / dpl_HWrNDHHbKHt1h5S3TfDatCYVgNbU Ready, nhưng smoke test tạo ảnh portrait phát hiện 500: Image to composite must have same dimensions or smaller. Log và bundle Turbopack xác nhận đường dẫn URL chứa orientation động bị resolve thành asset landscape cho cả hai hướng.
+- Sửa bằng map hai URL literal riêng cho portrait/landscape, dùng chung cho guest render và admin edit. 25 tests và build pass; bundle mới tham chiếu hai asset module riêng biệt. Sau deployment, nghiệm thu trực tiếp cả portrait/landscape, admin edit đổi hướng, exact retry, preview renewal, thumbnail và tracking.
