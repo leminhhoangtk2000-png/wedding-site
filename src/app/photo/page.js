@@ -935,12 +935,14 @@ export default function PhotoPage() {
                               aria-checked={isSelected}
                               disabled={hasSubmittedDraft}
                             >
-                              <span style={{position:'relative',display:'block',width:'100%',aspectRatio:'4/3',overflow:'hidden',borderRadius:8}}>
-                                <FilmPhoto imageUrl={uploadData.preview_url} crop={crop} orientation={orientation} filter={computeEffectiveFilter(preset,defaultAdjustments(preset))} seed={uploadData.id} thumbnail />
+                              <span className={styles.presetIcon} aria-hidden="true">
+                                {preset.icon || '✦'}
                               </span>
                               <span className={styles.presetName}>{preset.name}</span>
                               <span className={styles.presetSub}>{preset.subtitle}</span>
-                              <span className={styles.presetSub}>{preset.tags?.join(" · ")}</span>
+                              {preset.tags && preset.tags.length > 0 && (
+                                <span className={styles.presetTags}>{preset.tags.join(" · ")}</span>
+                              )}
                             </button>
                           );
                         })}

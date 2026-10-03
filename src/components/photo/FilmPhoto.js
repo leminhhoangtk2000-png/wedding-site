@@ -48,7 +48,7 @@ export default function FilmPhoto({ imageUrl, crop, orientation='portrait', filt
     return ()=>{active=false;};
   },[imageUrl,cropKey,filterKey,orientation,seed,thumbnail,onStateChange]);
   return <>
-    <canvas ref={ref} aria-label="Photo with selected film tone" role="img" style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',opacity:state==='ready'?1:0}} />
+    <canvas ref={ref} aria-label="Photo with selected film tone" role="img" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'contain',pointerEvents:'none',opacity:state==='ready'?1:0}} />
     {state!=='ready'&&<span role={state==='error'?'alert':'status'} style={{position:'absolute',inset:0,display:'grid',placeItems:'center',padding:8,fontSize:12,color:'#231d16',background:'#ebe4d8'}}>{state==='error'?'Unable to load color preview. Please reload photo to retry.':'Applying film tone…'}</span>}
   </>;
 }
