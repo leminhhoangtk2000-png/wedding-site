@@ -1,8 +1,9 @@
 import sharp from 'sharp';
-import convert from 'heic-convert';
+import decodeHeic from 'heic-decode';
 import { fileURLToPath } from 'node:url';
 import { FRAMES, transformPixels } from './film.mjs';
 
+export const MAX_CLIENT_UPLOAD_BYTES = 3 * 1024 * 1024;
 export const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
 export function validateCrop(crop, orientation, width, height) {
   if (!['portrait', 'landscape'].includes(orientation) || !crop ||
@@ -25,8 +26,18 @@ export async function normalizePhoto(bytes) {
   // Inspect actual ISO-BMFF brand, not supplied MIME/extension. libvips binary builds
   // often decode AVIF but do not include the HEVC decoder required by iPhone HEIC.
   if (bytes.subarray(4, 8).toString() === 'ftyp' && /hei[cf]|heix|hevc|mif1/.test(bytes.subarray(8, 64).toString())) {
-    try { input = Buffer.from(await convert({ buffer: bytes, format: 'JPEG', quality: 0.95 })); }
-    catch { throw new Error('HEIC_UNSUPPORTED'); }
+    let images;
+    try {
+      // libheif exposes dimensions before allocating the full RGBA display buffer.
+      images = await decodeHeic.all({buffer: bytes});
+      const first = images[0];
+      if (!first || !Number.isSafeInteger(first.width * first.height) || first.width <= 0 || first.height <= 0 || first.width * first.height > 64000000)
+        throw new Error('INVALID_IMAGE');
+      const decoded = await first.decode();
+      input = await sharp(Buffer.from(decoded.data.buffer, decoded.data.byteOffset, decoded.data.byteLength),
+        {raw:{width:decoded.width,height:decoded.height,channels:4}}).jpeg({quality:95}).toBuffer();
+    } catch (error) { throw new Error(error.message==='INVALID_IMAGE' ? 'INVALID_IMAGE' : 'HEIC_UNSUPPORTED'); }
+    finally { images?.dispose(); }
   }
   try {
     const metadata = await sharp(input, { limitInputPixels: 64000000, animated: false }).metadata();

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getPrintingAdmin, photoFetch } from '@/lib/photo/client';
+import { processImageForUpload } from '@/components/photo/imageCompressor';
 import styles from '@/app/admin/printing/printing.module.css';
 
 const neutral = () => ({ brightness: 0, warmth: 0, contrast: 0, monochrome: false });
@@ -43,19 +44,26 @@ export default function AdminRequestEditor({ request, password, onSaved, onClose
     if (busy.current) return;
     busy.current = true;
     setSaving(true); setError(''); setNotice('');
-    // Keep the same immutable payload and key when the response is lost.
-    if (!operation.current) {
-      const body = new FormData();
-      body.set('action', 'edit'); body.set('id', saved.id);
-      body.set('operation_key', crypto.randomUUID());
-      body.set('expected_revision', String(saved.edit_revision));
-      body.set('guest_name', name.trim()); body.set('orientation', orientation);
-      body.set('adjustments', JSON.stringify(adjustments));
-      body.set('approve', String(approve));
-      if (file) body.set('file', file);
-      operation.current = { body, approve };
-    }
     try {
+      // Compress once; every uncertain retry reuses the exact same bytes and operation key.
+      if (!operation.current) {
+        let replacement = file;
+        if (file) {
+          const processed = await processImageForUpload(file);
+          if (!processed.ok) {
+            const failure = new Error(processed.error); failure.status = 413; throw failure;
+          }
+          replacement = processed.file;
+        }
+        const body = new FormData();
+        body.set('action', 'edit'); body.set('id', saved.id);
+        body.set('operation_key', crypto.randomUUID());
+        body.set('expected_revision', String(saved.edit_revision));
+        body.set('guest_name', name.trim()); body.set('orientation', orientation);
+        body.set('adjustments', JSON.stringify(adjustments)); body.set('approve', String(approve));
+        if (replacement) body.set('file', replacement);
+        operation.current = { body, approve };
+      }
       const result = await photoFetch('/api/admin/printing', {
         method: 'PATCH', headers: { 'x-admin-password': password }, body: operation.current.body,
       });
@@ -79,7 +87,7 @@ export default function AdminRequestEditor({ request, password, onSaved, onClose
     if (busy.current) return;
     busy.current = true; setSaving(true);
     try {
-      const result = await getPrintingAdmin(password);
+      const result = await getPrintingAdmin(password, {id:saved.id});
       const latest = result.requests.find(item => item.id === saved.id);
       if (!latest) throw new Error('Request no longer available.');
       setSaved(latest); setStale(false); setError('');

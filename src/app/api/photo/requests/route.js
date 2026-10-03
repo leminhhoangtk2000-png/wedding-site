@@ -1,5 +1,5 @@
-import { randomUUID } from 'node:crypto';
-import { db, command, respond, errorResponse, fail, hash, requireUUID, jsonBody, publicRequest, BUCKET } from '@/lib/photo/server';
+import { uploadPrint } from '@/lib/photo/print-storage';
+import { db, command, respond, errorResponse, fail, hash, requireUUID, jsonBody, publicRequest, BUCKET, releaseProcessing } from '@/lib/photo/server';
 import { renderPrintPhoto, validateCrop } from '@/lib/photo/image.mjs';
 import { resolveFilter } from '@/lib/photo/config-server';
 import { canonicalFilter } from '@/lib/photo/film.mjs';
@@ -11,15 +11,12 @@ export async function GET(request) {
     const token = request.headers.get('x-photo-token');
     if (!token || !/^[0-9a-f-]{36}$/i.test(token)) fail('NOT_FOUND', 404);
     const client = db();
-    await command(client, 'session'); // reconcile stale station claims
-    const { data, error } = await client.from('photo_print_requests').select('id,pickup_code,status,created_at').eq('id',id).eq('tracking_hash',hash(token)).maybeSingle();
-    if (error) fail('DATABASE_UNAVAILABLE', 503);
-    if (!data) fail('NOT_FOUND', 404);
+    const data = await command(client, 'tracking', {id, tracking_hash:hash(token)});
     return respond({ request: publicRequest(data) });
   } catch (error) { return errorResponse(error); }
 }
 export async function POST(request) {
-  let client, outputPath, retained = false, rpcStarted = false;
+  let client, outputPath, thumbnailPath, retained = false, rpcStarted = false, lease;
   try {
     const body = await jsonBody(request);
     for (const k of ['upload_id','upload_token','request_key','tracking_token']) requireUUID(body[k]);
@@ -33,9 +30,7 @@ export async function POST(request) {
     }
     const fingerprint = hash(JSON.stringify(canonical)), trackingHash = hash(body.tracking_token);
     client = db();
-    // Wait for any concurrent reservation transaction before looking up a
-    // retry. A lost response must remain recoverable even at the last slot.
-    const session = await command(client, 'session');
+    const session = await command(client, 'read_session');
     const { data: existing, error: existingError } = await client.from('photo_print_requests').select('*').eq('request_key',body.request_key).maybeSingle();
     if (existingError) fail('DATABASE_UNAVAILABLE', 503);
     if (existing) {
@@ -48,28 +43,28 @@ export async function POST(request) {
     if (uploadError) fail('DATABASE_UNAVAILABLE',503);
     if (!upload) fail('UPLOAD_NOT_FOUND',404);
     validateCrop(crop,body.orientation,upload.width,upload.height);
+    lease = await command(client, 'processing_acquire', {job_key: body.request_key});
     const { data: original, error: downloadError } = await client.storage.from(BUCKET).download(upload.storage_path);
     if (downloadError) fail('DATABASE_UNAVAILABLE',503);
     const snapshot = await resolveFilter(client,canonical.filter,body.upload_id);
     const rendered = await renderPrintPhoto(Buffer.from(await original.arrayBuffer()),crop,body.orientation,upload.width,upload.height,snapshot);
-    outputPath = `prints/${randomUUID()}.jpg`;
-    const { error: storageError } = await client.storage.from(BUCKET).upload(outputPath,rendered,{ contentType:'image/jpeg',upsert:false });
-    if (storageError) fail('DATABASE_UNAVAILABLE',503);
+    const stored = await uploadPrint(client,rendered);
+    outputPath=stored.storage_path; thumbnailPath=stored.thumbnail_path;
     rpcStarted = true;
     const saved = await command(client,'create',{
       ...canonical, request_key:body.request_key,tracking_hash:trackingHash,fingerprint,
-      upload_hash:hash(body.upload_token),storage_path:outputPath,
+      upload_hash:hash(body.upload_token),storage_path:outputPath,thumbnail_path:thumbnailPath,
       ...(snapshot ? {filter_snapshot:snapshot} : {}),
     });
     retained = saved.storage_path === outputPath;
-    if (!retained) await client.storage.from(BUCKET).remove([outputPath]);
+    if (!retained) await client.storage.from(BUCKET).remove([outputPath,thumbnailPath]);
     return respond({ request:publicRequest(saved),tracking_url:`/photo/status#id=${saved.id}&token=${body.tracking_token}` });
   } catch (error) {
     // An uncertain RPC transport failure can still commit later. Retain its
     // asset for reconciliation; only a known rollback is safe to clean up.
     if (client && outputPath && !retained && (!rpcStarted || error.status === 409 || error.status === 404)) {
-      await client.storage.from(BUCKET).remove([outputPath]);
+      await client.storage.from(BUCKET).remove([outputPath,thumbnailPath]);
     }
     return errorResponse(error);
-  }
+  } finally { await releaseProcessing(client, lease); }
 }

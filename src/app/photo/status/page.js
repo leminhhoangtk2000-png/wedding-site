@@ -17,6 +17,7 @@ import {
   HanddrawnCelebration,
   HanddrawnSettings,
 } from '@/components/icons/HanddrawnIcons';
+import { startPolling } from '@/lib/photo/poll.mjs';
 import StatusBadge from '@/components/photo/StatusBadge';
 import { getPhotoRequest, PHOTO_STATUS_LABELS } from '@/lib/photo/client';
 import styles from '../photo.module.css';
@@ -68,46 +69,24 @@ export default function PhotoStatusPage() {
     return () => window.removeEventListener('hashchange', parseHash);
   }, []);
 
-  // Initial fetch and 5-second polling
+  const pollRef = useRef(null);
   useEffect(() => {
     if (!authParams?.id || !authParams?.token) return;
-
     let active = true;
-
-    const runPoll = () => {
-      getPhotoRequest(authParams.id, authParams.token)
-        .then((res) => {
-          if (!active) return;
-          if (res && res.request) {
-            setRequestData(res.request);
-            setIsNotFound(false);
-            setErrorMessage('');
-            setLastUpdated(new Date());
-          }
-        })
-        .catch((err) => {
-          if (!active) return;
-          if (err.status === 404 || err.code === 'NOT_FOUND') {
-            setIsNotFound(true);
-          } else {
-            setErrorMessage(err.message || 'Unable to update photo print status.');
-          }
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    };
-
-    runPoll();
-
-    const timer = setInterval(() => {
-      runPoll();
-    }, 5000);
-
-    return () => {
-      active = false;
-      clearInterval(timer);
-    };
+    const poll = startPolling(async () => {
+      try {
+        const res = await getPhotoRequest(authParams.id, authParams.token);
+        if (!active) return false;
+        setRequestData(res.request); setIsNotFound(false); setErrorMessage(''); setLastUpdated(new Date());
+        return !['ready','rejected'].includes(res.request.status);
+      } catch (err) {
+        if (!active) return false;
+        if (err.status === 404) { setIsNotFound(true); return false; }
+        setErrorMessage(err.message || 'Unable to update photo print status.'); throw err;
+      } finally { if (active) setLoading(false); }
+    });
+    pollRef.current = poll;
+    return () => { active=false; poll.stop(); pollRef.current=null; };
   }, [authParams]);
 
   const handleCopyCode = async (code) => {
@@ -236,25 +215,7 @@ export default function PhotoStatusPage() {
               <button
                 type="button"
                 className={styles.btnPrimary}
-                onClick={() => {
-                  setLoading(true);
-                  getPhotoRequest(authParams.id, authParams.token)
-                    .then((res) => {
-                      if (res && res.request) {
-                        setRequestData(res.request);
-                        setIsNotFound(false);
-                        setErrorMessage('');
-                      }
-                    })
-                    .catch((err) => {
-                      if (err.status === 404 || err.code === 'NOT_FOUND') {
-                        setIsNotFound(true);
-                      } else {
-                        setErrorMessage(err.message || 'Unable to update photo print status.');
-                      }
-                    })
-                    .finally(() => setLoading(false));
-                }}
+                onClick={() => { setLoading(true); pollRef.current?.refresh(); }}
               >
                 <HanddrawnRefresh size={16} />
                 <span>Retry</span>
@@ -326,6 +287,8 @@ export default function PhotoStatusPage() {
                 <div>{errorMessage}</div>
               </div>
             )}
+
+            <button type="button" className={styles.btnSecondary} onClick={()=>pollRef.current?.refresh()}>Refresh status</button>
 
             {/* Pickup Code Highlight */}
             <div className={styles.pickupHighlight}>

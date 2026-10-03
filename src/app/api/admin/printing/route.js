@@ -1,32 +1,43 @@
-import { randomUUID } from 'node:crypto';
-import { db, requireAuth, command, respond, errorResponse, fail, requireUUID, jsonBody, signedPreview, BUCKET, hash } from '@/lib/photo/server';
+import { uploadPrint } from '@/lib/photo/print-storage';
+import { db, requireAuth, command, respond, errorResponse, fail, requireUUID, jsonBody, signedPreview, BUCKET, hash, cachedPreview, releaseProcessing } from '@/lib/photo/server';
 import { getPresetConfig } from '@/lib/photo/config-server';
 import { validatePresets } from '@/lib/photo/film.mjs';
-import { MAX_UPLOAD_BYTES, editPrintPhoto } from '@/lib/photo/image.mjs';
+import { MAX_CLIENT_UPLOAD_BYTES, editPrintPhoto } from '@/lib/photo/image.mjs';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 export async function GET(request) {
   try {
     requireAuth(request);
-    const client=db(), result=await command(client,'admin_list');
-    const requests=await Promise.all((result.requests || []).map(async r => ({
-      id:r.id,guest_name:r.guest_name,pickup_code:r.pickup_code,status:r.status,orientation:r.orientation,created_at:r.created_at,edit_revision:r.edit_revision,
-      preview_url:await signedPreview(client,r.storage_path),attempts:r.attempts,
-      preset_name:r.admin_image_edited ? 'Admin edited' : r.filter_snapshot?.preset?.name || null,filter_snapshot:r.filter_snapshot,
-    })));
+    const params = new URL(request.url).searchParams;
+    const page = Number(params.get('page') || 1), limit = Number(params.get('limit') || 25);
+    if (!Number.isInteger(page) || page < 1 || page > 100000 || !Number.isInteger(limit) || limit < 1 || limit > 50) fail('INVALID_INPUT');
+    const id = params.get('id'); if (id) requireUUID(id);
+    const client=db(), result=await command(client,'dashboard', {page,limit,id,status:params.get('status') || 'all',search:params.get('search') || ''});
+    // Small batches bound Storage signing pressure; stable cached URLs preserve browser cache.
+    const requests=[];
+    for (let i=0; i<(result.requests || []).length; i+=5) {
+      requests.push(...await Promise.all(result.requests.slice(i,i+5).map(async r => ({
+        id:r.id,guest_name:r.guest_name,pickup_code:r.pickup_code,status:r.status,orientation:r.orientation,created_at:r.created_at,edit_revision:r.edit_revision,
+        preview_url:await cachedPreview(client,r.storage_path),
+        thumbnail_url:await cachedPreview(client,r.thumbnail_path || r.storage_path),attempts:r.attempts,
+        preset_name:r.admin_image_edited ? 'Admin edited' : r.filter_snapshot?.preset?.name || null,filter_snapshot:r.filter_snapshot,
+      }))));
+    }
     const station=result.station ? { last_seen:result.station.last_seen,printer:result.station.printer,error:result.station.error } : null;
     return respond({
       session: {
         ...result.session,
-        capacity: null,
-        remaining: null,
       },
       requests,
+      counts: result.counts,
+      pagination: result.pagination,
       station,
       preset_config: await getPresetConfig(client),
     });
   } catch(error) { return errorResponse(error); }
 }
 export async function PATCH(request) {
+  let processingClient, lease;
   try {
     requireAuth(request);
     const contentType = request.headers.get('content-type') || '';
@@ -34,6 +45,7 @@ export async function PATCH(request) {
     let file = null;
 
     if (contentType.includes('multipart/form-data')) {
+      if (Number(request.headers.get('content-length')) > MAX_CLIENT_UPLOAD_BYTES + 65536) fail('INVALID_IMAGE_SIZE',413);
       const formData = await request.formData();
       body = {
         action: formData.get('action') || 'edit',
@@ -81,7 +93,7 @@ export async function PATCH(request) {
           ['brightness','warmth','contrast'].some(key => adjustments[key] != null &&
             (typeof adjustments[key] !== 'number' || !Number.isFinite(adjustments[key]) || Math.abs(adjustments[key]) > 100)) ||
           (adjustments.monochrome != null && typeof adjustments.monochrome !== 'boolean')) fail('INVALID_INPUT');
-      if (file && file.size > MAX_UPLOAD_BYTES) fail('INVALID_IMAGE_SIZE', 413);
+      if (file && file.size > MAX_CLIENT_UPLOAD_BYTES) fail('INVALID_IMAGE_SIZE', 413);
       const newBytes = file ? Buffer.from(await file.arrayBuffer()) : null;
       const edit_fingerprint = hash(JSON.stringify({
         id: body.id, expected_revision: body.expected_revision,
@@ -113,9 +125,11 @@ export async function PATCH(request) {
         Boolean(body.adjustments.monochrome)
       );
       const orientationChanged = body.orientation && body.orientation !== existing.orientation;
-      let newStoragePath = null;
+      let newStoragePath = null, thumbnailPath = null;
 
       if (file || hasAdjustments || orientationChanged) {
+        processingClient = client;
+        lease = await command(client, 'processing_acquire', {job_key: body.operation_key});
         let existingPrintBytes = null;
         if (!file) {
           const { data: dlBlob, error: dlErr } = await client.storage.from(BUCKET).download(existing.storage_path);
@@ -132,13 +146,8 @@ export async function PATCH(request) {
           adjustments: body.adjustments || null,
         });
 
-        const outputPath = `prints/${randomUUID()}.jpg`;
-        const { error: upErr } = await client.storage.from(BUCKET).upload(outputPath, reRendered, {
-          contentType: 'image/jpeg',
-          upsert: false,
-        });
-        if (upErr) fail('DATABASE_UNAVAILABLE', 503);
-        newStoragePath = outputPath;
+        const stored = await uploadPrint(client,reRendered);
+        newStoragePath=stored.storage_path; thumbnailPath=stored.thumbnail_path;
       }
 
       const payload = {
@@ -148,7 +157,7 @@ export async function PATCH(request) {
         edit_fingerprint,
         ...(body.guest_name ? { guest_name: body.guest_name.trim() } : {}),
         ...(body.orientation ? { orientation: body.orientation } : {}),
-        ...(newStoragePath ? { storage_path: newStoragePath } : {}),
+        ...(newStoragePath ? { storage_path: newStoragePath, thumbnail_path: thumbnailPath } : {}),
         ...(body.approve ? { approve: true } : {}),
       };
 
@@ -157,11 +166,11 @@ export async function PATCH(request) {
       catch (error) {
         // A provider timeout may have committed; retain its file for an exact retry.
         if (newStoragePath && ['STATE_CONFLICT','IDEMPOTENCY_CONFLICT','NOT_FOUND'].includes(error.code))
-          await client.storage.from(BUCKET).remove([newStoragePath]);
+          await client.storage.from(BUCKET).remove([newStoragePath,thumbnailPath]);
         throw error;
       }
       if (newStoragePath && updatedReq.storage_path !== newStoragePath)
-        await client.storage.from(BUCKET).remove([newStoragePath]);
+        await client.storage.from(BUCKET).remove([newStoragePath,thumbnailPath]);
       const preview_url = await signedPreview(client, updatedReq.storage_path);
       return respond({ request: updatedReq, preview_url });
     }
@@ -172,5 +181,5 @@ export async function PATCH(request) {
     if (['approve','reprint','ready'].includes(body.action) && !hardwareReady) fail('HARDWARE_NOT_VERIFIED',409);
     if (!['pause','resume'].includes(body.action)) { requireUUID(body.id);requireUUID(body.operation_key); }
     await command(db(),body.action,body); return respond({});
-  } catch(error) { return errorResponse(error); }
+  } catch(error) { return errorResponse(error); } finally { await releaseProcessing(processingClient, lease); }
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import AdminRequestEditor from '@/components/photo/AdminRequestEditor';
+import { startPolling } from '@/lib/photo/poll.mjs';
 import PhotoHeader from '@/components/photo/PhotoHeader';
 import StatusBadge from '@/components/photo/StatusBadge';
 import PhotoboothCard from '@/components/photo/PhotoboothCard';
@@ -66,6 +67,13 @@ export default function AdminPrintingPage() {
   // Filters & Search
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState({page:1,status:'all',search:''});
+  const queryRef = useRef(query), fetchBusy = useRef(null);
+  useEffect(() => { queryRef.current=query; }, [query]);
+  useEffect(() => {
+    const timer=setTimeout(()=>setQuery({page:1,status:statusFilter,search:searchQuery.trim()}),300);
+    return ()=>clearTimeout(timer);
+  }, [statusFilter,searchQuery]);
 
   const [stationOnline, setStationOnline] = useState(false);
 
@@ -73,11 +81,18 @@ export default function AdminPrintingPage() {
   const fetchData = useCallback(
     async (isBackground = false) => {
       if (!password) return;
+      while (fetchBusy.current) {
+        await fetchBusy.current.promise;
+        if (JSON.stringify(queryRef.current)!==JSON.stringify(query)) return;
+      }
+      let release;
+      fetchBusy.current={promise:new Promise(resolve=>{release=resolve;})};
       if (!isBackground) setLoading(true);
       else setRefreshing(true);
 
       try {
-        const res = await getPrintingAdmin(password);
+        const res = await getPrintingAdmin(password,query);
+        if (JSON.stringify(queryRef.current)!==JSON.stringify(query)) return;
         if (res && res.session) {
           setData(res);
           if(!configDirtyRef.current)applyConfig(res.preset_config);
@@ -95,13 +110,15 @@ export default function AdminPrintingPage() {
           setIsAuthenticated(false);
         } else {
           setMutationError(err.message || 'Error connecting to print admin server.');
+          if (isBackground) throw err;
         }
       } finally {
+        fetchBusy.current=null; release();
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [password]
+    [password,query]
   );
 
   // Auto-authenticate if password was loaded from shared sessionStorage
@@ -113,16 +130,11 @@ export default function AdminPrintingPage() {
     return ()=>{active=false;};
   }, [password, isAuthenticated, fetchData]);
 
-  // 5-second polling when authenticated
   useEffect(() => {
     if (!isAuthenticated || !password) return;
-
-    const timer = setInterval(() => {
-      fetchData(true);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, [isAuthenticated, password, fetchData]);
+    const poll=startPolling(async()=> { await fetchData(true); }, {interval:10000});
+    return ()=>poll.stop();
+  }, [isAuthenticated,password,fetchData]);
 
   // Handle Login submission
   const handleLoginSubmit = async (e) => {
@@ -302,29 +314,10 @@ export default function AdminPrintingPage() {
     }
   };
 
-  // Filter requests
-  const filteredRequests = (data?.requests || []).filter((req) => {
-    // Status filter
-    if (statusFilter === 'pending' && req.status !== 'pending') return false;
-    if (statusFilter === 'processing' && !['approved', 'claimed', 'submitting', 'submitted'].includes(req.status))
-      return false;
-    if (statusFilter === 'review' && req.status !== 'review') return false;
-    if (statusFilter === 'ready' && req.status !== 'ready') return false;
-    if (statusFilter === 'rejected' && req.status !== 'rejected') return false;
-
-    // Search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      const matchName = req.guest_name?.toLowerCase().includes(q);
-      const matchCode = req.pickup_code?.toLowerCase().includes(q);
-      return matchName || matchCode;
-    }
-
-    return true;
-  });
-
-  const pendingCount = (data?.requests || []).filter((r) => r.status === 'pending').length;
-  const reviewCount = (data?.requests || []).filter((r) => r.status === 'review').length;
+  // Filtering and counts cover the whole queue, independently of the current page.
+  const filteredRequests = data?.requests || [];
+  const pendingCount = data?.counts?.pending || 0;
+  const reviewCount = data?.counts?.review || 0;
 
   return (
     <div className={styles.adminContainer}>
@@ -924,7 +917,7 @@ export default function AdminPrintingPage() {
                   className={`${styles.filterTab} ${statusFilter === 'all' ? styles.active : ''}`}
                   onClick={() => setStatusFilter('all')}
                 >
-                  All ({data?.requests?.length || 0})
+                  All ({data?.pagination?.total || 0})
                 </button>
                 <button
                   type="button"
@@ -973,6 +966,11 @@ export default function AdminPrintingPage() {
               />
             </div>
 
+            <div className={styles.toolbar} aria-label="Queue pagination">
+              <button type="button" disabled={query.page<=1 || refreshing} onClick={()=>setQuery(prev=>({...prev,page:prev.page-1}))}>Previous</button>
+              <span>Page {query.page} · {data?.pagination?.matched || 0} matching requests</span>
+              <button type="button" disabled={query.page*25 >= (data?.pagination?.matched || 0) || refreshing} onClick={()=>setQuery(prev=>({...prev,page:prev.page+1}))}>Next</button>
+            </div>
             {/* QUEUE TABLE (DESKTOP) */}
             <div className={styles.tableContainer}>
               {filteredRequests.length === 0 ? (
@@ -1009,7 +1007,7 @@ export default function AdminPrintingPage() {
                           >
                             {req.preview_url ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={req.preview_url} alt={`Photo from ${req.guest_name}`} className={styles.thumbnailImg} />
+                              <img loading="lazy" src={req.thumbnail_url || req.preview_url} alt={`Photo from ${req.guest_name}`} className={styles.thumbnailImg} />
                             ) : (
                               <div style={{ color: '#666', fontSize: '0.7rem', textAlign: 'center', paddingTop: 20 }}>
                                 N/A
@@ -1165,7 +1163,7 @@ export default function AdminPrintingPage() {
                       >
                         {req.preview_url && (
                           /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={req.preview_url} alt={req.guest_name} className={styles.thumbnailImg} />
+                          <img loading="lazy" src={req.thumbnail_url || req.preview_url} alt={req.guest_name} className={styles.thumbnailImg} />
                         )}
                       </div>
 

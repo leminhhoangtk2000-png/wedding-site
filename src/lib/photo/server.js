@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { DEFAULT_PRESETS } from './film.mjs';
 
 export const BUCKET = 'photo_print_private';
 export const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -24,22 +23,12 @@ export function db() {
 }
 export async function command(client, action, payload = {}) {
   const shouldUseFilmRpc = (['preset_config','save_presets'].includes(action)||(action==='create'&&payload.filter_snapshot));
-  let { data, error } = await client.rpc(shouldUseFilmRpc ? 'photo_print_film_command' : 'photo_print_command', { p_action: action, p_payload: payload });
-  if (error && shouldUseFilmRpc && (error.code === 'PGRST202' || error.message?.includes('photo_print_film_command'))) {
-    if (action === 'create') {
-      const fallbackResult = await client.rpc('photo_print_command', { p_action: action, p_payload: payload });
-      data = fallbackResult.data;
-      error = fallbackResult.error;
-    } else if (action === 'preset_config') {
-      return { version: 1, presets: DEFAULT_PRESETS };
-    } else if (action === 'save_presets') {
-      return { version: (payload.expected_version || 1) + 1, presets: payload.presets };
-    }
-  }
+  const runtimeAction = ['read_session','tracking','dashboard','processing_acquire','processing_release'].includes(action);
+  const { data, error } = await client.rpc(runtimeAction ? 'photo_print_runtime' : shouldUseFilmRpc ? 'photo_print_film_command' : 'photo_print_command', { p_action: action, p_payload: payload });
   if (error) {
+    const code = ['INVALID_INPUT','PAUSED','FULL','STATE_CONFLICT','IDEMPOTENCY_CONFLICT','NOT_FOUND','UPLOAD_NOT_FOUND','STATION_BUSY','STATION_OFFLINE','INVALID_JOB','INVALID_ACTION','UPLOAD_LIMIT','CONFIG_NOT_FOUND','CONFIG_STALE','PROCESSING_BUSY','PROCESSING_LIMIT'].find(k => error.message === k);
+    if (code) fail(code, code.startsWith('PROCESSING_') ? 429 : code.includes('NOT_FOUND') ? 404 : 409);
     console.error(`[command error: ${action}]`, error);
-    const code = ['INVALID_INPUT','PAUSED','FULL','STATE_CONFLICT','IDEMPOTENCY_CONFLICT','NOT_FOUND','UPLOAD_NOT_FOUND','STATION_BUSY','STATION_OFFLINE','INVALID_JOB','INVALID_ACTION','UPLOAD_LIMIT','CONFIG_NOT_FOUND','CONFIG_STALE'].find(k => error.message === k);
-    if (code) fail(code, code.includes('NOT_FOUND') ? 404 : 409);
     // No provider error/details or secrets in public response.
     fail('DATABASE_UNAVAILABLE', 503);
   }
@@ -63,10 +52,12 @@ const messages = {
   NOT_FOUND: 'Request not found.', UPLOAD_NOT_FOUND: 'Photo upload has expired or is no longer available. Please upload again.',
   INVALID_FILTER: 'Invalid film filter configuration.', CONFIG_NOT_FOUND: 'Preset configuration version not found. Please reload settings.', CONFIG_STALE: 'Presets have been updated elsewhere. Your edits are preserved; reload new config before saving.',
   INVALID_INPUT: 'Invalid submission data.', INVALID_CROP: 'Photo crop area does not match paper ratio or is too small.',
-  INVALID_IMAGE: 'Unable to process image. Please choose another JPEG, PNG, or HEIC photo.', INVALID_IMAGE_SIZE: 'Please select an image smaller than 12MB.',
+  INVALID_IMAGE: 'Unable to process image. Please choose another JPEG, PNG, or HEIC photo.', INVALID_IMAGE_SIZE: 'Please select a photo smaller than 3MB, or allow the page to optimize it before uploading.',
   HEIC_UNSUPPORTED: 'Unable to convert this HEIC photo. Please export as JPEG and retry.',
   STATION_BUSY: 'Another Mac print station is currently active.', STATION_OFFLINE: 'Print station is offline or encountered an error.',
   HARDWARE_NOT_VERIFIED: 'Printer setup is not verified yet. Photo requests can remain pending until the print station is ready.',
+  PROCESSING_BUSY: 'Photo processing is busy. Please retry in a few seconds; your draft is preserved.',
+  PROCESSING_LIMIT: 'Photo processing limit reached for this hour. Please try again later.',
   UPLOAD_LIMIT: 'Upload limit reached for this hour. Please try again later.',
 };
 export function errorResponse(error) {
@@ -75,7 +66,7 @@ export function errorResponse(error) {
   }
   const code = error.code || (messages[error.message] ? error.message : 'INTERNAL_ERROR');
   const status = error.status || (code === 'INVALID_IMAGE_SIZE' ? 413 : ['INVALID_IMAGE','HEIC_UNSUPPORTED'].includes(code) ? 415 : messages[code] ? 400 : 500);
-  return Response.json({ success: false, code, error: messages[code] || 'Unable to process request at this time. Please try again.' }, { status, headers: { 'Cache-Control': 'no-store' } });
+  return Response.json({ success: false, code, error: messages[code] || 'Unable to process request at this time. Please try again.' }, { status, headers: { 'Cache-Control': 'no-store', ...(status === 429 ? {'Retry-After': code === 'PROCESSING_LIMIT' ? '3600' : '3'} : {}) } });
 }
 export function publicRequest(r) { return { id: r.id, pickup_code: r.pickup_code, status: r.status, created_at: r.created_at }; }
 export async function signedPreview(client, path) {
@@ -91,4 +82,23 @@ export async function signedPreview(client, path) {
     console.error('[signedPreview exception]', path, err);
     return null;
   }
+}
+
+export async function releaseProcessing(client, lease) {
+  if (!client || !lease) return;
+  try { await command(client, 'processing_release', lease); }
+  catch { console.error('[photo] processing lease release failed; lease will expire'); }
+}
+// Per-instance bounded URL cache reduces signing and image reloads. Admission is DB-backed.
+const previewCache = new Map();
+export async function cachedPreview(client, path) {
+  const key = `${process.env.NEXT_PUBLIC_SUPABASE_URL}:${path}`;
+  const cached = previewCache.get(key);
+  if (cached && cached.expires > Date.now()) return cached.url;
+  const url = await signedPreview(client, path);
+  if (url) {
+    previewCache.set(key, {url, expires: Date.now() + 480000});
+    if (previewCache.size > 250) previewCache.delete(previewCache.keys().next().value);
+  }
+  return url;
 }

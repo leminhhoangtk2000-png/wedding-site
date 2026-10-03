@@ -2,6 +2,7 @@
 // adapter is test-only. Never contacts the configured production Supabase.
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
+import { Readable } from 'node:stream';
 import { mkdtemp,readFile,writeFile,mkdir,cp,symlink,rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -9,19 +10,18 @@ import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import sharp from 'sharp';
+import { performance } from 'node:perf_hooks';
 import { PGlite } from '@electric-sql/pglite';
+import {applyPhotoMigrations} from '../../tools/photo-print/migrations.mjs';
 import {FILM_STOCK_PRESETS,computeEffectiveFilter} from '../../src/lib/photo/film.mjs';
 
 const preview=process.argv.includes('--preview');
+const load=process.argv.includes('--load');
 const intakeOnly=process.argv.includes('--intake-only');
 const project=process.cwd(),pg=new PGlite(),objects=new Map();
 let filmQADraft;
 await pg.exec("create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);");
-await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_printing.sql'),'utf8'));
-await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_presets.sql'),'utf8'));
-await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_looks_v2.sql'),'utf8'));
-await pg.exec(await readFile(join(project,'supabase/migrations/20261002_photo_film_stocks_v3.sql'),'utf8'));
-await pg.exec(await readFile(join(project,'supabase/migrations/20261002180000_photo_admin_edit_safe.sql'),'utf8'));
+await applyPhotoMigrations(pg);
 const provider=createServer(async(req,res)=>{
   res.setHeader('Access-Control-Allow-Origin','*');
   const chunks=[];for await(const chunk of req)chunks.push(chunk);const bytes=Buffer.concat(chunks);
@@ -29,8 +29,8 @@ const provider=createServer(async(req,res)=>{
   const json=(body,status=200)=>{res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(body));};
   try{
     if(url.pathname==='/film-qa')return json(filmQADraft);
-    if(['/rest/v1/rpc/photo_print_command','/rest/v1/rpc/photo_print_film_command'].includes(url.pathname)){
-      const body=JSON.parse(bytes);const {rows}=await pg.query(`select ${url.pathname.endsWith('photo_print_film_command')?'photo_print_film_command':'photo_print_command'}($1,$2::jsonb) result`,[body.p_action,JSON.stringify(body.p_payload)]);return json(rows[0].result);
+    if(['/rest/v1/rpc/photo_print_command','/rest/v1/rpc/photo_print_film_command','/rest/v1/rpc/photo_print_runtime'].includes(url.pathname)){
+      const body=JSON.parse(bytes);const {rows}=await pg.query(`select ${url.pathname.split('/').at(-1)}($1,$2::jsonb) result`,[body.p_action,JSON.stringify(body.p_payload)]);return json(rows[0].result);
     }
     const table=/^\/rest\/v1\/(photo_print_uploads|photo_print_requests)$/.exec(url.pathname)?.[1];
     if(table){
@@ -70,7 +70,8 @@ const provider=createServer(async(req,res)=>{
 provider.listen(0,'127.0.0.1');await once(provider,'listening');
 const providerURL=`http://127.0.0.1:${provider.address().port}`;
 const root=await mkdtemp(join(tmpdir(),'wedding-photo-api-'));
-let next;
+let next, handlerServer, monitor;
+const traffic={started:0,finished:0};
 try{
   if(preview){await cp(join(project,'src'),join(root,'src'),{recursive:true});await symlink(join(project,'public'),join(root,'public'));}
   else await cp(join(project,'src/app/api'),join(root,'src/app/api'),{recursive:true});
@@ -106,7 +107,7 @@ return <div style={{padding:24,background:'#0e1217',color:'white'}}><h1>Local cr
   else await writeFile(join(root,'next.config.mjs'),'export default { serverExternalPackages: ["sharp", "heic-convert"] };');
   const portProbe=createServer();portProbe.listen(0,'127.0.0.1');await once(portProbe,'listening');const port=portProbe.address().port;await new Promise(r=>portProbe.close(r));
   const admin='test-admin-password',stationToken='test-station-token-at-least-32-characters';
-  const testEnv={...process.env,NEXT_PUBLIC_SUPABASE_URL:providerURL,NEXT_PUBLIC_SUPABASE_ANON_KEY:'fixture-public',SUPABASE_SERVICE_ROLE_KEY:'fixture-service',ADMIN_PASSWORD:admin,PHOTO_PRINT_STATION_TOKEN:stationToken,PHOTO_PRINT_HARDWARE_VERIFIED:intakeOnly?'false':'true',PHOTO_PRINT_ACCEPT_WITHOUT_PRINTER:intakeOnly?'true':'false'};
+  const testEnv={...process.env,NODE_ENV:'production',NEXT_PUBLIC_SUPABASE_URL:providerURL,NEXT_PUBLIC_SUPABASE_ANON_KEY:'fixture-public',SUPABASE_SERVICE_ROLE_KEY:'fixture-service',ADMIN_PASSWORD:admin,PHOTO_PRINT_STATION_TOKEN:stationToken,PHOTO_PRINT_HARDWARE_VERIFIED:intakeOnly?'false':'true',PHOTO_PRINT_ACCEPT_WITHOUT_PRINTER:intakeOnly?'true':'false'};
   if(preview){
     await mkdir(join(root,'src/app/photo/film-qa'),{recursive:true});
     await writeFile(join(root,'src/app/photo/film-qa/page.js'),`'use client';
@@ -115,12 +116,40 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
     let buildOutput='';builder.stdout.on('data',b=>{buildOutput+=b;});builder.stderr.on('data',b=>{buildOutput+=b;});
     const [code]=await once(builder,'exit');if(code!==0)throw new Error(buildOutput);console.log('Preview production build passed.');
   }
-  next=spawn(process.execPath,[join(project,'node_modules/next/dist/bin/next'),...(preview?['start']:['dev','--webpack']),'--port',String(port)],{cwd:root,env:testEnv,stdio:['ignore','pipe','pipe']});
-  let output='';next.stdout.on('data',b=>{output+=b;});next.stderr.on('data',b=>{output+=b;});
-  const base=`http://127.0.0.1:${port}`;
-  for(let i=0;i<100;i++){if(output.includes('Ready in'))break;if(next.exitCode!=null)throw new Error(output);await new Promise(r=>setTimeout(r,200));}
+  let base;
+  if (preview) {
+    next=spawn(process.execPath,[join(project,'node_modules/next/dist/bin/next'),'start','--port',String(port)],{cwd:root,env:testEnv,stdio:['ignore','pipe','pipe']});
+    let output='';next.stdout.on('data',b=>{output+=b;});next.stderr.on('data',b=>{output+=b;});
+    for(let i=0;i<100;i++){if(output.includes('Ready in'))break;if(next.exitCode!=null)throw new Error(output);await new Promise(r=>setTimeout(r,200));}
+    base=`http://127.0.0.1:${port}`;
+  } else {
+    Object.assign(process.env,testEnv);
+    const routes=new Map();
+    for(const name of ['photo/status','photo/uploads','photo/requests','admin/printing','printing/station']) {
+      const source=(await readFile(join(project,'src/app/api',name,'route.js'),'utf8'))
+        .replace(/(['"])@\/([^'"]+)\1/g,(_,quote,path)=>JSON.stringify(new URL('./src/'+path+(path.endsWith('.mjs')?'':'.js'),`file://${project}/`).href));
+      const file=join(root,name.replaceAll('/','-')+'.mjs');await writeFile(file,source);
+      routes.set('/api/'+name,await import(new URL(`file://${file}`).href));
+    }
+    handlerServer=createServer(async(req,res)=>{
+      traffic.started++;
+      try {
+        const handler=routes.get(new URL(req.url,'http://local').pathname)?.[req.method];
+        if(!handler){res.writeHead(404);res.end();return;}
+        const request=new Request('http://local'+req.url,{method:req.method,headers:req.headers,
+          ...(['GET','HEAD'].includes(req.method)?{}:{body:Readable.toWeb(req),duplex:'half'})});
+        const response=await handler(request);
+        // Consume unused multipart streams on admission rejection so keep-alive
+        // connections can be reused; do not buffer 100 upload bodies in the fixture.
+        if(request.body && !request.bodyUsed) for await (const _chunk of request.body) { /* drain */ }
+        res.writeHead(response.status,Object.fromEntries(response.headers));
+        res.end(Buffer.from(await response.arrayBuffer()));traffic.finished++;
+      }catch(error){res.writeHead(500);res.end(JSON.stringify({error:error.message}));}
+    });
+    handlerServer.listen(port,'127.0.0.1');await once(handlerServer,'listening');base=`http://127.0.0.1:${port}`;
+  }
   const call=async(path,method='GET',body,headers={})=>{
-    const response=await fetch(base+path,{method,headers:body instanceof FormData?headers:{'Content-Type':'application/json',...headers},body:body?body instanceof FormData?body:JSON.stringify(body):undefined});
+    const response=await fetch(base+path,{method,signal:AbortSignal.timeout(30000),headers:body instanceof FormData?headers:{'Content-Type':'application/json',...headers},body:body?body instanceof FormData?body:JSON.stringify(body):undefined});
     return {status:response.status,data:await response.json()};
   };
   assert.equal((await call('/api/photo/status')).data.session.accepting,false);
@@ -164,6 +193,45 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   assert.equal((await call(`/api/photo/requests?id=${id}`,'GET',undefined,{'x-photo-token':randomUUID()})).status,404);
   assert.equal((await call(`/api/photo/requests?id=${id}`,'GET',undefined,{'x-photo-token':body.tracking_token})).data.request.status,'pending');
   const state=await call('/api/admin/printing','GET',undefined,{'x-admin-password':admin});assert.equal(state.data.requests.length,1);assert.ok(state.data.requests[0].preview_url);assert.equal(state.data.requests[0].tracking_hash,undefined);assert.equal(state.data.requests[0].preset_name,'Soft Wedding');
+  // Capability refresh must renew a stale URL without uploading again.
+  assert.equal((await call(`/api/photo/uploads?id=${upload.id}`,'GET',undefined,{'x-photo-token':upload.token})).status,200);
+  assert.equal((await call(`/api/photo/uploads?id=${upload.id}`,'GET',undefined,{'x-photo-token':randomUUID()})).status,404);
+  const thumbPath=(await pg.query('select thumbnail_path from photo_print_requests where id=$1',[id])).rows[0].thumbnail_path;
+  const thumbMeta=await sharp(objects.get('photo_print_private/'+thumbPath)).metadata();assert.ok(thumbMeta.width<=320&&thumbMeta.height<=320);
+  const stablePreview=await call('/api/admin/printing','GET',undefined,{'x-admin-password':admin});
+  assert.equal(stablePreview.data.requests[0].preview_url,state.data.requests[0].preview_url);
+  if(load) {
+    const started=performance.now();let admissionRetries=0;
+    monitor=setInterval(()=>console.log('LOAD progress '+JSON.stringify({...traffic,admissionRetries})),5000);
+    const retry=async(path,method,payload,headers={})=>{
+      for(let i=0;i<240;i++) {
+        const result=await call(path,method,payload,headers);
+        if(result.data.code!=='PROCESSING_BUSY') {assert.equal(result.status,200,JSON.stringify(result));return result.data;}
+        admissionRetries++;await new Promise(resolve=>setTimeout(resolve,250+Math.random()*250));
+      }
+      throw new Error('Admission retry timed out');
+    };
+    const pixels=Buffer.alloc(1600*2368*3);let seed=69;
+    for(let i=0;i<pixels.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;pixels[i]=seed>>>24;}
+    const loadPhoto=await sharp(pixels,{raw:{width:1600,height:2368,channels:3}}).jpeg({quality:75}).toBuffer();
+    assert.ok(loadPhoto.length<=3*1024*1024);
+    const results=await Promise.all(Array.from({length:100},async(_,i)=>{
+      const form=new FormData();form.append('file',new Blob([loadPhoto],{type:'image/jpeg'}),'load.jpg');
+      const uploaded=(await retry('/api/photo/uploads','POST',form)).upload;
+      const input={...body,upload_id:uploaded.id,upload_token:uploaded.token,request_key:randomUUID(),tracking_token:randomUUID(),guest_name:`Load Guest ${i}`,
+        crop:{x:0,y:0,width:1,height:1}};
+      const created=await retry('/api/photo/requests','POST',input);
+      const repeated=await retry('/api/photo/requests','POST',input);assert.equal(created.request.id,repeated.request.id);
+      const tracked=await retry(`/api/photo/requests?id=${created.request.id}`,'GET',undefined,{'x-photo-token':input.tracking_token});assert.equal(tracked.request.status,'pending');
+      return created.request.id;
+    }));
+    assert.equal(new Set(results).size,100);
+    const pages=await Promise.all([1,2,3,4,5].map(page=>call(`/api/admin/printing?page=${page}`,'GET',undefined,{'x-admin-password':admin})));
+    assert.equal(new Set(pages.flatMap(p=>p.data.requests.map(r=>r.id))).size,101);
+    assert.equal((await pg.query('select count(*)::int n from photo_print_processing')).rows[0].n,0);
+    clearInterval(monitor);monitor=null;
+    console.log('LOAD PASS '+JSON.stringify({virtualUsers:100,uploadBytes:loadPhoto.length,uniqueRequests:100,admissionRetries,durationMs:Math.round(performance.now()-started),fixture:'PGlite and Storage HTTP adapter; not production capacity proof'}));
+  }
   const adminMutation=action=>call('/api/admin/printing','PATCH',{action,id,operation_key:randomUUID()},{'x-admin-password':admin});
   if(intakeOnly){
     assert.equal((await call('/api/photo/status')).data.session.intake_only,true);
@@ -180,18 +248,20 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
   assert.equal(restoredEdit.status,200);
   assert.equal(restoredEdit.data.request.orientation,'portrait');
   assert.equal((await adminMutation('approve')).status,200);
+  const savedPrintPath=restoredEdit.data.request.storage_path;
+  const savedPrint=objects.get('photo_print_private/'+savedPrintPath);
   const station_id=randomUUID(),station=payload=>call('/api/printing/station','POST',{station_id,...payload},{Authorization:`Bearer ${stationToken}`});
   assert.equal((await station({action:'heartbeat',printer:'CP1500'})).status,200);
   const claimed=await station({action:'claim'});assert.ok(claimed.data.job);const job=claimed.data.job;
-  assert.deepEqual(Buffer.from(await (await fetch(job.image_url)).arrayBuffer()),originalPrint);
+  assert.deepEqual(Buffer.from(await (await fetch(job.image_url)).arrayBuffer()),savedPrint);
   assert.equal((await station({action:'claim'})).data.job,null);
   assert.equal((await station({...job,action:'begin'})).status,200);
   assert.equal((await station({...job,action:'submitted',cups_job_id:'CP1500-123'})).status,200);
   assert.equal((await adminMutation('ready')).status,200);
   assert.equal((await call(`/api/photo/requests?id=${id}`,'GET',undefined,{'x-photo-token':body.tracking_token})).data.request.status,'ready');
   assert.equal((await adminMutation('reprint')).status,200);
-  assert.equal((await call('/api/photo/status')).data.session.reserved,2);
-  assert.deepEqual(objects.get('photo_print_private/'+snapshot.storage_path),originalPrint);
+  assert.equal((await call('/api/photo/status')).data.session.reserved,2+(load?100:0));
+  assert.deepEqual(objects.get('photo_print_private/'+savedPrintPath),savedPrint);
   assert.deepEqual((await pg.query('select filter_snapshot from photo_print_requests where id=$1',[id])).rows[0].filter_snapshot,snapshot.filter_snapshot);
   if(!preview) {
     const oldBody={...body,request_key:randomUUID(),tracking_token:randomUUID()};delete oldBody.filter;
@@ -227,10 +297,12 @@ export default function FilmQA(){return <div style={{padding:40}}><h1>Film QA fi
     console.log(`PREVIEW fixture ready: ${base}/photo ; admin password: test-admin-password; metadata /tmp/wedding-photo-preview.json`);
     await new Promise(resolve=>{process.once('SIGINT',resolve);process.once('SIGTERM',resolve);});
   }
-  console.log('PASS: actual Next HTTP routes → PostgreSQL RPC → private Storage fixture → approval → station claim/report → ready/reprint; no real printer or production provider used.');
+  console.log('PASS: actual route handlers over HTTP → PostgreSQL RPC → private Storage fixture → approval → station claim/report → ready/reprint; no real printer or production provider used.');
   }
 }catch(error){console.error(error);process.exitCode=1;}
 finally{
+  clearInterval(monitor);
   if(next){next.kill('SIGTERM');await Promise.race([once(next,'exit'),new Promise(r=>setTimeout(r,5000))]);if(next.exitCode===null)next.kill('SIGKILL');}
-  await new Promise(r=>provider.close(r));await pg.close();await rm(root,{recursive:true,force:true});
+  if(handlerServer){handlerServer.closeAllConnections();await new Promise(r=>handlerServer.close(r));}
+  provider.closeAllConnections();await new Promise(r=>provider.close(r));await pg.close();await rm(root,{recursive:true,force:true});
 }

@@ -1,4 +1,4 @@
-import { command, fail } from './server';
+import { command, fail } from './server.js';
 import { canonicalFilter, computeEffectiveFilter, LEGACY_PRESETS, DEFAULT_PRESETS, ENGINE_VERSION, FRAME_VERSION, seedFor } from './film.mjs';
 // Fail closed: substituting defaults could change an already previewed version.
 export const getPresetConfig = (client,version) => command(client,'preset_config',version==null?{}:{version});

@@ -19,6 +19,7 @@ const routeSource = (await readFile(sourceURL, 'utf8'))
   .replace("'@/lib/photo/server'", JSON.stringify(new URL('../../src/lib/photo/server.js', import.meta.url).href))
   .replace("import { getPresetConfig } from '@/lib/photo/config-server';", 'const getPresetConfig = async () => ({});')
   .replace("'@/lib/photo/film.mjs'", JSON.stringify(new URL('../../src/lib/photo/film.mjs', import.meta.url).href))
+  .replace("'@/lib/photo/print-storage'", JSON.stringify(new URL('../../src/lib/photo/print-storage.js', import.meta.url).href))
   .replace("'@/lib/photo/image.mjs'", JSON.stringify(new URL('../../src/lib/photo/image.mjs', import.meta.url).href));
 const routeRoot = await mkdtemp(join(tmpdir(), 'wedding-admin-route-'));
 await writeFile(join(routeRoot, 'route.mjs'), routeSource);
@@ -30,7 +31,7 @@ test('admin edits persist, retry exactly, reject stale/review writes and queue t
   const pg = new PGlite();
   const objects = new Map();
   await pg.exec('create role anon;create role authenticated;create role service_role bypassrls;create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);');
-  for (const migration of ['20261002_photo_printing.sql','20261002_photo_film_presets.sql','20261002_remove_photo_quota_limit.sql','20261002180000_photo_admin_edit_safe.sql'])
+  for (const migration of ['20261002_photo_printing.sql','20261002_photo_film_presets.sql','20261002_remove_photo_quota_limit.sql','20261002180000_photo_admin_edit_safe.sql','20261003010000_photo_runtime.sql','20261003020000_photo_thumbnails.sql'])
     await pg.exec(await readFile(new URL('../../supabase/migrations/' + migration, import.meta.url), 'utf8'));
   await pg.exec(await readFile(new URL('../../supabase/migrations/20261002180000_photo_admin_edit_safe.sql',import.meta.url),'utf8'));
   const cmd = async (action, payload = {}) => (await pg.query('select photo_print_command($1,$2::jsonb) result', [action, JSON.stringify(payload)])).rows[0].result;

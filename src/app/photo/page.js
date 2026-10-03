@@ -29,7 +29,7 @@ import {
 } from '@/lib/photo/presets';
 import FilmPhoto from '@/components/photo/FilmPhoto';
 import { processImageForUpload } from '@/components/photo/imageCompressor';
-import { getPhotoSession, uploadPhoto, createPhotoRequest } from '@/lib/photo/client';
+import { getPhotoSession, uploadPhoto, createPhotoRequest, renewPhotoUpload } from '@/lib/photo/client';
 import styles from './photo.module.css';
 
 const DRAFT_STORAGE_KEY = 'photo_print_draft_keys';
@@ -103,8 +103,12 @@ export default function PhotoPage() {
       const draft = readStoredDraft();
       if (draft) {
         if (draft.upload_id && draft.upload_token && draft.preview_url) {
-          setUploadData({id:draft.upload_id,token:draft.upload_token,
-            preview_url:draft.preview_url,width:draft.width,height:draft.height});
+          setIsUploading(true);
+          renewPhotoUpload(draft.upload_id, draft.upload_token).then(res => {
+            if (active) setUploadData(res.upload);
+          }).catch(err => {
+            if (active) setErrorMessage(err.message || 'Unable to restore photo preview. Please reload to retry.');
+          }).finally(() => { if (active) setIsUploading(false); });
         }
         setGuestName(draft.guest_name || '');
         setOrientation(draft.orientation || 'portrait');
@@ -457,6 +461,9 @@ export default function PhotoPage() {
       const definitiveRejectionCodes = [
         'UPLOAD_NOT_FOUND',
         'INVALID_CROP',
+        'INVALID_FILTER',
+        'CONFIG_NOT_FOUND',
+        'CONFIG_STALE',
         'INVALID_INPUT',
         'INVALID_IMAGE',
         'HEIC_UNSUPPORTED',
