@@ -4,8 +4,8 @@ import { ATTENDANCE_VALUES } from '@/lib/rsvpConstants';
 
 function checkAdminAuth(request) {
   const headerPassword = request.headers.get('x-admin-password');
-  const validPassword = process.env.ADMIN_PASSWORD || '696969';
-  return Boolean(headerPassword && (headerPassword === validPassword || headerPassword === '696969'));
+  const validPassword = process.env.ADMIN_PASSWORD?.trim();
+  return Boolean(validPassword && validPassword.length >= 6 && headerPassword?.trim() === validPassword);
 }
 
 export async function GET(request) {

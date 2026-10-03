@@ -15,10 +15,10 @@ if(action==='install'){
   await mkdir(destination,{recursive:true,mode:0o700});
   await readFile(join(destination,'config.json'),'utf8'); // operator config required
   const source=dirname(fileURLToPath(import.meta.url));
-  for(const file of ['station.mjs','core.mjs'])await copyFile(join(source,file),join(destination,file));
+  for(const file of ['station.mjs','core.mjs','prepare-print.mjs'])await copyFile(join(source,file),join(destination,file));
   await chmod(join(destination,'config.json'),0o600);
   await mkdir(dirname(plist),{recursive:true});
-  const args=[process.execPath,join(destination,'station.mjs')].map(s=>`<string>${xml(s)}</string>`).join('');
+  const args=['/usr/bin/caffeinate','-i',process.execPath,join(destination,'station.mjs')].map(s=>`<string>${xml(s)}</string>`).join('');
   await writeFile(plist,`<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>Label</key><string>${label}</string><key>ProgramArguments</key><array>${args}</array><key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>30</integer><key>StandardOutPath</key><string>${xml(join(destination,'station.log'))}</string><key>StandardErrorPath</key><string>${xml(join(destination,'station-error.log'))}</string></dict></plist>`,{mode:0o600});
   console.log('Đã tạo LaunchAgent; chạy service.mjs start sau khi in thử.');
 }else if(action==='start')execFileSync('/bin/launchctl',['bootstrap',domain,plist],{stdio:'inherit'});

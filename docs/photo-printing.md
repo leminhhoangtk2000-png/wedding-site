@@ -57,3 +57,9 @@ Phiên mặc định **tạm dừng**. Không mở cho khách trước khi cấu
 ## QR tại bàn in
 
 `public/photo-qr.svg` trỏ tới `https://www.project69hd.xyz/photo`. Nếu đổi domain, chạy `node tools/photo-print/qr.mjs https://DOMAIN/photo` rồi kiểm tra đường dẫn. Chỉ in và chia sẻ QR sau khi trang đã triển khai, mở được từ điện thoại và trạm Mac đã qua nghiệm thu vật lý. QR không chứa token quản trị hoặc token xem ảnh.
+
+## Mac print safe area
+
+CP1500 borderless printing trimmed the first physical frame test. Station now prepares each downloaded JPEG with native macOS sips: safe_margin_mm defaults to 4 (valid 3-8mm), print_background defaults to FBF5EB. The whole image is scaled uniformly and centered on an unchanged 100x148mm, 300dpi canvas; both portrait and landscape supported. Stored photos and immutable frame/filter snapshots are unchanged.
+
+After updating station source, reinstall the service so prepare-print.mjs is copied alongside station.mjs/core.mjs. Validate the next paper result before setting hardware_verified=true. Never pad the stored image manually as well as the worker output, which would double the margin.

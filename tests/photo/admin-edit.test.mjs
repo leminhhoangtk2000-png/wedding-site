@@ -87,6 +87,16 @@ test('admin edits persist, retry exactly, reject stale/review writes and queue t
     objects.set(request.storage_path, await renderPrintPhoto(bytes,{x:0,y:0,width:1,height:1},'portrait',1000,1480));
     const edit = {action:'edit',id:request.id,operation_key:randomUUID(),expected_revision:0,guest_name:'Edited',orientation:'landscape'};
     assert.equal((await call(edit,false)).status,401);
+    for (const fallback of ['696969', 'etBM9eB71LTq2qE6jbnAFwgH6SjYckhE']) {
+      const rejected = await PATCH(new Request('http://local/api/admin/printing', {
+        method: 'PATCH', headers: {'Content-Type':'application/json','x-admin-password':fallback},
+        body: JSON.stringify(edit),
+      }));
+      assert.equal(rejected.status,401,'Static fallback must never authorize a print mutation');
+    }
+    delete process.env.ADMIN_PASSWORD;
+    assert.equal((await call(edit)).status,503,'Missing server password must fail closed');
+    process.env.ADMIN_PASSWORD = 'fixture-admin';
     const saved = await call(edit); assert.equal(saved.status,200,JSON.stringify(saved));
     assert.equal(saved.data.request.guest_name,'Edited'); assert.equal(saved.data.request.edit_revision,1);
     assert.equal(saved.data.request.status,'pending'); assert.equal(saved.data.request.admin_image_edited,true);

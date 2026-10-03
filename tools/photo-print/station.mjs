@@ -5,6 +5,7 @@ import { homedir } from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { durableJSON,lpArgs,processJob,recoverJob } from './core.mjs';
+import { preparePrintFile, safePrintLayout } from './prepare-print.mjs';
 
 const exec=promisify(execFile);
 const configPath=process.env.PHOTO_PRINT_CONFIG || join(homedir(),'Library/Application Support/WeddingPhotoPrint/config.json');
@@ -13,6 +14,7 @@ const env={...process.env,LC_ALL:'C',LANG:'C'};
 const native=async (file,args) => (await exec(file,args,{env,timeout:20000,maxBuffer:1024*1024})).stdout;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function validateConfig(c) {
+  safePrintLayout(1181,1748,'portrait',c.safe_margin_mm ?? 4);
   const url=new URL(c.server_url);
   if (url.protocol!=='https:' && !(c.allow_local_http===true && ['localhost','127.0.0.1'].includes(url.hostname) && url.protocol==='http:')) throw new Error('server_url phải dùng HTTPS.');
   if (url.username || url.password || url.search || url.hash || url.pathname!=='/') throw new Error('server_url phải là origin, không chứa token/path.');
@@ -66,7 +68,8 @@ async function main() {
     if(!response.ok) throw new Error('Không tải được bản ảnh in.');
     const bytes=Buffer.from(await response.arrayBuffer());
     if(bytes.length>12*1024*1024 || bytes[0]!==0xff || bytes[1]!==0xd8) throw new Error('Bản ảnh in không hợp lệ.');
-    const path=join(jobsDir,`${job.attempt_id}.jpg`);const f=await open(path,'w',0o600);try{await f.writeFile(bytes);await f.sync();}finally{await f.close();}return path;
+    const path=join(jobsDir,`${job.attempt_id}.jpg`);const f=await open(path,'w',0o600);try{await f.writeFile(bytes);await f.sync();}finally{await f.close();}
+    return preparePrintFile(path,join(jobsDir,`${job.attempt_id}.print.jpg`),job.orientation,config);
   };
   let printerError=null;
   let heartbeatBusy=false;

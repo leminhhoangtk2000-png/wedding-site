@@ -10,11 +10,11 @@ export function secureEqual(value, expected) {
 }
 export function requireAuth(request, station = false) {
   const configured = process.env[station ? 'PHOTO_PRINT_STATION_TOKEN' : 'ADMIN_PASSWORD'];
-  const expected = (configured || (station ? '' : '696969')).trim();
+  const expected = (configured || '').trim();
   if (!expected || expected.length < (station ? 32 : 6)) fail('AUTH_NOT_CONFIGURED', 503);
   const rawActual = station ? request.headers.get('authorization')?.replace(/^Bearer /, '') : request.headers.get('x-admin-password');
   const actual = rawActual ? rawActual.trim() : '';
-  if (!secureEqual(actual, expected) && (station || (!secureEqual(actual, '696969') && !secureEqual(actual, 'etBM9eB71LTq2qE6jbnAFwgH6SjYckhE')))) fail('UNAUTHORIZED', 401);
+  if (!secureEqual(actual, expected)) fail('UNAUTHORIZED', 401);
 }
 export function db() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
